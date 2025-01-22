@@ -1,0 +1,64 @@
+body {
+    width: calc(100vw-2px);
+    background-color: var(--background);
+    color: var(--inverseSurface);
+    word-wrap: break-word;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+quote {
+    display: block;
+    padding-block: 4px;
+    padding-left: 8px;
+    padding-right: 4px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    background-color: var(--surfaceContainerHigh);
+}
+
+.collapse-item-arrow {
+    margin-right: 4px;
+    transition: transform .15s cubic-bezier(.4, 0, .2, 1);
+}
+.icon {
+    display: flex;
+    height: 1em;
+    width: 1em;
+}
+.icon svg {
+    height: 1em;
+    width: 1em;
+}
+
+.smile {
+    width: 32px;
+    height: 32px;
+}
+
+/** 折叠框按钮 */
+.collapse_btn {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    flex-wrap: nowrap;
+}
+
+/** 折叠框按钮内容 */
+.foldBox:not(.no) .collapse_btn .collapse-item-arrow {
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+/** 折叠框内容 */
+.foldBox.no .collapse_content {
+    display: none;
+}
+.foldBox {
+    display: block;
+    padding-inline: 4px;
+    border-radius: 8px;
+    background-color: var(--surfaceContainerHighest);
+}
