@@ -21,7 +21,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.srap.nga.logic.network.NetworkModule
+import com.srap.nga.ui.component.button.SearchButton
 import com.srap.nga.ui.component.card.ImageTextCard
 import com.srap.nga.ui.component.card.LoadingCard
 import kotlinx.coroutines.launch
@@ -47,7 +52,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopicCateGoryScreen(
-    onViewTopicSubject: (Int) -> Unit
+    onViewTopicSubject: (Int) -> Unit,
+    onSearch: () -> Unit,
 ) {
     val viewModel: TopicCateGoryViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
@@ -68,6 +74,11 @@ fun TopicCateGoryScreen(
                 ),
                 title = {
                     Text("社区")
+                },
+                actions = {
+                    SearchButton {
+                        onSearch()
+                    }
                 }
             )
         }

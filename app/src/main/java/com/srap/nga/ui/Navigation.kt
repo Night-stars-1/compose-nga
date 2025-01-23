@@ -16,6 +16,7 @@ import com.srap.nga.ui.image.ImagePreviewScreen
 import com.srap.nga.ui.login.qrcode.QRCodeLoginScreen
 import com.srap.nga.ui.main.MainScreen
 import com.srap.nga.ui.post.PostScreen
+import com.srap.nga.ui.search.SearchScreen
 import com.srap.nga.ui.topic.subject.TopicSubjectScreen
 import com.srap.nga.ui.userinfo.UserInfoScreen
 import com.srap.nga.utils.GlobalObject
@@ -47,7 +48,8 @@ fun AppNavigation(navController: NavHostController) {
         composable("home") {
             MainScreen(
                 onViewPost = navController::navigateToPost,
-                onViewTopicSubject = navController::navigateToTopicSubject
+                onViewTopicSubject = navController::navigateToTopicSubject,
+                onSearch = navController::navigateToSearch
             )
         }
 
@@ -147,6 +149,33 @@ fun AppNavigation(navController: NavHostController) {
                 onBackClick = navController::popBackStack
             )
         }
+
+        // 搜索页
+        composable(
+            "search"
+        ) {
+            SearchScreen(
+                onBackClick = navController::popBackStack,
+                onViewSearchResult = navController::navigateToSearchResult,
+            )
+        }
+
+        // 搜索页
+        composable(
+            "search/result/{text}",
+            arguments = listOf(
+                navArgument("text") {
+                    type = NavType.StringType
+                },
+            ),
+        ) {
+            val text = it.arguments?.getInt("id")
+            if (text != null) {
+                // TODO 搜索结果页
+            } else {
+                Text("搜索字为空为空")
+            }
+        }
     }
 }
 
@@ -172,6 +201,14 @@ fun NavHostController.navigateToLogin() {
     navigate("login/qrcode") {
         popUpTo("home")
     }
+}
+
+fun NavHostController.navigateToSearch() {
+    navigate("search")
+}
+
+fun NavHostController.navigateToSearchResult(text: String) {
+    navigate("search/result/$text")
 }
 
 fun NavHostController.navigateToImagePreView(image: String, images: List<String>) {

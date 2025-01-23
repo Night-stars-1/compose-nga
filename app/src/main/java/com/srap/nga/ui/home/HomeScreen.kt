@@ -31,13 +31,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.ui.Alignment
-import com.srap.nga.ui.component.card.ImageTextCard
+import com.srap.nga.ui.component.button.SearchButton
 import com.srap.nga.ui.component.card.LoadingCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onViewPost: (Int) -> Unit
+    onViewPost: (Int) -> Unit,
+    onSearch: () -> Unit,
 ) {
     val viewModel: HomeViewModel = hiltViewModel()
 
@@ -54,6 +55,11 @@ fun HomeScreen(
                 ),
                 title = {
                     Text("推荐")
+                },
+                actions = {
+                    SearchButton {
+                        onSearch()
+                    }
                 }
             )
         }

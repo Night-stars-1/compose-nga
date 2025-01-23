@@ -23,6 +23,7 @@ import com.srap.nga.ui.topic.category.TopicCateGoryScreen
 fun MainScreen(
     onViewPost: (Int) -> Unit,
     onViewTopicSubject: (Int) -> Unit,
+    onSearch: () -> Unit,
 ) {
     var selectIndex by rememberSaveable { mutableIntStateOf(0) }
     var previousIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -78,8 +79,8 @@ fun MainScreen(
                 key = index,
                 content = {
                     when (index) {
-                        0 -> HomeScreen(onViewPost)
-                        1 -> TopicCateGoryScreen(onViewTopicSubject)
+                        0 -> HomeScreen(onViewPost, onSearch)
+                        1 -> TopicCateGoryScreen(onViewTopicSubject, onSearch)
                     }
                 }
             )
