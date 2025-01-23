@@ -25,14 +25,15 @@ fun TopicSubjectCard(
     count: Int,
     modifier: Modifier = Modifier
 ) {
+    val newImages = images?.filter { !it.contains(".mp4") }
     val color = MaterialTheme.colorScheme.outline
     Card(
         modifier = modifier
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(title)
-            if (images != null) {
-                ImagesPreviewer(images)
+            if (newImages != null) {
+                ImagesPreviewer(newImages)
             }
             Row(
                 modifier = Modifier

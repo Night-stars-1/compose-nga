@@ -12,6 +12,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -126,6 +128,7 @@ fun ImagePreviewer(
             contentDescription = "图片",
             modifier = Modifier
                 .fillMaxSize()
+                .shadow(8.dp, shape = RoundedCornerShape(12.dp))
                 .clickable {
                     scope.launch {
                         current.previewerState.value = previewerState
