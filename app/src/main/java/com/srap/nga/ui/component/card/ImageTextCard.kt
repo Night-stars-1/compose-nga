@@ -31,7 +31,7 @@ fun ImageTextCard(
     description: String?,
     modifier: Modifier = Modifier
 ) {
-    return Row(
+    Row(
         modifier = modifier
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically

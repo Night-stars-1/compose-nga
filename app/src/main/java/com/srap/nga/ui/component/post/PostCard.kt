@@ -1,5 +1,6 @@
 package com.srap.nga.ui.component.post
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil3.compose.AsyncImage
+import com.srap.nga.utils.toHttps
 
 @Composable
 fun PostCard(
@@ -37,7 +39,7 @@ fun PostCard(
 ) {
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
 
-    return ConstraintLayout(
+    ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
     ) {
@@ -45,7 +47,7 @@ fun PostCard(
 
         // 头像
         AsyncImage(
-            model = avatar,
+            model = avatar.toHttps(),
             contentDescription = "头像",
             modifier = Modifier
                 .size(36.dp)
