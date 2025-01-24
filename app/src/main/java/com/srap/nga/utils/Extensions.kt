@@ -84,6 +84,6 @@ inline fun Modifier.noRippleClickable(
 /**
  * 将HTTP转为HTTPS
  */
-fun String.toHttps() {
-    this.replace("http://", "https://")
+fun String.toHttps(): String {
+    return this.replace("http://", "https://")
 }
