@@ -33,10 +33,11 @@ class SignInterceptor : Interceptor {
             val fid = formData.getOrDefault("fid", "")
             val tid = formData.getOrDefault("tid", "")
             val uid = formData.getOrDefault("uid", "")
+            val key = formData.getOrDefault("key", "")
 
 //            val sortedKeys = formData.keys.filter { !it.startsWith("__") }.sorted()
 //            val combinedValues = sortedKeys.joinToString("") { formData[it] ?: "" }
-            val md5String = "$appId$accessUid$accessToken$fid$tid$uid${timestamp}$salt"
+            val md5String = "$appId$accessUid$accessToken$fid$tid$uid$key${timestamp}$salt"
             Log.d(TAG, "intercept: $md5String")
             val md5Signature = StringUtil.md5(md5String)
 

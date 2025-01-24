@@ -4,16 +4,16 @@ import com.srap.nga.logic.model.base.BaseResponse
 
 data class SubjectBySearchResponse(
     @SerializedName("currentPage")
-    val currentPage: Int,
+    val currentPage: Int = 0,
     @SerializedName("perPage")
-    val perPage: Int,
+    val perPage: Int = 0,
     @SerializedName("result")
-    val result: Result,
+    val result: Result?,
     @SerializedName("total")
-    val total: Int,
+    val total: Int = 0,
     @SerializedName("totalPage")
-    val totalPage: Int
-) : BaseResponse<TopicCateGoryResponse>() {
+    val totalPage: Int = 0
+) : BaseResponse<SubjectBySearchResponse>() {
     data class Result(
         @SerializedName("data")
         val `data`: List<Data>,
@@ -64,7 +64,12 @@ data class SubjectBySearchResponse(
             @SerializedName("tid")
             val tid: Int,
             @SerializedName("type")
-            val type: Int
+            val type: Int,
+            /**
+             * 回复数
+             */
+            @SerializedName("replies")
+            val replies: Int
         )
     }
 }

@@ -17,6 +17,7 @@ import com.srap.nga.ui.login.qrcode.QRCodeLoginScreen
 import com.srap.nga.ui.main.MainScreen
 import com.srap.nga.ui.post.PostScreen
 import com.srap.nga.ui.search.SearchScreen
+import com.srap.nga.ui.search.result.SearchResultScreen
 import com.srap.nga.ui.topic.subject.TopicSubjectScreen
 import com.srap.nga.ui.userinfo.UserInfoScreen
 import com.srap.nga.utils.GlobalObject
@@ -162,16 +163,21 @@ fun AppNavigation(navController: NavHostController) {
 
         // 搜索页
         composable(
-            "search/result/{text}",
+            "search/result/{key}",
             arguments = listOf(
-                navArgument("text") {
+                navArgument("key") {
                     type = NavType.StringType
                 },
             ),
         ) {
-            val text = it.arguments?.getInt("id")
-            if (text != null) {
-                // TODO 搜索结果页
+            val key = it.arguments?.getString("key")
+            if (key != null) {
+                SearchResultScreen(
+                    key = key,
+                    onViewPost = navController::navigateToPost,
+                    onViewTopicSubject = navController::navigateToTopicSubject,
+                    onBackClick = navController::popBackStack,
+                )
             } else {
                 Text("搜索字为空为空")
             }
@@ -207,8 +213,11 @@ fun NavHostController.navigateToSearch() {
     navigate("search")
 }
 
-fun NavHostController.navigateToSearchResult(text: String) {
-    navigate("search/result/$text")
+fun NavHostController.navigateToSearchResult(key: String) {
+    // 搜索词不为空才调整
+    if (key.isNotEmpty()) {
+        navigate("search/result/$key")
+    }
 }
 
 fun NavHostController.navigateToImagePreView(image: String, images: List<String>) {

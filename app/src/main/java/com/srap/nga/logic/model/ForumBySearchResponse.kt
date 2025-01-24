@@ -7,17 +7,17 @@ data class ForumBySearchResponse(
      * 当前页码
      */
     @SerializedName("currentPage")
-    val currentPage: Int,
+    val currentPage: Int = 0,
     @SerializedName("perPage")
-    val perPage: Int,
+    val perPage: Int = 0,
     @SerializedName("result")
-    val result: List<Result>,
+    val result: List<Result>?,
     /**
      * 总页码
      */
     @SerializedName("totalPage")
     val totalPage: Int?
-) : BaseResponse<TopicCateGoryResponse>(){
+) : BaseResponse<ForumBySearchResponse>(){
     data class Result(
         @SerializedName("fid")
         val fid: Int,

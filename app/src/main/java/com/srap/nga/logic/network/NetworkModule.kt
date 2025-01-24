@@ -26,6 +26,7 @@ object NetworkModule {
     const val NGA_APP_ICON_URL = "https://img4.nga.178.com/ngabbs/nga_classic/f/app/%s.png"
     const val NGA_ATTACHMENTS_URL = "https://img.nga.178.com/attachments/%s"
     const val NGA_SMILE_URL = "https://img4.nga.178.com/ngabbs/post/smile/%s"
+    const val NGA_APP_IMAGE_URL = "http://img4.nga.178.com/ngabbs/nga_classic/f/app/%s.png"
     const val NGA_QR_LOGIN_URL = "https://ngabbs.com/nuke.php?__lib=login&__act=qrlogin_ui&qrkey=%s"
 
     @NgaService

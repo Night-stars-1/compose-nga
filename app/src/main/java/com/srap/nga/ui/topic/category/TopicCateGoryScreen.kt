@@ -166,12 +166,13 @@ fun TopicCateGoryScreen(
 
                             items(group.forums) { forum ->
                                 ImageTextCard(
-                                    NetworkModule.NGA_APP_ICON_URL.format(forum.id),
-                                    forum.name,
-                                    forum.info,
-                                    onClick = {
-                                        onViewTopicSubject(forum.fid)
-                                    }
+                                    image = NetworkModule.NGA_APP_ICON_URL.format(forum.id),
+                                    title = forum.name,
+                                    description = forum.info,
+                                    modifier = Modifier
+                                        .clickable {
+                                            onViewTopicSubject(forum.fid)
+                                        }
                                 )
                             }
                         }

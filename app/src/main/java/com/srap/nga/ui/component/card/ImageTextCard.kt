@@ -2,6 +2,7 @@ package com.srap.nga.ui.component.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,8 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -26,22 +29,11 @@ fun ImageTextCard(
     image: String,
     title: String,
     description: String?,
-    onClick: (() -> Unit)? = null
+    modifier: Modifier = Modifier
 ) {
-    val color = MaterialTheme.colorScheme.outline
-
-    val modifier: Modifier = if (onClick != null) {
-        Modifier
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-            }
-    } else {
-        Modifier
-            .fillMaxWidth()
-    }
     return Row(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 头像
@@ -75,5 +67,39 @@ fun ImageTextCard(
                 )
             )
         }
+    }
+}
+
+
+/**
+ * 图标文本卡片
+ * 上图下字
+ */
+@Composable
+fun ImageTextVerticalCard(
+    image: String,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    val color = MaterialTheme.colorScheme.outline
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+    ) {
+        AsyncImage(
+            model = image,
+            contentDescription = text,
+            modifier = Modifier
+                .size(48.dp),
+            colorFilter = ColorFilter.tint(color),
+        )
+        Text(
+            text = text,
+            lineHeight = 14.sp,
+            fontSize = 14.sp,
+            color = color,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }

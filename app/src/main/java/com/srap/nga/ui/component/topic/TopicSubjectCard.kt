@@ -20,10 +20,10 @@ import com.srap.nga.ui.component.ImagesPreviewer
 @Composable
 fun TopicSubjectCard(
     title: String,
-    images: List<String>?,
     name: String,
     count: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    images: List<String>? = emptyList<String>(),
 ) {
     val newImages = images?.filter { !it.contains(".mp4") }
     val color = MaterialTheme.colorScheme.outline
