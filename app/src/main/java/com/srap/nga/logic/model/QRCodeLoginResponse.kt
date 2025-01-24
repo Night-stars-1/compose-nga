@@ -8,14 +8,10 @@ import com.srap.nga.logic.state.Code
 
 
 data class QRCodeLoginResponse(
-    @SerializedName("code")
-    override val code: Code,
     @SerializedName("result")
     @JsonAdapter(QRCodeLoginResultAdapter::class)
     val result: Result?,
-    @SerializedName("msg")
-    override val msg: String
-): BaseResponse<QRCodeLoginResponse>(code, msg) {
+): BaseResponse<QRCodeLoginResponse>() {
     data class Result(
         @SerializedName("avatar")
         val avatar: Any,

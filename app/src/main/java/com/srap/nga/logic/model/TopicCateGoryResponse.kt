@@ -5,8 +5,6 @@ import com.srap.nga.logic.model.base.BaseResponse
 import com.srap.nga.logic.state.Code
 
 data class TopicCateGoryResponse(
-    override val code: Code,
-    override val msg: String,
     /**
      * 推荐版块
      */
@@ -17,7 +15,7 @@ data class TopicCateGoryResponse(
      */
     @SerializedName("result")
     val result: List<Result>
-) : BaseResponse<TopicCateGoryResponse>(code, msg) {
+) : BaseResponse<TopicCateGoryResponse>() {
     /**
      * 推荐版块
      */

@@ -4,13 +4,9 @@ import com.srap.nga.logic.model.base.BaseResponse
 import com.srap.nga.logic.state.Code
 
 data class UserInfoResponse(
-    @SerializedName("code")
-    override val code: Code,
     @SerializedName("result")
     val result: Result,
-    @SerializedName("msg")
-    override val msg: String,
-) : BaseResponse<UserInfoResponse>(code, msg){
+) : BaseResponse<UserInfoResponse>(){
     data class Result(
         @SerializedName("adfree")
         val adfree: Int,

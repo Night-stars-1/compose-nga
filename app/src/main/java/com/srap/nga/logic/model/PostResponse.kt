@@ -5,8 +5,6 @@ import com.srap.nga.logic.model.base.BaseResponse
 import com.srap.nga.logic.state.Code
 
 data class PostResponse(
-    override val code: Code,
-    override val msg: String,
     val result: List<Result>,
     @SerializedName("attachPrefix")
     val attachPrefix: String,
@@ -57,7 +55,7 @@ data class PostResponse(
     val tsubject: String,
     @SerializedName("vrows")
     val vrows: Int
-) : BaseResponse<PostResponse>(code, msg) {
+) : BaseResponse<PostResponse>() {
     data class Result(
         val author: Author,
         val content: String,

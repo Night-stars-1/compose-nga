@@ -9,16 +9,12 @@ import com.srap.nga.logic.state.Code
 data class TopicSubjectResponse(
     @SerializedName("bit_data")
     val bitData: Int,
-    @SerializedName("code")
-    override val code: Code,
     @SerializedName("currentPage")
     val currentPage: Int,
     @SerializedName("fid")
     val fid: Int,
     @SerializedName("forumname")
     val forumName: String,
-    @SerializedName("msg")
-    override val msg: String,
     @SerializedName("perPage")
     val perPage: Int,
     @SerializedName("result")
@@ -27,7 +23,7 @@ data class TopicSubjectResponse(
     val total: Int,
     @SerializedName("totalPage")
     val totalPage: Int
-) : BaseResponse<TopicSubjectResponse>(code, msg) {
+) : BaseResponse<TopicSubjectResponse>() {
     data class Result(
         @SerializedName("attachPrefix")
         val attachPrefix: String,

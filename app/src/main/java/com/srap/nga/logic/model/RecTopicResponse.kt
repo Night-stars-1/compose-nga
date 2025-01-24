@@ -5,10 +5,8 @@ import com.google.gson.annotations.SerializedName
 import com.srap.nga.logic.model.base.BaseResponse
 
 data class RecTopicResponse(
-    override val code: Code,
-    override val msg: String,
     val result: List<Any>
-) : BaseResponse<RecTopicResponse>(code, msg) {
+) : BaseResponse<RecTopicResponse>() {
     data class Result(
         @SerializedName("app_id")
         val appId: Int,
