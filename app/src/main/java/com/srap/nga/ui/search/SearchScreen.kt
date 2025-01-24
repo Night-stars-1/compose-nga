@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -15,7 +16,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -41,7 +44,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.srap.nga.ui.component.button.BackButton
+import com.srap.nga.ui.component.card.SearchItemCard
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +55,8 @@ fun SearchScreen(
     onBackClick: () -> Unit,
     onViewSearchResult: (String) -> Unit,
 ) {
+    val viewModel: SearchViewModel = hiltViewModel()
+
     val focusRequest = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         try {
@@ -82,7 +90,10 @@ fun SearchScreen(
                             .focusRequester(focusRequest),
                         singleLine = true,
                         value = textInput,
-                        onValueChange = { textInput = it },
+                        onValueChange = {
+                            textInput = it
+                            viewModel.fetchData(textInput.text)
+                        },
                         textStyle = textStyle.copy(fontSize = 18.sp),
                         trailingIcon = {
                             AnimatedVisibility(
@@ -134,7 +145,19 @@ fun SearchScreen(
         ) {
             HorizontalDivider()
 
+            viewModel.result.forEach {
+                SearchItemCard(
+                    title = it,
+                    startIcon = Icons.Default.Search,
+                    endIcon = Icons.Default.NorthWest,
+                    modifier = Modifier
+                        .clickable {
+                            onViewSearchResult(it)
+                        }
+                )
+            }
 
+            // TODO 搜索记录
         }
     }
 }

@@ -4,7 +4,6 @@ import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 import com.srap.nga.logic.model.base.BaseResponse
 import com.srap.nga.logic.network.deserializer.QRCodeLoginResultAdapter
-import com.srap.nga.logic.state.Code
 
 
 data class QRCodeLoginResponse(

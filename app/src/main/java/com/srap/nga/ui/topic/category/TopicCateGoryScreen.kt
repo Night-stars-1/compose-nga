@@ -156,7 +156,7 @@ fun TopicCateGoryScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(horizontal = 4.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
                         result.result[index].groups.forEach { group ->

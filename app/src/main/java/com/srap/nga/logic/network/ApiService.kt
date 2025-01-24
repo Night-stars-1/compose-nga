@@ -2,6 +2,7 @@ package com.srap.nga.logic.network
 
 import com.srap.nga.logic.model.CreateQRCodeResponse
 import com.srap.nga.logic.model.ForumBySearchResponse
+import com.srap.nga.logic.model.SearchPromptResponse
 import com.srap.nga.logic.model.PostResponse
 import com.srap.nga.logic.model.QRCodeLoginResponse
 import com.srap.nga.logic.model.RecTopicResponse
@@ -124,4 +125,15 @@ interface ApiService {
         @Field("page") page: Int,
         @Field("__output") output: Int = 14
     ): Call<ForumBySearchResponse>
+
+
+    /**
+     * 搜索提示词
+     */
+    @FormUrlEncoded
+    @POST("nuke.php?__lib=search&__act=instant_search")
+    fun getSearchPrompt(
+        @Field("word") word: String,
+        @Field("__output") output: Int = 14
+    ): Call<SearchPromptResponse>
 }

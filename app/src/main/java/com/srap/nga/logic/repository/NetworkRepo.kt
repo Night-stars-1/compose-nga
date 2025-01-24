@@ -96,6 +96,13 @@ class NetworkRepo @Inject constructor(
         apiService.getSubjectBySearch(key, page).await()
     }
 
+    /**
+     * 搜索提示词
+     */
+    fun getSearchPrompt(word: String) = fire {
+        apiService.getSearchPrompt(word).await()
+    }
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

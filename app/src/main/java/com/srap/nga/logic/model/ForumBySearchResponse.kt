@@ -17,7 +17,7 @@ data class ForumBySearchResponse(
      */
     @SerializedName("totalPage")
     val totalPage: Int?
-) : BaseResponse<ForumBySearchResponse>(){
+) : BaseResponse<ForumBySearchResponse>() {
     data class Result(
         @SerializedName("fid")
         val fid: Int,
