@@ -4,7 +4,11 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import com.srap.nga.myApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,8 +58,25 @@ fun isDarkTheme(): Boolean {
 fun Context.copyText(text: String?, showToast: Boolean = true) {
     text?.let {
         val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        ClipData.newPlainText("copy text", it)?.let { clipboardManager.setPrimaryClip(it) }
+        ClipData.newPlainText("复制", it)?.let { clipboardManager.setPrimaryClip(it) }
         if (showToast)
             ToastUtil.show("已复制: $it")
     }
+}
+
+/**
+ * 去除点击的涟漪(水波纹)效果
+ */
+inline fun Modifier.noRippleClickable(
+    enabled: Boolean = true,
+    crossinline onClick: () -> Unit
+): Modifier = composed {
+    clickable(
+        enabled = enabled,
+        indication = null, // 去除涟漪效果
+        interactionSource = remember { MutableInteractionSource() },
+        onClick = throttle {
+            onClick()
+        }
+    )
 }

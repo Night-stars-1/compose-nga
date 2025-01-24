@@ -48,12 +48,11 @@ class TopicSubjectLoadViewModel @AssistedInject constructor(
                             ToastUtil.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
-                            result = state.response
-                            if (result != null) {
-                                page = result!!.currentPage
-                                totalPage = result!!.totalPage
-                                list += result!!.result.data
-                            }
+                            val response = state.response
+                            result = response
+                            page = response.currentPage
+                            totalPage = response.totalPage
+                            list += response.result.data
                         }
                     }
                     super.fetchData()

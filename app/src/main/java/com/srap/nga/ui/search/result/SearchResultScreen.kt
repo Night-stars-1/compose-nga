@@ -1,9 +1,11 @@
 package com.srap.nga.ui.search.result
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -35,6 +37,7 @@ import com.srap.nga.ui.component.card.ImageTextVerticalCard
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.tab.FancyTab
 import com.srap.nga.ui.component.topic.TopicSubjectCard
+import com.srap.nga.utils.noRippleClickable
 import kotlinx.coroutines.launch
 
 data class SearchResultTag(
@@ -80,7 +83,14 @@ fun SearchResultScreen(
                     BackButton { onBackClick() }
                 },
                 title = {
-                    Text(key)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .noRippleClickable { onBackClick() },
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(key)
+                    }
                 }
             )
         }
@@ -91,6 +101,7 @@ fun SearchResultScreen(
         )
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
             SecondaryTabRow(
@@ -144,14 +155,6 @@ fun SearchResultScreen(
                         RefreshLoadList(
                             viewModel = viewModel,
                         ) { index, item ->
-                            ImageTextVerticalCard(
-                                modifier = Modifier
-                                    .clickable {
-                                        onViewTopicSubject(item.fid)
-                                    },
-                                image = NetworkModule.NGA_APP_IMAGE_URL.format(item.id.toString()),
-                                text = item.name
-                            )
                             ImageTextCard(
                                 image= NetworkModule.NGA_APP_ICON_URL.format(item.id),
                                 title = item.name,

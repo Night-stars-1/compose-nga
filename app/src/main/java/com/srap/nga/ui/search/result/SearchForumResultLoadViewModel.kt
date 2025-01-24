@@ -43,11 +43,12 @@ class SearchForumResultLoadViewModel @AssistedInject constructor(
                             ToastUtil.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
-                            result = state.response
-                            if (result != null) {
-                                page = result!!.currentPage
-                                totalPage = result!!.totalPage ?: 1
-                                list += result!!.result
+                            val response = state.response
+                            if (response.result != null) {
+                                result = response
+                                page = state.response.currentPage
+                                totalPage = state.response.totalPage ?: 1
+                                list += response.result
                             }
                         }
                     }
