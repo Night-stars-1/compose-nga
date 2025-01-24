@@ -44,7 +44,7 @@ class QRCodeLoginViewModel @Inject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show("[$TAG] ${state.errMsg}")
+                            ToastUtil.show(state.errMsg)
                         }
 
                         is LoadingState.Success -> {
@@ -88,7 +88,7 @@ class QRCodeLoginViewModel @Inject constructor(
                     .collect { state ->
                         when (state) {
                             is LoadingState.Error -> {
-                                ToastUtil.show("[$TAG] ${state.errMsg}")
+                                ToastUtil.show(state.errMsg)
                             }
 
                             is LoadingState.Success -> {

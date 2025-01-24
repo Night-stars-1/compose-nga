@@ -41,7 +41,7 @@ class UserInfoLoadViewModel @AssistedInject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show("[$TAG] ${state.errMsg}")
+                            ToastUtil.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             totalPage = state.response.totalPage
@@ -60,7 +60,7 @@ class UserInfoLoadViewModel @AssistedInject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show("[$TAG] ${state.errMsg}")
+                            ToastUtil.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             result = state.response.result
