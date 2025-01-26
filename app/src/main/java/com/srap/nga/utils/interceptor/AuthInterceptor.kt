@@ -18,7 +18,7 @@ class AuthInterceptor : Interceptor {
         try {
             val jsonObject = JSONObject(responseBody)
             val code = jsonObject.optInt("code")
-            if (code == 46) {
+            if (code == 46 || code == 2048) {
                 Handler(Looper.getMainLooper()).post {
                     GlobalObject.navController?.navigateToLogin()
                 }

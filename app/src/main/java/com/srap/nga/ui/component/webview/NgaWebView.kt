@@ -38,6 +38,7 @@ import com.srap.nga.utils.ThemeUtil
 import com.srap.nga.utils.provider.NgaProvider
 import com.srap.nga.utils.provider.ThemeColorProvider
 import kotlin.text.toInt
+import androidx.core.text.parseAsHtml
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -203,7 +204,10 @@ fun HtmlText(
                 movementMethod = CustomLinkMovementMethod(onViewPost)
                 setTextColor(contentColor)
                 setLinkTextColor(primary)
-                text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_OPTION_USE_CSS_COLORS, CoilImageGetter(this), null)
+                text = html.parseAsHtml(
+                    HtmlCompat.FROM_HTML_OPTION_USE_CSS_COLORS,
+                    CoilImageGetter(this)
+                )
             }
         }
     )

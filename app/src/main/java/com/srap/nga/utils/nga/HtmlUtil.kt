@@ -64,7 +64,8 @@ object HtmlUtil {
                         if (it.content.isNotEmpty() && it.content != "<br/>") {
                             HtmlText(
                                 html = it.content,
-                                onViewPost = onViewPost
+                                onViewPost = onViewPost,
+                                modifier = modifier.fillMaxSize()
                             )
                         }
                     }

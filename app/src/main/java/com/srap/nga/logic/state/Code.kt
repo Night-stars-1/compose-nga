@@ -8,6 +8,7 @@ enum class Code(val value: Int) {
     SUCCESS(0),
     LOGIN_ERROR(1),
     NOT_LOGIN(46),
+    NOT_NGA_LOGIN(2048),
 
     CODE_ERROR(-1);
 

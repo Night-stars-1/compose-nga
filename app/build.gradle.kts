@@ -39,7 +39,7 @@ android {
             )
         }
         debug {
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".test"
         }
     }
 

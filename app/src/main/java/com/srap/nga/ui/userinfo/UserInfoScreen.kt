@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,7 @@ import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.topic.TopicSubjectCard
 import com.srap.nga.ui.component.userinfo.UserInfoCard
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +44,7 @@ fun UserInfoScreen(
     val listState = rememberLazyListState()
     val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
+    val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,7 +63,15 @@ fun UserInfoScreen(
                     Text(
                         text = if (firstVisibleItemIndex > 0) viewModel.result?.username.toString() else "",
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .clickable {
+                                if (firstVisibleItemIndex > 0) {
+                                    scope.launch {
+                                        listState.animateScrollToItem(0)
+                                    }
+                                }
+                            }
                     )
                 }
             )
@@ -73,7 +84,15 @@ fun UserInfoScreen(
                 .padding(innerPadding),
             listState = listState,
             content = {
-                UserInfoCard(viewModel.result?.username ?: "用户名")
+                val result = viewModel.result
+                if (result != null) {
+                    UserInfoCard(
+                        avatar = result.avatar,
+                        name = result.username,
+                        description = "级别: ${result.group} | IP属地: ${result.ipLoc}\n" +
+                                "UID: ${result.uid} | 威望: ${result.rvrc}"
+                    )
+                }
             }
         ) { index, item ->
             TopicSubjectCard(

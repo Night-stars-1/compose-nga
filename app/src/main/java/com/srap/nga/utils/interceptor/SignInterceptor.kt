@@ -16,8 +16,8 @@ class SignInterceptor : Interceptor {
         Log.i(TAG, "intercept: $request")
         // 构建新的请求
         val signedRequest = request.newBuilder()
-            .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; 22081212C Build/UKQ1.230917.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/123.0.6312.118 Mobile Safari/537.36")
-
+            .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Build/UKQ1.230917.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/123.0.6312.118 Mobile Safari/537.36")
+            .header("X-USER-AGENT", "Nga_Official/90941(Xiaomi;Android 14)")
         val originalBody = request.body
         if (originalBody != null) {
 
