@@ -1,5 +1,6 @@
 package com.srap.nga.ui.post
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,7 +67,7 @@ fun PostScreen(
                     item.content,
                     images = item.attches?.map { it.attachUrl } ?: emptyList<String>(),
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxSize(),
                     onViewPost = onViewPost,
                 )
             }

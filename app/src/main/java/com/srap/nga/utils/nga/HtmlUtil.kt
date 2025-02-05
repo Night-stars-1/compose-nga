@@ -38,7 +38,7 @@ object HtmlUtil {
             val key = matchResult.groups[1]?.value // ac
             val value = matchResult.groups[2]?.value // 无语
             val smilePath = smileMap[key]?.get(value)
-            """<img src="${NetworkModule.NGA_SMILE_URL.format(smilePath)}" class="smile""""
+            """<img src="${NetworkModule.NGA_SMILE_URL.format(smilePath)}" class="smile" />"""
         }
         // [flash]https://www.bilibili.com/video/BV1q16DY1E6M/[/flash]
         result = result.replace(Regex("""\[flash](https?://.+?)\[/flash]"""), """<a href="$1">点击查看视频</a>""")
@@ -74,14 +74,14 @@ object HtmlUtil {
                             image = it.url,
                             images = images,
                             modifier = Modifier
-                                .fillMaxWidth(),
+                                .fillMaxSize(),
                             contentScale = ContentScale.FillWidth
                         )
                     }
                     is NgaContent.Quote -> {
                         Card(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxSize()
                                 .padding(vertical = 4.dp)
                         ) {
                             Column(
@@ -93,7 +93,8 @@ object HtmlUtil {
                                     RenderNgaContent(
                                         listOf(nestedContent),
                                         images,
-                                        modifier,onViewPost
+                                        modifier,
+                                        onViewPost
                                     )
                                 }
                             }
@@ -105,7 +106,8 @@ object HtmlUtil {
                                 RenderNgaContent(
                                     listOf(nestedContent),
                                     images,
-                                    modifier,onViewPost
+                                    modifier,
+                                    onViewPost
                                 )
                             }
                         }
