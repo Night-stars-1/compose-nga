@@ -11,6 +11,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.ImagePreviewer
+import com.srap.nga.ui.component.card.ExpandableCard
 import com.srap.nga.ui.component.webview.HtmlText
 import com.srap.nga.utils.nga.parse.NgaContent
 import com.srap.nga.utils.nga.parse.SplitQuote
@@ -74,7 +75,8 @@ object HtmlUtil {
                             image = it.url,
                             images = images,
                             modifier = Modifier
-                                .fillMaxSize(),
+                                .fillMaxSize()
+                                .padding(bottom = 2.dp),
                             contentScale = ContentScale.FillWidth
                         )
                     }
@@ -101,14 +103,22 @@ object HtmlUtil {
                         }
                     }
                     is NgaContent.Collapse -> {
-                        Column(modifier = modifier.fillMaxSize()) {
-                            it.content.forEach { nestedContent ->
-                                RenderNgaContent(
-                                    listOf(nestedContent),
-                                    images,
-                                    modifier,
-                                    onViewPost
-                                )
+                        ExpandableCard(
+                            title = it.name
+                        ) {
+                            Column(
+                                modifier = modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp)
+                            ) {
+                                it.content.forEach { nestedContent ->
+                                    RenderNgaContent(
+                                        listOf(nestedContent),
+                                        images,
+                                        modifier,
+                                        onViewPost
+                                    )
+                                }
                             }
                         }
                     }

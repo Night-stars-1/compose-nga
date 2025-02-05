@@ -3,6 +3,7 @@ agp = "8.8.0"
 coilCompose = "3.0.4"
 constraintlayoutComposeVersion = "1.1.0"
 core = "3.5.1"
+jsoup = "1.18.1"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -32,6 +33,7 @@ androidx-material3-window-size = { module = "androidx.compose.material3:material
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutComposeVersion" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

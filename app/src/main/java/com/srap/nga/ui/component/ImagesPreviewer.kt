@@ -126,9 +126,9 @@ fun ImagePreviewer(
         AsyncImage(
             model = image,
             contentDescription = "图片",
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .shadow(8.dp, shape = RoundedCornerShape(12.dp))
+                .shadow(8.dp, shape = RoundedCornerShape(14.dp))
                 .clickable {
                     scope.launch {
                         current.previewerState.value = previewerState

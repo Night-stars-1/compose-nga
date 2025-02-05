@@ -107,4 +107,7 @@ dependencies {
 
     // 二维码生成
     implementation(libs.zxing.core)
+
+    // HTML解析库
+    implementation(libs.jsoup)
 }
