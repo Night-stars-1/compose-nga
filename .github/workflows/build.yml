@@ -9,13 +9,15 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4.2.2
-      - name: setup jdk
-        uses: actions/setup-java@v1
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
+          distribution: 'temurin'
           java-version: 11
-      - uses: gradle/gradle-build-action@v2
-        with:
-          arguments: assembleRelease
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease
       - uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
