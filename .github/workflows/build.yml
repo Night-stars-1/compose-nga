@@ -1,0 +1,33 @@
+name: Build & Publish Release APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  Gradle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4.2.2
+      - name: setup jdk
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - uses: gradle/gradle-build-action@v2
+        with:
+          arguments: assembleRelease
+      - uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+      - name: Move APK
+        run: mv ${{steps.sign_app.outputs.signedReleaseFile}} nga.apk
+      - name: Upload APK to Github
+        uses: actions/upload-artifact@v4
+        with:
+          name: nga
+          path: "*.apk"
