@@ -97,6 +97,8 @@ class QRCodeLoginViewModel @Inject constructor(
                                     stopQRCodeCheckLoop()
                                     StorageUtil.Token = result.token
                                     StorageUtil.Uid = result.uid
+                                    // 更改登录状态为登录
+                                    GlobalObject.isLogin = true
                                     Handler(Looper.getMainLooper()).post {
                                         GlobalObject.navController?.navigateToHome()
                                     }

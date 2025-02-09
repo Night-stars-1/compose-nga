@@ -19,6 +19,8 @@ class AuthInterceptor : Interceptor {
             val jsonObject = JSONObject(responseBody)
             val code = jsonObject.optInt("code")
             if (code == 46 || code == 2048) {
+                // 更改登录状态为未登录
+                GlobalObject.isLogin = false
                 Handler(Looper.getMainLooper()).post {
                     GlobalObject.navController?.navigateToLogin()
                 }

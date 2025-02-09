@@ -50,7 +50,8 @@ fun AppNavigation(navController: NavHostController) {
             MainScreen(
                 onViewPost = navController::navigateToPost,
                 onViewTopicSubject = navController::navigateToTopicSubject,
-                onSearch = navController::navigateToSearch
+                onSearch = navController::navigateToSearch,
+                onViewLogin = navController::navigateToLogin,
             )
         }
 
@@ -69,7 +70,7 @@ fun AppNavigation(navController: NavHostController) {
                     id = id,
                     onBackClick = navController::popBackStack,
                     onViewPost = navController::navigateToPost,
-                    onUserInfo = navController::navigateToUserInfo
+                    onUserInfo = navController::navigateToUserInfo,
                 )
             } else {
                 Text("帖子ID为空")
@@ -134,8 +135,9 @@ fun AppNavigation(navController: NavHostController) {
             if (id != null) {
                 UserInfoScreen(
                     id = id,
+                    onViewPost = navController::navigateToPost,
+                    onViewLogin = navController::navigateToLogin,
                     onBackClick = navController::popBackStack,
-                    onViewPost = navController::navigateToPost
                 )
             } else {
                 Text("用户ID为空")

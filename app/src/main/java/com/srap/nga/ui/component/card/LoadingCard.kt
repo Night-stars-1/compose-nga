@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 fun LoadingCard(modifier: Modifier = Modifier) {
     return Box(
         modifier = modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
     }

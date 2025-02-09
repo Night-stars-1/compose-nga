@@ -6,6 +6,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -16,15 +17,48 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.srap.nga.ui.home.HomeScreen
 import com.srap.nga.ui.topic.category.TopicCateGoryScreen
+import com.srap.nga.ui.userinfo.UserInfoScreen
+import com.srap.nga.utils.StorageUtil
+
+data class NavigationItem(
+    val name: String,
+    val icon: ImageVector,
+    val content: @Composable () -> Unit,
+)
 
 @Composable
 fun MainScreen(
     onViewPost: (Int) -> Unit,
     onViewTopicSubject: (Int) -> Unit,
     onSearch: () -> Unit,
+    onViewLogin: () -> Unit,
 ) {
+    val navigationData = listOf(
+        NavigationItem(
+            name = "主页",
+            icon = Icons.Filled.Home,
+            content = { HomeScreen(onViewPost, onSearch) }
+        ),
+        NavigationItem(
+            name = "社区",
+            icon = Icons.Filled.Topic,
+            content = { TopicCateGoryScreen(onViewTopicSubject, onSearch) }
+        ),
+        NavigationItem(
+            name = "我的",
+            icon = Icons.Filled.PersonOutline,
+            content = { UserInfoScreen(
+                id = StorageUtil.Uid,
+                onViewPost = onViewPost,
+                onViewLogin = onViewLogin,
+                onBackClick = null
+            ) }
+        )
+    )
+
     var selectIndex by rememberSaveable { mutableIntStateOf(0) }
     var previousIndex by rememberSaveable { mutableIntStateOf(0) }
     val savableStateHolder = rememberSaveableStateHolder()
@@ -35,31 +69,20 @@ fun MainScreen(
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            item(
-                selected = selectIndex == 0,
-                label = {
-                    if (selectIndex == 0) Text("主页")
-                },
-                onClick = {
-                    setSelectIndex(0)
-                },
-                icon = {
-                    Icon(Icons.Filled.Home, contentDescription = "主页")
-                }
-            )
-
-            item(
-                selected = selectIndex == 1,
-                label = {
-                    if (selectIndex == 1) Text("社区")
-                },
-                onClick = {
-                    setSelectIndex(1)
-                },
-                icon = {
-                    Icon(Icons.Filled.Topic, contentDescription = "社区")
-                }
-            )
+            navigationData.forEachIndexed { index, item ->
+                item(
+                    selected = selectIndex == index,
+                    label = {
+                        if (selectIndex == index) Text(item.name)
+                    },
+                    onClick = {
+                        setSelectIndex(index)
+                    },
+                    icon = {
+                        Icon(item.icon, contentDescription = item.name)
+                    }
+                )
+            }
         }
     ) {
         AnimatedContent(
@@ -78,10 +101,7 @@ fun MainScreen(
             savableStateHolder.SaveableStateProvider(
                 key = index,
                 content = {
-                    when (index) {
-                        0 -> HomeScreen(onViewPost, onSearch)
-                        1 -> TopicCateGoryScreen(onViewTopicSubject, onSearch)
-                    }
+                    navigationData[index].content()
                 }
             )
         }
