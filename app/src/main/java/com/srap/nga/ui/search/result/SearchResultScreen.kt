@@ -36,14 +36,10 @@ import com.srap.nga.ui.component.card.ImageTextCard
 import com.srap.nga.ui.component.card.ImageTextVerticalCard
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.tab.FancyTab
+import com.srap.nga.ui.component.tab.SearchResultTag
 import com.srap.nga.ui.component.topic.TopicSubjectCard
 import com.srap.nga.utils.noRippleClickable
 import kotlinx.coroutines.launch
-
-data class SearchResultTag(
-    val title: String,
-    val viewModel: BaseRefreshLoadViewModel<*>
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

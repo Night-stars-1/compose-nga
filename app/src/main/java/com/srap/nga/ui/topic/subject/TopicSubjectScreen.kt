@@ -34,6 +34,7 @@ import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.card.LoadingCard
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.tab.FancyTab
+import com.srap.nga.ui.component.tab.SearchResultTag
 import com.srap.nga.ui.component.topic.TopicSubjectCard
 import kotlinx.coroutines.launch
 
@@ -80,11 +81,27 @@ fun TopicSubjectScreen(
                     data.subForum.size + 1
                 }
             )
-            var loadViewModelList = listOf<TopicSubjectLoadViewModel>(
-                hiltViewModel<TopicSubjectLoadViewModel, TopicSubjectLoadViewModel.ViewModelFactory>(key = "${id}load") { factory ->
-                    factory.create(id, data.data, result.totalPage)
-                }
+
+            var loadViewModelList = mutableListOf<SearchResultTag<TopicSubjectLoadViewModel>>(
+                SearchResultTag(
+                    title = "全部",
+                    viewModel = hiltViewModel<TopicSubjectLoadViewModel, TopicSubjectLoadViewModel.ViewModelFactory>(key = "${id}load") { factory ->
+                        factory.create(id, data.data, result.totalPage)
+                    }
+                )
             )
+
+            data.subForum.forEachIndexed { index, item ->
+                loadViewModelList.add(
+                    SearchResultTag(
+                        title = item.name,
+                        viewModel = hiltViewModel<TopicSubjectLoadViewModel, TopicSubjectLoadViewModel.ViewModelFactory>(key = "${id}load${index}") { factory ->
+                            factory.create(item.id)
+                        }
+                    )
+                )
+
+            }
             Column(
                 modifier = Modifier
                     .padding(top = innerPadding.calculateTopPadding())
@@ -99,20 +116,13 @@ fun TopicSubjectScreen(
                         )
                     },
                 ) {
-                    FancyTab(
-                        title = "全部",
-                        onClick = {
-                            scope.launch { pagerState.animateScrollToPage(0) }
-                        },
-                        selected = (0 == pagerState.currentPage)
-                    )
-                    data.subForum.forEachIndexed { index, item ->
+                    loadViewModelList.forEachIndexed { index, item ->
                         FancyTab(
-                            title = item.name,
+                            title = item.title,
                             onClick = {
                                 scope.launch { pagerState.animateScrollToPage(index) }
                             },
-                            selected = (index + 1 == pagerState.currentPage)
+                            selected = (index == pagerState.currentPage)
                         )
                     }
                 }
@@ -122,36 +132,22 @@ fun TopicSubjectScreen(
                 HorizontalPager(
                     state = pagerState,
                 ) { index ->
-                    if (index == 0) {
-                        RefreshLoadList(
-                            viewModel = loadViewModelList[index],
-//                            modifier = Modifier
-//                                .padding(horizontal = 8.dp)
-//                                .padding(bottom = 8.dp)
-                        ) { index, item ->
-                            TopicSubjectCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp)
-                                    .clickable {
-                                        onViewPost(item.tid)
-                                    },
-                                title = item.subject,
-                                images = item.attachs?.map { NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl) },
-                                name = item.author,
-                                count = item.replies,
-                            )
-                        }
-                    } else {
-                        Box(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Text(
-                                modifier = Modifier.align(Alignment.Center),
-                                text = "Fancy tab ${index + 1} selected",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
+                    val viewModel = loadViewModelList[index].viewModel
+                    RefreshLoadList(
+                        viewModel = viewModel,
+                    ) { index, item ->
+                        TopicSubjectCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                                .clickable {
+                                    onViewPost(item.tid)
+                                },
+                            title = item.subject,
+                            images = item.attachs?.map { NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl) },
+                            name = item.author,
+                            count = item.replies,
+                        )
                     }
                 }
             }

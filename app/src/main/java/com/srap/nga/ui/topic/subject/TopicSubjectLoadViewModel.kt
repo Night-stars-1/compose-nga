@@ -32,8 +32,8 @@ class TopicSubjectLoadViewModel @AssistedInject constructor(
     interface ViewModelFactory {
         fun create(
             @Assisted("id") id: Int,
-            @Assisted("list")list: List<TopicSubjectResponse.Result.Data>,
-            @Assisted("totalPage") totalPage: Int
+            @Assisted("list")list: List<TopicSubjectResponse.Result.Data> = emptyList(),
+            @Assisted("totalPage") totalPage: Int = 1
         ): TopicSubjectLoadViewModel
     }
 
