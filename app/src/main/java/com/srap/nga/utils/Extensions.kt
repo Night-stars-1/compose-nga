@@ -5,11 +5,16 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.srap.nga.myApplication
+import com.srap.nga.ui.component.state.SwipeableState
+import com.srap.nga.ui.component.state.nestedScrollConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -86,4 +91,24 @@ inline fun Modifier.noRippleClickable(
  */
 fun String.toHttps(): String {
     return this.replace("http://", "https://")
+}
+
+@Composable
+fun Modifier.swipeable(
+    state: SwipeableState,
+    orientation: Orientation,
+    enabled: Boolean = true,
+    reverseDirection: Boolean = false,
+    interactionSource: MutableInteractionSource? = null,
+) : Modifier {
+    return nestedScroll(state.nestedScrollConnection)
+        .draggable(
+            orientation = orientation,
+            enabled = enabled,
+            reverseDirection = reverseDirection,
+            interactionSource = interactionSource,
+            startDragImmediately = state.isAnimationRunning,
+            onDragStopped = { state.performFling() },
+            state = state.draggableState
+        )
 }

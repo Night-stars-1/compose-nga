@@ -109,7 +109,7 @@ fun UserInfoScreen(
                     .fillMaxWidth()
                     .padding(innerPadding),
                 listState = listState,
-                content = {
+                header = {
                     val result = viewModel.result
                     if (result != null) {
                         UserInfoCard(
