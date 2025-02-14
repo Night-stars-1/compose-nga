@@ -86,13 +86,12 @@ fun ImagePreviewer(
 ) {
     var index = -1
     var newImage = Pair(image.first, image.second.replace(".medium.jpg", ""))
-    Log.i("TAG", "ImagePreviewer: $images $newImage ${images.contains(newImage)}")
     val newImages = if (images.any { it.second == newImage.second }) {
         images.mapIndexed { itIndex, item ->
             // 避免images有多个key一样的图片
             if (item.second == newImage.second && index == -1) {
                 index = itIndex
-                newImage = Pair(image.first, "${image.second}${itIndex}")
+                newImage = Pair(newImage.first, "${newImage.second}${itIndex}")
             }
             Pair(item.first, "${item.second}${itIndex}")
         }
