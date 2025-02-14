@@ -30,6 +30,9 @@ class PostViewModel @AssistedInject constructor(
 
     var response by mutableStateOf<PostResponse?>(null)
 
+    var replyQuantity = 0
+        private set
+
     override fun fetchData() {
         viewModelScope.launch {
             networkRepo.getPost(id, page)
@@ -44,6 +47,7 @@ class PostViewModel @AssistedInject constructor(
                                 list += it.result
                                 page = it.currentPage
                                 totalPage = it.totalPage
+                                replyQuantity = it.vrows - 1
                             }
                         }
                     }

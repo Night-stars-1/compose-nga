@@ -53,6 +53,11 @@ data class PostResponse(
      */
     @SerializedName("tsubject")
     val tsubject: String,
+    /**
+     * 帖子+评论数量
+     *
+     * -1后为评论的数量
+     */
     @SerializedName("vrows")
     val vrows: Int
 ) : BaseResponse<PostResponse>() {

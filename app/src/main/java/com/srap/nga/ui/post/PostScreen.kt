@@ -1,7 +1,10 @@
 package com.srap.nga.ui.post
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -56,31 +59,62 @@ fun PostScreen(
                 .padding(innerPadding),
             viewModel = viewModel,
         ) { index, item ->
-            // 帖子内容，或评论
-            PostCard(
-                avatar = item.author.avatar,
-                name = item.author.username,
-                onAvatarClick = {
-                    onUserInfo(item.author.uid)
+            if (index == 0) {
+                // 帖子内容
+                PostCard(
+                    avatar = item.author.avatar,
+                    name = item.author.username,
+                    onAvatarClick = {
+                        onUserInfo(item.author.uid)
+                    }
+                ) {
+                    HtmlUtil.FromHtml(
+                        item.content,
+                        uid = item.author.uid.toString(),
+                        images = item.attches?.map { NGA_ATTACHMENTS_URL.format(it.attachUrl) } ?: emptyList<String>(),
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        onViewPost = onViewPost,
+                    )
                 }
-            ) {
-                HtmlUtil.FromHtml(
-                    item.content,
-                    uid = item.author.uid.toString(),
-                    images = item.attches?.map { NGA_ATTACHMENTS_URL.format(it.attachUrl) } ?: emptyList<String>(),
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    onViewPost = onViewPost,
-                )
-            }
-            if (index != viewModel.list.lastIndex) {
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                    thickness = 1.dp
-                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+            } else {
+                if (index == 1) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 4.dp)
+                    ) {
+                        Text("评论 ${viewModel.replyQuantity}")
+                    }
+                }
+                // 帖子评论
+                PostCard(
+                    avatar = item.author.avatar,
+                    name = item.author.username,
+                    onAvatarClick = {
+                        onUserInfo(item.author.uid)
+                    }
+                ) {
+                    HtmlUtil.FromHtml(
+                        item.content,
+                        uid = item.author.uid.toString(),
+                        images = item.attches?.map { NGA_ATTACHMENTS_URL.format(it.attachUrl) } ?: emptyList<String>(),
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        onViewPost = onViewPost,
+                    )
+                }
+                if (index != viewModel.list.lastIndex) {
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                        thickness = 1.dp
+                    )
+                }
             }
         }
     }
