@@ -151,10 +151,16 @@ internal val SwipeableState.nestedScrollConnection: NestedScrollConnection
     get() = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             val delta = available.toFloat()
-            if (delta > 0 && source == NestedScrollSource.UserInput) {
+            /**
+             * offset.value < 100
+             * 只在底部提示框出现的时候抵消父组件的滚动
+             * 100 是为了让提示框完全滚动下去
+             */
+            return if (delta > 0 && offset.value < 100 && source == NestedScrollSource.UserInput) {
+                // 该次滚动消费的available
+                // 用来在底部提示框出现的时候抵消父组件的滚动
                 performDrag(delta).toOffset()
-            }
-            return Offset.Zero
+            } else Offset.Zero // 向下不消费available
         }
 
         override fun onPostScroll(
@@ -164,19 +170,7 @@ internal val SwipeableState.nestedScrollConnection: NestedScrollConnection
         ): Offset {
             return if (source == NestedScrollSource.UserInput) {
                 performDrag(available.toFloat()).toOffset()
-            } else {
-                Offset.Zero
-            }
-        }
-
-        override suspend fun onPreFling(available: Velocity): Velocity {
-            val velocity = available.y
-            return if (velocity > 0) {
-                performFling()
-                available
-            } else {
-                Velocity.Zero
-            }
+            } else Offset.Zero
         }
 
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
