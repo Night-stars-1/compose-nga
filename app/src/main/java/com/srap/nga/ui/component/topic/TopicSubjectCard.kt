@@ -26,9 +26,9 @@ fun TopicSubjectCard(
     name: String,
     count: Int,
     modifier: Modifier = Modifier,
-    images: List<String>? = emptyList<String>(),
+    images: List<Pair<String, String>>? = emptyList<Pair<String, String>>(),
 ) {
-    val newImages = images?.filter { !it.contains(".mp4") }
+    val newImages = images?.filter { !it.first.contains(".mp4") }
     val color = MaterialTheme.colorScheme.outline
     Card(
         modifier = modifier

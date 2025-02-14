@@ -51,7 +51,8 @@ object HtmlUtil {
     @Composable
     private fun RenderNgaContent(
         ngaContent: List<NgaContent>?,
-        images: List<String>,
+        uid: String,
+        images: List<Pair<String, String>>,
         modifier: Modifier = Modifier,
         onViewPost: (Int) -> Unit,
     ) {
@@ -72,7 +73,7 @@ object HtmlUtil {
                     }
                     is NgaContent.Image -> {
                         ImagePreviewer(
-                            image = it.url,
+                            image = Pair(it.url, "${it.url}$uid"),
                             images = images,
                             modifier = Modifier
                                 .fillMaxSize()
@@ -94,6 +95,7 @@ object HtmlUtil {
                                 it.content.forEach { nestedContent ->
                                     RenderNgaContent(
                                         listOf(nestedContent),
+                                        uid,
                                         images,
                                         modifier,
                                         onViewPost
@@ -114,6 +116,7 @@ object HtmlUtil {
                                 it.content.forEach { nestedContent ->
                                     RenderNgaContent(
                                         listOf(nestedContent),
+                                        uid,
                                         images,
                                         modifier,
                                         onViewPost
@@ -130,11 +133,13 @@ object HtmlUtil {
     @Composable
     fun FromHtml(
         html: String,
+        uid: String,
         images: List<String>,
         modifier: Modifier = Modifier,
         onViewPost: (Int) -> Unit,
     ) {
         val ngaContent = parseNgaHtml(html)
-        RenderNgaContent(ngaContent, images, modifier, onViewPost)
+        val newImages = images.map { Pair(it, "$it$uid") }
+        RenderNgaContent(ngaContent, uid, newImages, modifier, onViewPost)
     }
 }

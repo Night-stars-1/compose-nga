@@ -65,6 +65,7 @@ fun PostScreen(
             ) {
                 HtmlUtil.FromHtml(
                     item.content,
+                    uid = item.author.uid.toString(),
                     images = item.attches?.map { it.attachUrl } ?: emptyList<String>(),
                     modifier = Modifier
                         .fillMaxSize(),

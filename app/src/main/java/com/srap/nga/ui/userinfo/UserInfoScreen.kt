@@ -129,7 +129,7 @@ fun UserInfoScreen(
                             onViewPost(item.tid)
                         },
                     title = item.subject,
-                    images = item.attachs?.map { NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl) },
+                    images = item.attachs?.map { Pair(NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl), "${item.authorId}${it.attachUrl}") },
                     name = item.author,
                     count = item.replies,
                 )
