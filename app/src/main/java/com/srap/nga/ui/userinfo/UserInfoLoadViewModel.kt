@@ -1,5 +1,6 @@
 package com.srap.nga.ui.userinfo
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,14 +16,14 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlin.jvm.javaClass
+
+private val TAG = "UserInfoLoadViewModel"
 
 @HiltViewModel(assistedFactory = UserInfoLoadViewModel.ViewModelFactory::class)
 class UserInfoLoadViewModel @AssistedInject constructor(
     @Assisted var id: Int,
     networkRepo: NetworkRepo,
 ) : BaseRefreshLoadViewModel<TopicSubjectResponse.Result.Data>(networkRepo) {
-    private val TAG = javaClass.simpleName
 
     @AssistedFactory
     interface ViewModelFactory {

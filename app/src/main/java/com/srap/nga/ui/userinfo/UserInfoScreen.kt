@@ -71,7 +71,7 @@ fun UserInfoScreen(
                         text = if (onBackClick != null) {
                             if (firstVisibleItemIndex > 0) {
                                 viewModel.result?.username.toString()
-                            } else "异常"
+                            } else "用户详情"
                         } else "我的",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
