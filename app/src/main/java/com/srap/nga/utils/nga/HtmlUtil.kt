@@ -2,7 +2,6 @@ package com.srap.nga.utils.nga
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
@@ -62,7 +61,8 @@ object HtmlUtil {
             ngaContent?.forEach {
                 when (it) {
                     is NgaContent.Text -> {
-                        if (it.content.isNotEmpty() && it.content != "<br/>") {
+                        if (it.content.isNotBlank() && it.content != "<br/>") {
+                            // 排除空格和只有换行符的情况
                             HtmlText(
                                 html = it.content,
                                 onViewPost = onViewPost,

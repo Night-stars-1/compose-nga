@@ -39,6 +39,7 @@ import com.srap.nga.utils.provider.NgaProvider
 import com.srap.nga.utils.provider.ThemeColorProvider
 import kotlin.text.toInt
 import androidx.core.text.parseAsHtml
+import androidx.core.net.toUri
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -112,7 +113,7 @@ fun openUrl(url: Uri) {
 }
 
 fun openUrl(url: String) {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     myApplication.startActivity(intent)
 }
@@ -130,14 +131,13 @@ open class CoilImageGetter(
         imageLoader.enqueue(ImageRequest.Builder(textView.context).data(finalSource).apply {
             target { image ->
                 drawablePlaceholder.updateImage(image)
-//                textView.height += image.height
+                textView.height += 5 // 增加一点高度防止无法看见表情包
                 textView.text = textView.text
             }
         }.build())
         return drawablePlaceholder
     }
 
-    @Suppress("DEPRECATION")
     private class DrawablePlaceHolder : BitmapDrawable() {
 
         private var image: Image? = null
@@ -176,7 +176,7 @@ class CustomLinkMovementMethod(
     }
 
     private fun handleCustomNavigation(url: String) {
-        val uri = Uri.parse(url)
+        val uri = url.toUri()
         if (url.contains("nga") && url.contains("tid")) {
             val tid = uri.getQueryParameter("tid")
             if (tid != null) {
