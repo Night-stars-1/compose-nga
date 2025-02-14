@@ -3,20 +3,28 @@ package com.srap.nga.ui.component
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jvziyaoyao.scale.image.previewer.TransformImageView
 import com.jvziyaoyao.scale.zoomable.previewer.rememberPreviewerState
@@ -106,39 +114,53 @@ fun ImagePreviewer(
     )
     val scope = rememberCoroutineScope()
     val imageHeight = remember { mutableStateOf(0.dp) }
-    val density = LocalDensity.current
+    val current = LocalDensity.current
 
-    TransformImageView(
-        modifier = modifier
-            .heightIn(min = imageHeight.value)
-            .onGloballyPositioned { layoutCoordinates ->
-                // 获取相对于屏幕的实际尺寸,避免点击图片播放动画后图片消失
-                val actualHeight = layoutCoordinates.size.height
-                if (imageHeight.value == 0.dp) {
-                    imageHeight.value = with(density) { actualHeight.toDp() }
-                }
-            }
-            .clickable {
-                scope.launch {
-                    ImagePreview.openImage(newImages, previewerState)
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
 
-                    // 点击事件触发动效
-                    withFrameMillis {
-                        scope.launch {
-                            previewerState.enterTransform(index)
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        TransformImageView(
+            modifier = modifier
+                .shadow(4.dp, shape = RoundedCornerShape(14.dp))
+                .height(imageHeight.value)
+                .clickable {
+                    scope.launch {
+                        ImagePreview.openImage(newImages, previewerState)
+
+                        // 点击事件触发动效
+                        withFrameMillis {
+                            scope.launch {
+                                previewerState.enterTransform(index)
+                            }
+                        }
+                    }
+                },
+            imageLoader = {
+                // 缩略图
+                val painter = rememberAsyncImagePainter(
+                    newImage.first,
+                    contentScale = contentScale,
+                )
+                LaunchedEffect(painter.intrinsicSize) {
+                    if (painter.intrinsicSize != Size.Unspecified) {
+                        // 计算图片的高度,让图片完整显示
+                        val imageWidth = with(current) { painter.intrinsicSize.width.toDp() }
+                        val imageScale = imageWidth / screenWidth
+                        val curImageHeight = with(current) { painter.intrinsicSize.height.toDp() }
+                        val newHeight = curImageHeight / imageScale
+                        if (imageHeight.value == 0.dp) {
+                            imageHeight.value = newHeight
                         }
                     }
                 }
+                // 必须依次返回key、图片数据、图片的尺寸
+                Triple(newImage.second, painter, painter.intrinsicSize)
             },
-        imageLoader = {
-            // 缩略图
-            val painter = rememberAsyncImagePainter(
-                newImage.first,
-                contentScale = contentScale
-            )
-            // 必须依次返回key、图片数据、图片的尺寸
-            Triple(newImage.second, painter, painter.intrinsicSize)
-        },
-        transformState = previewerState,
-    )
+            transformState = previewerState,
+        )
+    }
+
 }
