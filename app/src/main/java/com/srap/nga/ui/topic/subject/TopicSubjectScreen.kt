@@ -82,26 +82,22 @@ fun TopicSubjectScreen(
                 }
             )
 
-            var loadViewModelList = mutableListOf<SearchResultTag<TopicSubjectLoadViewModel>>(
+            val loadViewModelList = listOf(
                 SearchResultTag(
                     title = "全部",
                     viewModel = hiltViewModel<TopicSubjectLoadViewModel, TopicSubjectLoadViewModel.ViewModelFactory>(key = "${id}load") { factory ->
                         factory.create(id, data.data, result.totalPage)
                     }
                 )
-            )
-
-            data.subForum.forEachIndexed { index, item ->
-                loadViewModelList.add(
-                    SearchResultTag(
-                        title = item.name,
-                        viewModel = hiltViewModel<TopicSubjectLoadViewModel, TopicSubjectLoadViewModel.ViewModelFactory>(key = "${id}load${index}") { factory ->
-                            factory.create(item.id)
-                        }
-                    )
+            ) + data.subForum.mapIndexed { index, item ->
+                SearchResultTag(
+                    title = item.name,
+                    viewModel = hiltViewModel<TopicSubjectLoadViewModel, TopicSubjectLoadViewModel.ViewModelFactory>(key = "${id}load${index}") { factory ->
+                        factory.create(item.id)
+                    }
                 )
-
             }
+
             Column(
                 modifier = Modifier
                     .padding(top = innerPadding.calculateTopPadding())
