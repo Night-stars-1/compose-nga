@@ -7,21 +7,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
@@ -92,6 +91,10 @@ fun ImagePreviewer(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit
 ) {
+    val dpSaver = Saver<Dp, Float>(
+        save = { it.value },
+        restore = { it.dp }
+    )
     var index = -1
     var newImage = Pair(image.first, image.second.replace(".medium.jpg", ""))
     val newImages = if (images.any { it.second == newImage.second }) {
@@ -113,7 +116,7 @@ fun ImagePreviewer(
         getKey = { newImages[it].second }
     )
     val scope = rememberCoroutineScope()
-    val imageHeight = remember { mutableStateOf(0.dp) }
+    val imageHeight = rememberSaveable(stateSaver = dpSaver) { mutableStateOf(0.dp) }
     val current = LocalDensity.current
 
     val configuration = LocalConfiguration.current
@@ -152,6 +155,7 @@ fun ImagePreviewer(
                         val curImageHeight = with(current) { painter.intrinsicSize.height.toDp() }
                         val newHeight = curImageHeight / imageScale
                         if (imageHeight.value == 0.dp) {
+                            Log.i("TAG", "ImagePreviewer: $imageHeight")
                             imageHeight.value = newHeight
                         }
                     }
