@@ -33,7 +33,7 @@ fun ImagesPreviewer(
 ) {
     val previewerState = rememberPreviewerState(
         pageCount = { images.size },
-        getKey = { images[it] }
+        getKey = { images[it].second }
     )
     val scope = rememberCoroutineScope()
 
@@ -59,10 +59,10 @@ fun ImagesPreviewer(
                         }
                     },
                 imageLoader = {
-                    val key = images[index]
-                    val imageDrawableId = images[index]
+                    val key = images[index].second
+                    val imageUrl = images[index].first
                     // 缩略图
-                    val painter = rememberAsyncImagePainter(imageDrawableId)
+                    val painter = rememberAsyncImagePainter(imageUrl)
                     // 必须依次返回key、图片数据、图片的尺寸
                     Triple(key, painter, painter.intrinsicSize)
                 },
@@ -84,23 +84,27 @@ fun ImagePreviewer(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit
 ) {
-    var newImage = image
-    Log.i("TAG", "ImagePreviewer: $images $image")
-    val newImages = if (images.contains(image)) {
-        images.mapIndexed { index, item ->
+    var index = -1
+    var newImage = Pair(image.first, image.second.replace(".medium.jpg", ""))
+    Log.i("TAG", "ImagePreviewer: $images $newImage ${images.contains(newImage)}")
+    val newImages = if (images.any { it.second == newImage.second }) {
+        images.mapIndexed { itIndex, item ->
             // 避免images有多个key一样的图片
-            if (item.first == image.first) newImage = Pair(image.first, "${image.second}${index}")
-            Pair(item.first, "${item.second}${index}")
+            if (item.second == newImage.second && index == -1) {
+                index = itIndex
+                newImage = Pair(image.first, "${image.second}${itIndex}")
+            }
+            Pair(item.first, "${item.second}${itIndex}")
         }
     } else {
-        listOf(image)
+        index = 0
+        listOf(newImage)
     }
 
     val previewerState = rememberPreviewerState(
         pageCount = { newImages.size },
         getKey = { newImages[it].second }
     )
-    val index = newImages.indexOf(image)
     val scope = rememberCoroutineScope()
     val imageHeight = remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
@@ -128,15 +132,13 @@ fun ImagePreviewer(
                 }
             },
         imageLoader = {
-            val key = newImages[index].second
-            val imageDrawableId = newImages[index].first
             // 缩略图
             val painter = rememberAsyncImagePainter(
-                imageDrawableId,
+                newImage.first,
                 contentScale = contentScale
             )
             // 必须依次返回key、图片数据、图片的尺寸
-            Triple(key, painter, painter.intrinsicSize)
+            Triple(newImage.second, painter, painter.intrinsicSize)
         },
         transformState = previewerState,
     )

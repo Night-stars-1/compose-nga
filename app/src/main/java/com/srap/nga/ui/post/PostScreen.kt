@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.srap.nga.logic.network.NetworkModule.NGA_ATTACHMENTS_URL
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.post.PostCard
@@ -66,7 +67,7 @@ fun PostScreen(
                 HtmlUtil.FromHtml(
                     item.content,
                     uid = item.author.uid.toString(),
-                    images = item.attches?.map { it.attachUrl } ?: emptyList<String>(),
+                    images = item.attches?.map { NGA_ATTACHMENTS_URL.format(it.attachUrl) } ?: emptyList<String>(),
                     modifier = Modifier
                         .fillMaxSize(),
                     onViewPost = onViewPost,

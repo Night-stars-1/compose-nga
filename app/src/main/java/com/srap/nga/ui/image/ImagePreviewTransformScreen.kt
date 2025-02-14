@@ -46,7 +46,7 @@ fun ImagePreviewTransformScreen() {
                 }
             }),
             imageLoader = {
-                val painter = rememberAsyncImagePainter(images[it].second)
+                val painter = rememberAsyncImagePainter(images[it].first)
                 return@ScaleImagePreviewer Pair(painter, painter.intrinsicSize)
             }
         )
