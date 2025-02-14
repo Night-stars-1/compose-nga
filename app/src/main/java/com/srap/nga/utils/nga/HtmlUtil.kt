@@ -1,5 +1,6 @@
 package com.srap.nga.utils.nga
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,11 +17,13 @@ import com.srap.nga.utils.nga.parse.NgaContent
 import com.srap.nga.utils.nga.parse.SplitQuote
 import kotlin.collections.get
 
+private const val TAG = "HtmlUtil"
+
 object HtmlUtil {
-    private val TAG = javaClass.simpleName
 
     private fun parseNgaHtml(html: String): List<NgaContent> {
         var result = html
+        result = result.replace("<div style=\"text-align:center\">", "")
         // 去掉一个<br/>
 //        result = result.replace("""<br/><br/>""", """<br||||/>""").replace("""<br/>""", "").replace("""<br||||/>""", """<br/>""")
         // [img]https://ngabbs.com/read.php?tid=42886511[/img]
