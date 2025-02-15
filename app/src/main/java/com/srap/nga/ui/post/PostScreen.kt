@@ -20,9 +20,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.srap.nga.logic.network.NetworkModule.NGA_ATTACHMENTS_URL
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.list.RefreshLoadList
-import com.srap.nga.ui.component.post.PostCard
+import com.srap.nga.ui.component.post.PostReplyCard
+import com.srap.nga.ui.component.post.PostTitleCard
 import com.srap.nga.utils.nga.HtmlUtil
 
+/**
+ * 帖子详细页面
+ * @param id 帖子id
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostScreen(
@@ -58,39 +63,48 @@ fun PostScreen(
             modifier = Modifier
                 .padding(innerPadding),
             viewModel = viewModel,
-        ) { index, item ->
-            if (index == 0) {
-                // 帖子内容
-                PostCard(
-                    avatar = item.author.avatar,
-                    name = item.author.username,
-                    onAvatarClick = {
-                        onUserInfo(item.author.uid)
+            header = {
+                if (viewModel.list.isNotEmpty()) {
+                    val item = viewModel.list[0]
+                    // 帖子内容
+                    PostTitleCard(
+                        avatar = item.author.avatar,
+                        name = item.author.username,
+                        onAvatarClick = {
+                            onUserInfo(item.author.uid)
+                        }
+                    ) {
+                        HtmlUtil.FromHtml(
+                            item.content,
+                            uid = item.author.uid.toString(),
+                            images = item.attches?.map { NGA_ATTACHMENTS_URL.format(it.attachUrl) } ?: emptyList<String>(),
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            onViewPost = onViewPost,
+                        )
                     }
-                ) {
-                    HtmlUtil.FromHtml(
-                        item.content,
-                        uid = item.author.uid.toString(),
-                        images = item.attches?.map { NGA_ATTACHMENTS_URL.format(it.attachUrl) } ?: emptyList<String>(),
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        onViewPost = onViewPost,
-                    )
-                }
 
-                Spacer(modifier = Modifier.height(8.dp))
-            } else {
-                if (index == 1) {
+//                Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                        thickness = 1.dp
+                    )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 4.dp)
                     ) {
-                        Text("评论 ${viewModel.replyQuantity}")
+                        Text("共${viewModel.replyQuantity}个评论")
                     }
                 }
+            }
+        ) { index, item ->
+            if (index != 0) {
                 // 帖子评论
-                PostCard(
+                PostReplyCard(
                     avatar = item.author.avatar,
                     name = item.author.username,
                     onAvatarClick = {
@@ -104,15 +118,6 @@ fun PostScreen(
                         modifier = Modifier
                             .fillMaxSize(),
                         onViewPost = onViewPost,
-                    )
-                }
-                if (index != viewModel.list.lastIndex) {
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                        thickness = 1.dp
                     )
                 }
             }

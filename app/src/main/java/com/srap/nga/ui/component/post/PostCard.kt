@@ -28,8 +28,11 @@ import androidx.constraintlayout.compose.Dimension
 import coil3.compose.AsyncImage
 import com.srap.nga.utils.toHttps
 
+/**
+ * 标题卡片
+ */
 @Composable
-fun PostCard(
+fun PostTitleCard(
     avatar: String,
     name: String,
     modifier: Modifier = Modifier,
@@ -118,6 +121,109 @@ fun PostCard(
                 top.linkTo(avatarRef.bottom, margin = 4.dp)
                 start.linkTo(parent.start)
                 bottom.linkTo(parent.bottom)
+                width = Dimension.fillToConstraints
+                height = Dimension.wrapContent
+            }
+        ) {
+            message()
+        }
+    }
+}
+
+/**
+ * 评论卡片
+ */
+@Composable
+fun PostReplyCard(
+    avatar: String,
+    name: String,
+    modifier: Modifier = Modifier,
+    onAvatarClick: () -> Unit = {},
+    message: @Composable () -> Unit
+) {
+    var dropdownMenuExpanded by remember { mutableStateOf(false) }
+
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        val (avatarRef, nameRef, expandRef, messageRef) = createRefs()
+
+        // 头像
+        AsyncImage(
+            model = avatar.toHttps(),
+            contentDescription = "头像",
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .constrainAs(avatarRef) {
+                    top.linkTo(parent.top, margin = 4.dp)
+                    start.linkTo(parent.start)
+                }
+                .clickable {
+                    onAvatarClick()
+                },
+        )
+
+        // 名称
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.constrainAs(nameRef) {
+                top.linkTo(avatarRef.top)
+                start.linkTo(avatarRef.end, margin = 4.dp)
+            }
+        )
+
+        // 操作栏
+        Box(
+            modifier = Modifier
+                .aspectRatio(1f, false)
+                .constrainAs(expandRef) {
+                    top.linkTo(avatarRef.top)
+                    bottom.linkTo(avatarRef.bottom)
+                    end.linkTo(parent.end)
+                    height = Dimension.fillToConstraints
+                }
+        ) {
+            IconButton(
+                onClick = {
+                    dropdownMenuExpanded = true
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.outline
+                )
+            }
+
+            DropdownMenu(
+                expanded = dropdownMenuExpanded,
+                onDismissRequest = {
+                    dropdownMenuExpanded = false
+                },
+            ) {
+                listOf("操作1", "操作2").forEachIndexed { index, menu ->
+                    DropdownMenuItem(
+                        text = { Text(menu) },
+                        onClick = {
+                            dropdownMenuExpanded = false
+                        }
+                    )
+                }
+            }
+
+        }
+
+        // 消息
+        Box(
+            modifier = Modifier.constrainAs(messageRef) {
+                top.linkTo(avatarRef.bottom, margin = 4.dp)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(nameRef.start)
+                end.linkTo(parent.end, margin = 4.dp)
                 width = Dimension.fillToConstraints
                 height = Dimension.wrapContent
             }
