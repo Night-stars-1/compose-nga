@@ -3,6 +3,8 @@ package com.srap.nga.ui.component.webview
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -40,6 +42,7 @@ import com.srap.nga.utils.provider.ThemeColorProvider
 import kotlin.text.toInt
 import androidx.core.text.parseAsHtml
 import androidx.core.net.toUri
+import androidx.core.graphics.createBitmap
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -127,18 +130,21 @@ open class CoilImageGetter(
     override fun getDrawable(source: String): Drawable {
         val finalSource = sourceModifier?.invoke(source) ?: source
 
-        val drawablePlaceholder = DrawablePlaceHolder()
+        val drawablePlaceholder = DrawablePlaceHolder(
+            res = textView.context.resources,
+            bitmap = createBitmap(1, 1)
+        )
         imageLoader.enqueue(ImageRequest.Builder(textView.context).data(finalSource).apply {
             target { image ->
                 drawablePlaceholder.updateImage(image)
-                textView.height += 5 // 增加一点高度防止无法看见表情包
+//                textView.height += 10 // 增加一点高度防止无法看见表情包
                 textView.text = textView.text
             }
         }.build())
         return drawablePlaceholder
     }
 
-    private class DrawablePlaceHolder : BitmapDrawable() {
+    private class DrawablePlaceHolder(res: Resources, bitmap: Bitmap) : BitmapDrawable(res, bitmap) {
 
         private var image: Image? = null
 
@@ -148,6 +154,7 @@ open class CoilImageGetter(
 
         fun updateImage(image: Image) {
             this.image = image
+            Log.i("TAG", "updateImage: ${image.width} ${image.height}")
             setBounds(0, 0, image.width, image.height)
         }
     }

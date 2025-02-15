@@ -1,6 +1,5 @@
 package com.srap.nga.ui.component
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -155,7 +153,6 @@ fun ImagePreviewer(
                         val curImageHeight = with(current) { painter.intrinsicSize.height.toDp() }
                         val newHeight = curImageHeight / imageScale
                         if (imageHeight.value == 0.dp) {
-                            Log.i("TAG", "ImagePreviewer: $imageHeight")
                             imageHeight.value = newHeight
                         }
                     }
