@@ -154,7 +154,6 @@ open class CoilImageGetter(
 
         fun updateImage(image: Image) {
             this.image = image
-            Log.i("TAG", "updateImage: ${image.width} ${image.height}")
             setBounds(0, 0, image.width, image.height)
         }
     }

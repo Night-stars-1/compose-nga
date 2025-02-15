@@ -1,6 +1,5 @@
 package com.srap.nga.utils.nga
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -88,7 +87,6 @@ object HtmlUtil {
                         Card(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(vertical = 4.dp)
                         ) {
                             Column(
                                 modifier = modifier

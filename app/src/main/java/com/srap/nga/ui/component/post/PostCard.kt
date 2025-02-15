@@ -117,8 +117,9 @@ fun PostCard(
             modifier = Modifier.constrainAs(messageRef) {
                 top.linkTo(avatarRef.bottom, margin = 4.dp)
                 start.linkTo(parent.start)
-                bottom.linkTo(parent.bottom, margin = 4.dp)
+                bottom.linkTo(parent.bottom)
                 width = Dimension.fillToConstraints
+                height = Dimension.wrapContent
             }
         ) {
             message()
