@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
             navController = rememberNavController()
 
             AppTheme(
-                dynamicColor = true
+                dynamicColor = false
             ) {
                 Surface(
                     modifier = Modifier

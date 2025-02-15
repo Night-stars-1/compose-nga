@@ -36,12 +36,11 @@ fun ExpandableCard(
         modifier = Modifier
             .padding(bottom = 2.dp)
             .background(
-                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.colorScheme.surfaceContainerHighest,
                 shape = RoundedCornerShape(8.dp)
             )
             .animateContentSize()
             .fillMaxWidth()
-            .clickable { expanded = !expanded }
     ) {
         Column {
             Row(
