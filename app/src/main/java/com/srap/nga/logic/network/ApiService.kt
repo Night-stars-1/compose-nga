@@ -1,5 +1,6 @@
 package com.srap.nga.logic.network
 
+import com.srap.nga.logic.model.CateGoryFavorResponse
 import com.srap.nga.logic.model.CreateQRCodeResponse
 import com.srap.nga.logic.model.ForumBySearchResponse
 import com.srap.nga.logic.model.SearchPromptResponse
@@ -44,6 +45,15 @@ interface ApiService {
     fun getTopicCateGory(
         @Field("__output") output: Int = 14
     ): Call<TopicCateGoryResponse>
+
+    /**
+     * 获取关注社区列表
+     */
+    @FormUrlEncoded
+    @POST("nuke.php?__lib=forum_favor2&__act=get")
+    fun getCateGoryFavor(
+        @Field("__output") output: Int = 14
+    ): Call<CateGoryFavorResponse>
 
     /**
      * 获取社区内容
