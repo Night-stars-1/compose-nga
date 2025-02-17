@@ -1,10 +1,13 @@
 package com.srap.nga.ui.topic.subject
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -29,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.card.LoadingCard
+import com.srap.nga.ui.component.list.ExtendedNestedScroll
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.tab.FancyTab
 import com.srap.nga.ui.component.tab.SearchResultTag
@@ -95,52 +99,67 @@ fun TopicSubjectScreen(
                 )
             }
 
-            Column(
+            ExtendedNestedScroll(
                 modifier = Modifier
-                    .padding(top = innerPadding.calculateTopPadding())
-            ) {
-                SecondaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    indicator = {
-                        TabRowDefaults.SecondaryIndicator(
-                            Modifier
-                                .tabIndicatorOffset(pagerState.currentPage, matchContentSize = true)
-                                .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-                        )
-                    },
-                ) {
-                    loadViewModelList.forEachIndexed { index, item ->
-                        FancyTab(
-                            title = item.title,
-                            onClick = {
-                                scope.launch { pagerState.animateScrollToPage(index) }
-                            },
-                            selected = (index == pagerState.currentPage)
-                        )
+                    .padding(top = innerPadding.calculateTopPadding()),
+                header = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                    ) {
+                        Text("呃呃呃呃呃呃呃呃呃呃呃呃呃呃呃")
                     }
                 }
-
-                HorizontalDivider()
-
-                HorizontalPager(
-                    state = pagerState,
-                ) { index ->
-                    val viewModel = loadViewModelList[index].viewModel
-                    RefreshLoadList(
-                        viewModel = viewModel,
-                    ) { index, item ->
-                        TopicSubjectCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp)
-                                .clickable {
-                                    onViewPost(item.tid)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    SecondaryScrollableTabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        indicator = {
+                            TabRowDefaults.SecondaryIndicator(
+                                Modifier
+                                    .tabIndicatorOffset(pagerState.currentPage, matchContentSize = true)
+                                    .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                            )
+                        },
+                    ) {
+                        loadViewModelList.forEachIndexed { index, item ->
+                            FancyTab(
+                                title = item.title,
+                                onClick = {
+                                    scope.launch { pagerState.animateScrollToPage(index) }
                                 },
-                            title = item.subject,
-                            images = item.attachs?.map { Pair(NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl), "${item.authorId}${it.attachUrl}") },
-                            name = item.author,
-                            count = item.replies,
-                        )
+                                selected = (index == pagerState.currentPage)
+                            )
+                        }
+                    }
+
+                    HorizontalDivider()
+
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxHeight()
+                    ) { index ->
+                        val viewModel = loadViewModelList[index].viewModel
+                        RefreshLoadList(
+                            viewModel = viewModel,
+                            modifier = Modifier.fillMaxHeight()
+                        ) { index, item ->
+                            TopicSubjectCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp)
+                                    .clickable {
+                                        onViewPost(item.tid)
+                                    },
+                                title = item.subject,
+                                images = item.attachs?.map { Pair(NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl), "${item.authorId}${it.attachUrl}") },
+                                name = item.author,
+                                count = item.replies,
+                            )
+                        }
                     }
                 }
             }
