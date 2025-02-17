@@ -21,7 +21,7 @@ private const val TAG = "HtmlUtil"
 
 object HtmlUtil {
 
-    private fun parseNgaHtml(html: String): List<NgaContent> {
+    private fun parseNgaHtml(html: String): SplitQuote {
         var result = html
         result = result.replace("<div style=\"text-align:center\">", "")
         // 去掉一个<br/>
@@ -48,7 +48,7 @@ object HtmlUtil {
 //        result = result.replace(Regex("""\[(\w+)](.+?)\[/\1]"""), """<$1>$2</$1>""")
         val parseObj = SplitQuote()
         parseObj.splitQuote(result)
-        return parseObj.data
+        return parseObj
     }
 
     @Composable
@@ -137,12 +137,11 @@ object HtmlUtil {
     fun FromHtml(
         html: String,
         uid: String,
-        images: List<String>,
         modifier: Modifier = Modifier,
         onViewPost: (Int) -> Unit,
     ) {
-        val ngaContent = parseNgaHtml(html)
-        val newImages = images.map { Pair(it, "$it$uid") }
-        RenderNgaContent(ngaContent, uid, newImages, modifier, onViewPost)
+        val data = parseNgaHtml(html)
+        val newImages = data.imageList.map { Pair(it, "$it$uid") }
+        RenderNgaContent(data.data, uid, newImages, modifier, onViewPost)
     }
 }

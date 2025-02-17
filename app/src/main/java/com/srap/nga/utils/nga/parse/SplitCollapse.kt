@@ -6,6 +6,7 @@ import org.jsoup.nodes.Element
 
 class SplitCollapse {
     private val dataStack = mutableListOf<NgaContent>()
+    val imageList = mutableListOf<String>()
 
     fun splitCollapse(text: String): List<NgaContent>? {
         val doc: Document = Jsoup.parse(text)
@@ -33,7 +34,14 @@ class SplitCollapse {
                 } else {
                     val content = SplitImage().splitImage(text)
                     text = ""
-                    content?.let { dataStack.addAll(it) }
+                    content?.let {
+                        it.forEach { item ->
+                            if (item is NgaContent.Image) {
+                                imageList.add(item.url)
+                            }
+                        }
+                        dataStack.addAll(it)
+                    }
                 }
             } else {
 //                val newText = child.outerHtml()
@@ -45,7 +53,14 @@ class SplitCollapse {
 
         // 添加结尾没有<br>导致未解析的内容
         val content = SplitImage().splitImage(text)
-        content?.let { dataStack.addAll(it) }
+        content?.let {
+            it.forEach { item ->
+                if (item is NgaContent.Image) {
+                    imageList.add(item.url)
+                }
+            }
+            dataStack.addAll(it)
+        }
 
         return dataStack
     }

@@ -1,10 +1,8 @@
 package com.srap.nga.ui.post
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -21,7 +19,7 @@ import com.srap.nga.logic.network.NetworkModule.NGA_ATTACHMENTS_URL
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.post.PostReplyCard
-import com.srap.nga.ui.component.post.PostTitleCard
+import com.srap.nga.ui.component.post.PostContentCard
 import com.srap.nga.utils.nga.HtmlUtil
 
 /**
@@ -67,7 +65,7 @@ fun PostScreen(
                 if (viewModel.list.isNotEmpty()) {
                     val item = viewModel.list[0]
                     // 帖子内容
-                    PostTitleCard(
+                    PostContentCard(
                         avatar = item.author.avatar,
                         name = item.author.username,
                         onAvatarClick = {
@@ -77,7 +75,6 @@ fun PostScreen(
                         HtmlUtil.FromHtml(
                             item.content,
                             uid = item.author.uid.toString(),
-                            images = item.attches?.map { NGA_ATTACHMENTS_URL.format(it.attachUrl) } ?: emptyList<String>(),
                             modifier = Modifier
                                 .fillMaxSize(),
                             onViewPost = onViewPost,
@@ -114,7 +111,6 @@ fun PostScreen(
                     HtmlUtil.FromHtml(
                         item.content,
                         uid = item.author.uid.toString(),
-                        images = item.attches?.map { NGA_ATTACHMENTS_URL.format(it.attachUrl) } ?: emptyList<String>(),
                         modifier = Modifier
                             .fillMaxSize(),
                         onViewPost = onViewPost,

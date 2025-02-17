@@ -2,8 +2,11 @@ package com.srap.nga.utils.nga.parse
 
 import android.util.Log
 
+private const val TAG = "SplitQuote"
+
 class SplitQuote {
-    private val TAG = javaClass.simpleName
+
+    val imageList = mutableListOf<String>()
 
     private val stack = mutableListOf<Int>()
     private val _dataStack = mutableListOf<NgaContent>()
@@ -27,8 +30,12 @@ class SplitQuote {
                     // 如果起始搜索位置为 0，则向数据堆栈添加关键词之前的内容 -> aaa
                     // 该内容对进行下一步切割
                     val newText = if (startKeyIndex != -1) text.substring(0, startKeyIndex) else text
-                    val content = SplitCollapse().splitCollapse(newText)
-                    content?.let { _dataStack.addAll(it) }
+                    val splitCollapseObj = SplitCollapse()
+                    val content = splitCollapseObj.splitCollapse(newText)
+                    content?.let {
+                        imageList.addAll(splitCollapseObj.imageList)
+                        _dataStack.addAll(it)
+                    }
                 }
                 when {
                     startKeyIndex != -1 && startKeyIndex < endKeyIndex -> {
@@ -57,14 +64,23 @@ class SplitQuote {
                         if (currentStart == 0) {
                             // 如果未搜索到 起始关键词和结束关键词，且起始位置为 0(未进行搜索)
                             // 直接返回文本，并进行下一步切割
-                            return SplitCollapse().splitCollapse(text)
+                            val splitCollapseObj = SplitCollapse()
+                            val content = splitCollapseObj.splitCollapse(text)
+                            content?.let {
+                                imageList.addAll(splitCollapseObj.imageList)
+                            }
+                            return content
                         } else {
                             // 如果起始位置不为 0
                             // aaa[quote]bbb[/quote]ccc
                             // 将之后的结果添加到数据堆栈 -> ccc
                             val newText = text.substring(currentStart + endKeyLength - 1)
-                            val content = SplitCollapse().splitCollapse(newText)
-                            content?.let { _dataStack.addAll(it) }
+                            val splitCollapseObj = SplitCollapse()
+                            val content = splitCollapseObj.splitCollapse(newText)
+                            content?.let {
+                                imageList.addAll(splitCollapseObj.imageList)
+                                _dataStack.addAll(it)
+                            }
                         }
                         return _dataStack.takeIf { it.isNotEmpty() }
                     }

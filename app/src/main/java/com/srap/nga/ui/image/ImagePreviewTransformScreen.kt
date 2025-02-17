@@ -24,8 +24,13 @@ fun ImagePreviewTransformScreen() {
         if (previewerState.canClose) {
             BackHandler {
                 scope.launch {
-                    // 返回键按下时退出变换
-                    previewerState.exitTransform()
+                    try {
+                        // 点击界面后关闭组件
+                        previewerState.exitTransform()
+                    } catch (e: IllegalStateException) {
+                        Log.e(TAG, "播放退出动画出错: ${e.message}", e)
+                        previewerState.close()
+                    }
                 }
             }
         }
@@ -46,6 +51,7 @@ fun ImagePreviewTransformScreen() {
                 }
             }),
             imageLoader = {
+                Log.i(TAG, "ImagePreviewTransformScreen: $it ${images[it].first}")
                 val painter = rememberAsyncImagePainter(images[it].first)
                 return@ScaleImagePreviewer Pair(painter, painter.intrinsicSize)
             }

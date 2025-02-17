@@ -29,10 +29,10 @@ import coil3.compose.AsyncImage
 import com.srap.nga.utils.toHttps
 
 /**
- * 标题卡片
+ * 帖子内容卡片
  */
 @Composable
-fun PostTitleCard(
+fun PostContentCard(
     avatar: String,
     name: String,
     modifier: Modifier = Modifier,
