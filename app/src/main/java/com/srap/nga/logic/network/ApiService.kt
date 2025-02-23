@@ -1,6 +1,7 @@
 package com.srap.nga.logic.network
 
 import com.srap.nga.logic.model.CateGoryFavorResponse
+import com.srap.nga.logic.model.CommonResponse
 import com.srap.nga.logic.model.CreateQRCodeResponse
 import com.srap.nga.logic.model.ForumBySearchResponse
 import com.srap.nga.logic.model.SearchPromptResponse
@@ -12,6 +13,7 @@ import com.srap.nga.logic.model.TopicCateGoryResponse
 import com.srap.nga.logic.model.TopicSubjectResponse
 import com.srap.nga.logic.model.UserInfoResponse
 import com.srap.nga.logic.model.UserSubjectResponse
+import com.srap.nga.logic.model.base.BaseResponse
 import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -54,6 +56,25 @@ interface ApiService {
     fun getCateGoryFavor(
         @Field("__output") output: Int = 14
     ): Call<CateGoryFavorResponse>
+
+    /**
+     * 关注社区
+     */
+    @FormUrlEncoded
+    @POST("nuke.php?__lib=forum_favor2&__act=add")
+    fun addCateGoryFavor(
+        @Field("fid") fid: Int,
+        @Field("__output") output: Int = 14
+    ): Call<CommonResponse>
+    /**
+     * 取消关注社区
+     */
+    @FormUrlEncoded
+    @POST("nuke.php?__lib=forum_favor2&__act=del")
+    fun delCateGoryFavor(
+        @Field("fid") fid: Int,
+        @Field("__output") output: Int = 14
+    ): Call<CommonResponse>
 
     /**
      * 获取社区内容

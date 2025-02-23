@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 fun SearchResultScreen(
     key: String,
     onViewPost: (Int) -> Unit,
-    onViewTopicSubject: (Int) -> Unit,
+    onViewTopicSubject: (Int, Boolean?) -> Unit,
     onBackClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -157,7 +157,7 @@ fun SearchResultScreen(
                                 description = item.parent.name,
                                 modifier = Modifier
                                     .clickable {
-                                        onViewTopicSubject(item.fid)
+                                        onViewTopicSubject(item.fid, null)
                                     }
                             )
                         }

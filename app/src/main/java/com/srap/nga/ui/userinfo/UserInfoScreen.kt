@@ -11,8 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +38,7 @@ import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.topic.TopicSubjectCard
 import com.srap.nga.ui.component.userinfo.UserInfoCard
 import com.srap.nga.utils.GlobalObject
+import com.srap.nga.utils.ToastUtil
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +89,17 @@ fun UserInfoScreen(
                                 }
                             }
                     )
+                },
+                actions = {
+                    if (onBackClick == null) {
+                        IconButton(
+                            onClick = {
+                                ToastUtil.show("未完成")
+                            },
+                        ) {
+                            Icon(Icons.Outlined.Grade, contentDescription="收藏")
+                        }
+                    }
                 }
             )
         }

@@ -43,7 +43,6 @@ import com.srap.nga.ui.component.button.SearchButton
 import com.srap.nga.ui.component.card.ImageTextCard
 import com.srap.nga.ui.component.card.LoadingCard
 import kotlinx.coroutines.launch
-import kotlin.text.get
 
 /**
  * 社区列表
@@ -51,7 +50,7 @@ import kotlin.text.get
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopicCateGoryScreen(
-    onViewTopicSubject: (Int) -> Unit,
+    onViewTopicSubject: (Int, Boolean?) -> Unit,
     onSearch: () -> Unit,
 ) {
     val viewModel: TopicCateGoryViewModel = hiltViewModel()
@@ -186,7 +185,7 @@ fun SelectCard(
 @Composable
 fun ContentCard(
     result: List<TopicCateGoryResponse.Result.Group>,
-    onViewTopicSubject: (Int) -> Unit,
+    onViewTopicSubject: (Int, Boolean?) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -206,7 +205,7 @@ fun ContentCard(
                     description = forum.info,
                     modifier = Modifier
                         .clickable {
-                            onViewTopicSubject(forum.fid)
+                            onViewTopicSubject(forum.fid, false)
                         }
                 )
             }
@@ -220,7 +219,7 @@ fun ContentCard(
 @Composable
 fun FavorContentCard(
     result: List<CateGoryFavorResponse.Result>,
-    onViewTopicSubject: (Int) -> Unit,
+    onViewTopicSubject: (Int, Boolean?) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -239,7 +238,7 @@ fun FavorContentCard(
                 description = "",
                 modifier = Modifier
                     .clickable {
-                        onViewTopicSubject(forum.fid)
+                        onViewTopicSubject(forum.fid, true)
                     }
             )
         }

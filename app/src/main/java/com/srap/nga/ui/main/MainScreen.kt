@@ -32,7 +32,7 @@ data class NavigationItem(
 @Composable
 fun MainScreen(
     onViewPost: (Int) -> Unit,
-    onViewTopicSubject: (Int) -> Unit,
+    onViewTopicSubject: (Int, Boolean?) -> Unit,
     onSearch: () -> Unit,
     onViewLogin: () -> Unit,
 ) {

@@ -1,5 +1,6 @@
 package com.srap.nga.ui
 
+import android.util.Log
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideIn
@@ -79,19 +80,30 @@ fun AppNavigation(navController: NavHostController) {
 
         // 社区详细页
         composable(
-            "topic/subject/{id}",
+            "topic/subject?id={id}&isFavor={isFavor}",
             arguments = listOf(
                 navArgument("id") {
                     type = NavType.IntType
                 },
+                navArgument("isFavor") {
+                    type = NavType.StringType
+                }
             ),
         ) {
             val id = it.arguments?.getInt("id")
+            Log.i("TAG", "AppNavigation: $id")
+            val isFavorString = it.arguments?.getString("isFavor")
+            val isFavor = when (isFavorString) {
+                "true" -> true
+                "false" -> false
+                else -> null
+            }
             if (id != null) {
                 TopicSubjectScreen(
                     id=id,
                     onBackClick = navController::popBackStack,
                     onViewPost = navController::navigateToPost,
+                    isFavor = isFavor
                 )
             } else {
                 Text("社区ID为空")
@@ -197,8 +209,12 @@ fun NavHostController.navigateToPost(id: Int) {
     navigate("post/$id")
 }
 
-fun NavHostController.navigateToTopicSubject(id: Int) {
-    navigate("topic/subject/$id")
+fun NavHostController.navigateToTopicSubject(id: Int, isFavor: Boolean?) {
+    var isFavorString = isFavor.toString()
+    if (isFavor == null) {
+        isFavorString = "unset"
+    }
+    navigate("topic/subject?id=${id}&isFavor=${isFavorString}")
 }
 
 fun NavHostController.navigateToUserInfo(id: Int) {

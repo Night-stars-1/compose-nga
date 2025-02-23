@@ -17,12 +17,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlin.jvm.javaClass
 
+private const val TAG = "TopicSubjectViewModel"
+
 @HiltViewModel(assistedFactory = TopicSubjectViewModel.ViewModelFactory::class)
 class TopicSubjectViewModel @AssistedInject constructor(
     @Assisted var id: Int,
     networkRepo: NetworkRepo,
 ) : BaseViewModel(networkRepo) {
-    private val TAG = javaClass.simpleName
 
     @AssistedFactory
     interface ViewModelFactory {
@@ -45,7 +46,46 @@ class TopicSubjectViewModel @AssistedInject constructor(
                         }
                         is LoadingState.Success -> {
                             result = state.response
-                            Log.i(TAG, "fetchData2: $result")
+                        }
+                    }
+                }
+        }
+    }
+
+    fun addCateGoryFavor() {
+        viewModelScope.launch {
+            networkRepo.addCateGoryFavor(id)
+                .collect { state ->
+                    when (state) {
+                        is LoadingState.Error -> {
+                            ToastUtil.show(state.errMsg)
+                        }
+                        is LoadingState.Success -> {
+                            if (state.response.result.isNotEmpty()) {
+                                ToastUtil.show(state.response.result[0])
+                            } else {
+                                ToastUtil.show(state.response.msg)
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    fun delCateGoryFavor() {
+        viewModelScope.launch {
+            networkRepo.delCateGoryFavor(id)
+                .collect { state ->
+                    when (state) {
+                        is LoadingState.Error -> {
+                            ToastUtil.show(state.errMsg)
+                        }
+                        is LoadingState.Success -> {
+                            if (state.response.result.isNotEmpty()) {
+                                ToastUtil.show(state.response.result[0])
+                            } else {
+                                ToastUtil.show(state.response.msg)
+                            }
                         }
                     }
                 }

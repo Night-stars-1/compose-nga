@@ -55,6 +55,20 @@ class NetworkRepo @Inject constructor(
     }
 
     /**
+     * 关注社区
+     */
+    fun addCateGoryFavor(fid: Int) = fire {
+        apiService.addCateGoryFavor(fid).await()
+    }
+
+    /**
+     * 取消关注社区
+     */
+    fun delCateGoryFavor(fid: Int) = fire {
+        apiService.delCateGoryFavor(fid).await()
+    }
+
+    /**
      * 获取社区内容
      */
     fun getTopicSubject(id: Int, page: Int = 1) = fire {
