@@ -6,30 +6,26 @@ import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import com.srap.nga.logic.model.QRCodeLoginResponse
-import com.srap.nga.logic.model.TopicSubjectResponse.Result.Data.Attach
+import com.srap.nga.logic.model.FavoriteResponse
 
-/**
- * QRCodeLogin Result字段兼容
- */
-class QRCodeLoginResultAdapter : TypeAdapter<QRCodeLoginResponse.Result>() {
+class FavoriteResultAdapter : TypeAdapter<List<FavoriteResponse.Data>>() {
     private val gson = Gson()
 
-    override fun write(out: JsonWriter, value: QRCodeLoginResponse.Result?) {
+    override fun write(out: JsonWriter, value: List<FavoriteResponse.Data>?) {
         out.beginArray()
         out.endArray()
     }
 
-    override fun read(reader: JsonReader): QRCodeLoginResponse.Result? {
+    override fun read(reader: JsonReader): List<FavoriteResponse.Data>? {
         return when (reader.peek()) {
             JsonToken.BEGIN_ARRAY -> {
-                var lastItem: QRCodeLoginResponse.Result? = null
+                var lastItem: List<FavoriteResponse.Data>? = null
 
                 reader.beginArray()
                 while (reader.hasNext()) {
-                    if (reader.peek() == JsonToken.BEGIN_OBJECT) {
-                        // 每次解析一个对象并覆盖前一个，最终保留最后一个对象
-                        lastItem = gson.fromJson(reader, QRCodeLoginResponse.Result::class.java)
+                    if (reader.peek() == JsonToken.BEGIN_ARRAY) {
+                        val type = object : TypeToken<List<FavoriteResponse.Data>>() {}.type
+                        lastItem = gson.fromJson(reader, type)
                     } else {
                         // 跳过非对象的元素
                         reader.skipValue()

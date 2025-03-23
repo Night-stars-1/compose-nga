@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.srap.nga.ui.home.HomeScreen
+import com.srap.nga.ui.navigateToFavorite
 import com.srap.nga.ui.topic.category.TopicCateGoryScreen
 import com.srap.nga.ui.userinfo.UserInfoScreen
 import com.srap.nga.utils.StorageUtil
@@ -35,6 +36,7 @@ fun MainScreen(
     onViewTopicSubject: (Int, Boolean?) -> Unit,
     onSearch: () -> Unit,
     onViewLogin: () -> Unit,
+    onViewFavorite: () -> Unit = {},
 ) {
     val navigationData = listOf(
         NavigationItem(
@@ -54,7 +56,8 @@ fun MainScreen(
                 id = StorageUtil.Uid,
                 onViewPost = onViewPost,
                 onViewLogin = onViewLogin,
-                onBackClick = null
+                onBackClick = null,
+                onViewFavorite = onViewFavorite,
             ) }
         )
     )

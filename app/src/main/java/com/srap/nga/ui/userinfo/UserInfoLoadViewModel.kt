@@ -55,7 +55,7 @@ class UserInfoLoadViewModel @AssistedInject constructor(
         }
     }
 
-    fun getUserInfo() {
+    private fun getUserInfo() {
         viewModelScope.launch {
             networkRepo.getUserInfo(id)
                 .collect { state ->

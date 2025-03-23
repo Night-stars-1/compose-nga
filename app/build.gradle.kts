@@ -14,7 +14,7 @@ android {
         applicationId = "com.srap.nga"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
+        versionCode = 5
         versionName = "测试版"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -64,12 +64,15 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.ui.tooling.preview.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
     // ui
     implementation(libs.constraintlayout.compose)
+    // UI预览
+    implementation(libs.androidx.ui.tooling)
 
     // 网络请求
     implementation(libs.retrofit)

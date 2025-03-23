@@ -13,6 +13,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.srap.nga.ui.favorite.FavoriteContentScreen
+import com.srap.nga.ui.favorite.FavoriteScreen
 import com.srap.nga.ui.image.ImagePreviewScreen
 import com.srap.nga.ui.login.qrcode.QRCodeLoginScreen
 import com.srap.nga.ui.main.MainScreen
@@ -53,6 +55,7 @@ fun AppNavigation(navController: NavHostController) {
                 onViewTopicSubject = navController::navigateToTopicSubject,
                 onSearch = navController::navigateToSearch,
                 onViewLogin = navController::navigateToLogin,
+                onViewFavorite = navController::navigateToFavorite,
             )
         }
 
@@ -196,6 +199,42 @@ fun AppNavigation(navController: NavHostController) {
                 Text("搜索字为空为空")
             }
         }
+
+        // 收藏夹
+        composable(
+            "favorite"
+        ) {
+            FavoriteScreen(
+                onViewFavoriteContent = navController::navigateToFavoriteContent,
+                onBackClick = navController::popBackStack,
+            )
+        }
+
+        // 收藏夹内容
+        composable(
+            "favorite/content/{id}/{title}",
+            arguments = listOf(
+                navArgument("id") {
+                    type = NavType.IntType
+                },
+                navArgument("title") {
+                    type = NavType.StringType
+                },
+            ),
+        ) {
+            val id = it.arguments?.getInt("id")
+            val title = it.arguments?.getString("title")
+            if (id != null && title != null){
+                FavoriteContentScreen(
+                    id = id,
+                    title = title,
+                    onViewPost = navController::navigateToPost,
+                    onBackClick = navController::popBackStack,
+                )
+            } else {
+                Text("收藏ID或名称为空")
+            }
+        }
     }
 }
 
@@ -240,4 +279,11 @@ fun NavHostController.navigateToSearchResult(key: String) {
 
 fun NavHostController.navigateToImagePreView(image: String, images: List<String>) {
     navigate("image/preview?image=$image&images=${images.joinToString("&images=")}")
+}
+
+fun NavHostController.navigateToFavorite() {
+    navigate("favorite")
+}
+fun NavHostController.navigateToFavoriteContent(id: Int, title: String) {
+    navigate("favorite/content/$id/$title")
 }

@@ -26,10 +26,9 @@ fun TopicSubjectCard(
     name: String,
     count: Int,
     modifier: Modifier = Modifier,
-    images: List<Pair<String, String>>? = emptyList<Pair<String, String>>(),
+    images: List<Pair<String, String>>? = emptyList(),
 ) {
     val newImages = images?.filter { !it.first.contains(".mp4") }
-    val color = MaterialTheme.colorScheme.outline
     Card(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp)),
@@ -50,7 +49,7 @@ fun TopicSubjectCard(
                 Text(
                     name,
                     fontSize = 14.sp,
-                    color = color
+                    color = MaterialTheme.colorScheme.outline
                 )
                 IconText(count.toString(), Icons.AutoMirrored.Filled.Chat)
             }

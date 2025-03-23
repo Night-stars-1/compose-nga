@@ -41,7 +41,7 @@ fun rememberSwipeableState(
 open class SwipeableState(
     internal val anchors: Triple<Float, Float, Float>,
     internal val heightRange: Pair<Float, Float>,
-    internal val animationSpec: AnimationSpec<Float> = SpringSpec<Float>(),
+    internal val animationSpec: AnimationSpec<Float> = SpringSpec(),
 ) {
     /**
      * 当前的滑动偏移量，< 0 为屏幕上方

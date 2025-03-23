@@ -10,35 +10,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * 折叠卡片
+ * 文本描述及操作栏卡片
+ * 左文本，右操作栏
  */
 @Composable
-fun ExpandableCard(
+fun ActionTextCard(
     title: String,
     description: String? = null,
     isFillClick: Boolean = false,
-    content: @Composable () -> Unit,
+    onClick: () -> Unit,
+    icon: @Composable () -> Unit,
 ) {
-    var expanded by remember { mutableStateOf (false) }
-
     Box(
         modifier = Modifier
             .padding(bottom = 2.dp)
@@ -49,7 +41,7 @@ fun ExpandableCard(
             .animateContentSize()
             .fillMaxWidth()
             .clickable(enabled = isFillClick) {
-                expanded = !expanded
+                onClick()
             }
     ) {
         Column(
@@ -71,16 +63,9 @@ fun ExpandableCard(
                         )
                 }
 
-                IconButton(onClick = { expanded = !expanded }) {
-                    if (expanded) {
-                        Icon(Icons.Default.KeyboardArrowUp, contentDescription = "展开")
-                    } else {
-                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "折叠")
-                    }
+                IconButton(onClick = { onClick() }) {
+                    icon()
                 }
-            }
-            if (expanded) {
-                content()
             }
         }
     }

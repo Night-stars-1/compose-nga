@@ -130,26 +130,28 @@ open class CoilImageGetter(
     override fun getDrawable(source: String): Drawable {
         val finalSource = sourceModifier?.invoke(source) ?: source
 
-        val drawablePlaceholder = DrawablePlaceHolder(
-            res = textView.context.resources,
-            bitmap = createBitmap(1, 1)
-        )
-        imageLoader.enqueue(ImageRequest.Builder(textView.context).data(finalSource).apply {
-            target { image ->
-                drawablePlaceholder.updateImage(image)
-//                textView.height += 10 // 增加一点高度防止无法看见表情包
-                textView.text = textView.text
-            }
-        }.build())
+        val drawablePlaceholder = DrawablePlaceHolder()
+//        imageLoader.enqueue(ImageRequest.Builder(textView.context).data(finalSource).apply {
+//            target(
+//                onError = {
+//                    Log.i("TAG", "getDrawable.onError: $source")
+//                },
+//                onSuccess = { image ->
+//                    drawablePlaceholder.updateImage(image)
+//                    textView.text = textView.text
+//                }
+//            )
+//        }.build())
         return drawablePlaceholder
     }
 
-    private class DrawablePlaceHolder(res: Resources, bitmap: Bitmap) : BitmapDrawable(res, bitmap) {
+    private class DrawablePlaceHolder : BitmapDrawable() {
 
         private var image: Image? = null
 
         override fun draw(canvas: Canvas) {
             image?.draw(canvas)
+            setBounds(0, 0, 100, 100)
         }
 
         fun updateImage(image: Image) {

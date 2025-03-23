@@ -124,6 +124,20 @@ class NetworkRepo @Inject constructor(
         apiService.getSearchPrompt(word).await()
     }
 
+    /**
+     * 获取收藏夹
+     */
+    fun getFavorite(page: Int) = fire {
+        apiService.getFavorite(page).await()
+    }
+
+    /**
+     * 获取收藏夹内容
+     */
+    fun getFavoriteContent(folder: Int, page: Int) = fire {
+        apiService.getFavoriteContent(folder, page).await()
+    }
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {

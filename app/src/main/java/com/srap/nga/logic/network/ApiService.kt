@@ -3,6 +3,8 @@ package com.srap.nga.logic.network
 import com.srap.nga.logic.model.CateGoryFavorResponse
 import com.srap.nga.logic.model.CommonResponse
 import com.srap.nga.logic.model.CreateQRCodeResponse
+import com.srap.nga.logic.model.FavoriteContentResponse
+import com.srap.nga.logic.model.FavoriteResponse
 import com.srap.nga.logic.model.ForumBySearchResponse
 import com.srap.nga.logic.model.SearchPromptResponse
 import com.srap.nga.logic.model.PostResponse
@@ -167,4 +169,25 @@ interface ApiService {
         @Field("word") word: String,
         @Field("__output") output: Int = 14
     ): Call<SearchPromptResponse>
+
+    /**
+     * 获取收藏夹
+     */
+    @FormUrlEncoded
+    @POST("nuke.php?__lib=topic_favor_v2&__act=list_folder")
+    fun getFavorite(
+        @Field("page") page: Int,
+        @Field("__output") output: Int = 14
+    ): Call<FavoriteResponse>
+
+    /**
+     * 获取收藏夹内容
+     */
+    @FormUrlEncoded
+    @POST("app_api.php?__lib=favor&__act=all")
+    fun getFavoriteContent(
+        @Field("folder") folder: Int,
+        @Field("page") page: Int,
+        @Field("__output") output: Int = 14
+    ): Call<FavoriteContentResponse>
 }

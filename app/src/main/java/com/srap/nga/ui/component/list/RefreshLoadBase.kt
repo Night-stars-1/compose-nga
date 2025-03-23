@@ -39,7 +39,10 @@ fun <T> RefreshLoadBase(
     // 刷新功能
     val state = rememberPullToRefreshState()
     val loadDistance = with(LocalDensity.current) { 70.dp.toPx() }
-    val swipeableState = rememberSwipeableState(Triple(-loadDistance, -30f, loadDistance))
+    val swipeableState = rememberSwipeableState(
+        anchors = Triple(-loadDistance, -30f, loadDistance),
+        heightRange = Pair(-300f, 300f)
+    )
 
     // 进入该界面后加载数据
     LaunchedEffect(Unit) {
@@ -55,8 +58,7 @@ fun <T> RefreshLoadBase(
     }
 
     PullToRefreshBox(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier,
         isRefreshing = viewModel.isRefreshing,
         state = state,
         onRefresh = viewModel::refresh,

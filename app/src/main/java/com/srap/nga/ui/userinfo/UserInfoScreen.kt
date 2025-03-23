@@ -24,8 +24,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +38,6 @@ import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.topic.TopicSubjectCard
 import com.srap.nga.ui.component.userinfo.UserInfoCard
 import com.srap.nga.utils.GlobalObject
-import com.srap.nga.utils.ToastUtil
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,10 +47,12 @@ fun UserInfoScreen(
     onViewPost: (Int) -> Unit,
     onViewLogin: () -> Unit,
     onBackClick: (() -> Unit)?,
+    onViewFavorite: () -> Unit = {},
 ) {
-    val viewModel = hiltViewModel<UserInfoLoadViewModel, UserInfoLoadViewModel.ViewModelFactory>(key = id.toString()) { factory ->
-        factory.create(id)
-    }
+    val viewModel =
+        hiltViewModel<UserInfoLoadViewModel, UserInfoLoadViewModel.ViewModelFactory>(key = id.toString()) { factory ->
+            factory.create(id)
+        }
 
     val listState = rememberLazyListState()
     val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
@@ -94,10 +95,10 @@ fun UserInfoScreen(
                     if (onBackClick == null) {
                         IconButton(
                             onClick = {
-                                ToastUtil.show("未完成")
+                                onViewFavorite()
                             },
                         ) {
-                            Icon(Icons.Outlined.Grade, contentDescription="收藏")
+                            Icon(Icons.Outlined.Grade, contentDescription = "收藏")
                         }
                     }
                 }
@@ -136,7 +137,7 @@ fun UserInfoScreen(
                         )
                     }
                 }
-            ) { index, item ->
+            ) { item ->
                 TopicSubjectCard(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -145,7 +146,12 @@ fun UserInfoScreen(
                             onViewPost(item.tid)
                         },
                     title = item.subject,
-                    images = item.attachs?.map { Pair(NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl), "${item.authorId}${it.attachUrl}") },
+                    images = item.attachs?.map {
+                        Pair(
+                            NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl),
+                            "${item.authorId}${it.attachUrl}"
+                        )
+                    },
                     name = item.author,
                     count = item.replies,
                 )

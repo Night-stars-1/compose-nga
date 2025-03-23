@@ -12,9 +12,11 @@ import com.srap.nga.logic.model.TopicSubjectResponse.Result.Data.Attach
  * TopicSubject attachs 字段兼容
  */
 class AttachListOrStringAdapter : TypeAdapter<List<Attach>>() {
+    private val gson = Gson()
+
     override fun write(out: JsonWriter, value: List<Attach>?) {
         out.beginArray()
-        value?.forEach { attach ->
+        value?.forEach { _ ->
             out.beginObject()
             out.endObject()
         }
@@ -25,7 +27,7 @@ class AttachListOrStringAdapter : TypeAdapter<List<Attach>>() {
         return when (reader.peek()) {
             JsonToken.BEGIN_ARRAY -> {
                 val type = object : TypeToken<List<Attach>>() {}.type
-                Gson().fromJson(reader, type)
+                gson.fromJson(reader, type)
             }
             JsonToken.STRING -> {
                 reader.nextString()

@@ -114,7 +114,6 @@ object HtmlUtil {
                             Column(
                                 modifier = modifier
                                     .fillMaxSize()
-                                    .padding(8.dp)
                             ) {
                                 it.content.forEach { nestedContent ->
                                     RenderNgaContent(
