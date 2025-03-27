@@ -2,12 +2,10 @@ package com.srap.nga.logic.network.deserializer
 
 import com.google.gson.Gson
 import com.google.gson.TypeAdapter
-import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
 import com.srap.nga.logic.model.QRCodeLoginResponse
-import com.srap.nga.logic.model.TopicSubjectResponse.Result.Data.Attach
 
 /**
  * QRCodeLogin Result字段兼容

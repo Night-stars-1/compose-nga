@@ -1,4 +1,4 @@
-package com.srap.nga.ui.component.favorite
+package com.srap.nga.ui.component.fav
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

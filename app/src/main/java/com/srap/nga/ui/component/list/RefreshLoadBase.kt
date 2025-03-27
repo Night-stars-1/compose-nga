@@ -1,5 +1,6 @@
 package com.srap.nga.ui.component.list
 
+import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +8,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -27,13 +31,11 @@ import com.srap.nga.ui.component.state.rememberSwipeableState
 import com.srap.nga.utils.swipeable
 import kotlin.math.roundToInt
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> RefreshLoadBase(
+fun <T> RefreshLoadContent(
     viewModel: BaseRefreshLoadViewModel<T>,
     modifier: Modifier = Modifier,
-    listState: LazyListState = rememberLazyListState(),
     content: @Composable () -> Unit,
 ) {
     // 刷新功能
@@ -94,15 +96,66 @@ fun <T> RefreshLoadBase(
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> RefreshLoadBase(
+    viewModel: BaseRefreshLoadViewModel<T>,
+    modifier: Modifier = Modifier,
+    state: LazyListState = rememberLazyListState(),
+    content: @Composable () -> Unit,
+) {
+    RefreshLoadContent(
+        viewModel = viewModel,
+        modifier = modifier,
+        content = content,
+    )
+
     // 检查是否滚动到底部
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo }
+    LaunchedEffect(state) {
+        snapshotFlow { state.layoutInfo }
             .collect { layoutInfo ->
                 val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
                 val totalItemsCount = layoutInfo.totalItemsCount
                 // 判断是否滚动到底部并触发加载更多
                 if (
                     lastVisibleItemIndex >= totalItemsCount - 1
+                    && !viewModel.isLoadMore
+                    && !viewModel.isRefreshing
+                    && !viewModel.isEmpty
+                ) {
+                    viewModel.loadMore()
+                }
+            }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> RefreshLoadBase(
+    viewModel: BaseRefreshLoadViewModel<T>,
+    columns: GridCells,
+    modifier: Modifier = Modifier,
+    state: LazyGridState = rememberLazyGridState(),
+    content: @Composable () -> Unit,
+) {
+    RefreshLoadContent(
+        viewModel = viewModel,
+        modifier = modifier,
+        content = content,
+    )
+
+    // 检查是否滚动到底部
+    LaunchedEffect(state) {
+        snapshotFlow { state.layoutInfo }
+            .collect { layoutInfo ->
+                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+                val totalItemsCount = layoutInfo.totalItemsCount
+                Log.i("TAG", "RefreshLoadBase: ${lastVisibleItemIndex >= totalItemsCount + columns.hashCode()} ${!viewModel.isLoadMore} ${!viewModel.isRefreshing} ${!viewModel.isEmpty}}")
+                // 判断是否滚动到底部并触发加载更多
+                if (
+                    lastVisibleItemIndex >= totalItemsCount + columns.hashCode()
                     && !viewModel.isLoadMore
                     && !viewModel.isRefreshing
                     && !viewModel.isEmpty

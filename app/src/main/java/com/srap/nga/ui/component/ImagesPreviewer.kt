@@ -125,7 +125,8 @@ fun ImagePreviewer(
     ) {
         TransformImageView(
             modifier = modifier
-                .shadow(4.dp, shape = RoundedCornerShape(14.dp))
+//                .shadow(4.dp, shape = RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(14.dp))
                 .height(imageHeight.value)
                 .clickable {
                     scope.launch {

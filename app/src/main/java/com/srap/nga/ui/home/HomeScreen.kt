@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -31,16 +30,21 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.ui.Alignment
+import com.srap.nga.logic.model.RecTopicResponse
 import com.srap.nga.ui.component.button.SearchButton
 import com.srap.nga.ui.component.card.LoadingCard
+import com.srap.nga.ui.component.list.RefreshLoadVerticalGrid
 
+/**
+ * 首页
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onViewPost: (Int) -> Unit,
     onSearch: () -> Unit,
 ) {
-    val viewModel: HomeViewModel = hiltViewModel()
+    val viewModel: HomeLoadViewModel = hiltViewModel()
 
     Scaffold(
         topBar = {
@@ -64,66 +68,70 @@ fun HomeScreen(
             )
         }
     ) { innerPadding ->
-        if (viewModel.list.isEmpty()) {
-            LoadingCard()
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2), // 每行固定 2 列
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(innerPadding),
-            ) {
-                items(viewModel.list) { item ->
-                    Card(
-                        onClick = {
-                            onViewPost(item.tid)
-                        },
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            // 主内容
-                            Column {
-                                AsyncImage(
-                                    model = item.threadIcon,
-                                    contentDescription = item.subject,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(75.dp)
-                                )
-                                Text(
-                                    text = item.subject,
-                                    modifier = Modifier.padding(8.dp),
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-
-                            // 左上角 Badge
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(2.dp)
-                                    .background(
-                                        color = Color.Black.copy(alpha = 0.6f), // 半透明背景
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(horizontal = 8.dp)
-                            ) {
-                                Text(
-                                    text = item.topic.parent[1].toString(),
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                }
+        RefreshLoadVerticalGrid(
+            viewModel = viewModel,
+            columns = GridCells.Fixed(2), // 每行固定 2 列
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(innerPadding),
+        ) {
+            items(viewModel.list) { item ->
+                HomeCard(item=item, onViewPost=onViewPost)
             }
         }
     }
+}
 
+@Composable
+fun HomeCard(
+    item: RecTopicResponse.Result,
+    onViewPost: (Int) -> Unit,
+) {
+    Card(
+        onClick = {
+            onViewPost(item.tid)
+        },
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            // 主内容
+            Column {
+                AsyncImage(
+                    model = item.threadIcon,
+                    contentDescription = item.subject,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(75.dp)
+                )
+                Text(
+                    text = item.subject,
+                    modifier = Modifier.padding(8.dp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // 左上角 Badge
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(2.dp)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.6f), // 半透明背景
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .padding(horizontal = 8.dp)
+            ) {
+                Text(
+                    text = item.topic.parent[1].toString(),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
 }

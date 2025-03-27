@@ -12,10 +12,33 @@ data class FavoriteResponse(
 ) : BaseResponse<FavoriteResponse>() {
     data class Data(
         val id: Int,
-        val type: Int,
+        private val type1: Int,
         val name: String,
+        /**
+         * 收藏夹内容数量
+         */
         val length: Int,
-    )
+        @SerializedName("default")
+        private val default1: Int = 0,
+    ) {
+        val type: FavType
+            get() = FavType.fromType(type1)
+        val default: Boolean
+            get() = default1 == 1
+    }
+
+    enum class FavType(val value: String,val type: Int) {
+        Secrecy(value="私密", type=0);
+
+        companion object {
+            fun fromType(type: Int): FavType {
+                return entries.firstOrNull { it.type == type } ?: Secrecy
+            }
+        }
+        override fun toString(): String {
+            return value
+        }
+    }
 }
 
 data class FavoriteContentResponse(

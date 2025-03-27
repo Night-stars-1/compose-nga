@@ -28,7 +28,7 @@ interface ApiService {
     @FormUrlEncoded
     @POST("nuke.php?__lib=app_inter&__act=recmd_topic")
     fun getRecTopic(
-        @Field("__output") output: Int = 14
+        @Field("page") page: Int = 1
     ): Call<RecTopicResponse>
 
     /**
@@ -44,20 +44,14 @@ interface ApiService {
     /**
      * 获取社区列表
      */
-    @FormUrlEncoded
     @POST("app_api.php?__lib=home&__act=category")
-    fun getTopicCateGory(
-        @Field("__output") output: Int = 14
-    ): Call<TopicCateGoryResponse>
+    fun getTopicCateGory(): Call<TopicCateGoryResponse>
 
     /**
      * 获取关注社区列表
      */
-    @FormUrlEncoded
     @POST("nuke.php?__lib=forum_favor2&__act=get")
-    fun getCateGoryFavor(
-        @Field("__output") output: Int = 14
-    ): Call<CateGoryFavorResponse>
+    fun getCateGoryFavor(): Call<CateGoryFavorResponse>
 
     /**
      * 关注社区
@@ -66,7 +60,6 @@ interface ApiService {
     @POST("nuke.php?__lib=forum_favor2&__act=add")
     fun addCateGoryFavor(
         @Field("fid") fid: Int,
-        @Field("__output") output: Int = 14
     ): Call<CommonResponse>
     /**
      * 取消关注社区
@@ -75,7 +68,6 @@ interface ApiService {
     @POST("nuke.php?__lib=forum_favor2&__act=del")
     fun delCateGoryFavor(
         @Field("fid") fid: Int,
-        @Field("__output") output: Int = 14
     ): Call<CommonResponse>
 
     /**
@@ -86,7 +78,6 @@ interface ApiService {
     fun getTopicSubject(
         @Field("fid") fid: Int,
         @Field("page") page: Int = 1,
-        @Field("__output") output: Int = 14
     ): Call<TopicSubjectResponse>
 
     /**
@@ -96,7 +87,6 @@ interface ApiService {
     @POST("app_api.php?__lib=user&__act=detail")
     fun getUserInfo(
         @Field("uid") uid: Int,
-        @Field("__output") output: Int = 14
     ): Call<UserInfoResponse>
 
     /**
@@ -107,17 +97,13 @@ interface ApiService {
     fun getUserSubject(
         @Field("uid") uid: Int,
         @Field("page") page: Int = 1,
-        @Field("__output") output: Int = 14
     ): Call<UserSubjectResponse>
 
     /**
      * 创建二维码
      */
-    @FormUrlEncoded
     @POST("nuke.php?__lib=login&__act=qrlogin_gen")
-    fun createQRCode(
-        @Field("__output") output: Int = 14
-    ): Call<CreateQRCodeResponse>
+    fun createQRCode(): Call<CreateQRCodeResponse>
 
     /**
      * 二维码登录
@@ -128,7 +114,6 @@ interface ApiService {
         @Field("qrkey") qrKey: String,
         @Field("hiddenkey") hiddenKey: String,
         @Field("device") device: String = "",
-        @Field("__output") output: Int = 14
     ): Call<QRCodeLoginResponse>
 
 
@@ -144,7 +129,6 @@ interface ApiService {
          * 数量
          */
         @Field("table") table: Int = 7,
-        @Field("__output") output: Int = 14
     ): Call<SubjectBySearchResponse>
 
 
@@ -156,7 +140,6 @@ interface ApiService {
     fun getForumBySearch(
         @Field("key") key: String,
         @Field("page") page: Int,
-        @Field("__output") output: Int = 14
     ): Call<ForumBySearchResponse>
 
 
@@ -167,7 +150,6 @@ interface ApiService {
     @POST("nuke.php?__lib=search&__act=instant_search")
     fun getSearchPrompt(
         @Field("word") word: String,
-        @Field("__output") output: Int = 14
     ): Call<SearchPromptResponse>
 
     /**
@@ -177,7 +159,6 @@ interface ApiService {
     @POST("nuke.php?__lib=topic_favor_v2&__act=list_folder")
     fun getFavorite(
         @Field("page") page: Int,
-        @Field("__output") output: Int = 14
     ): Call<FavoriteResponse>
 
     /**
@@ -188,6 +169,15 @@ interface ApiService {
     fun getFavoriteContent(
         @Field("folder") folder: Int,
         @Field("page") page: Int,
-        @Field("__output") output: Int = 14
     ): Call<FavoriteContentResponse>
+
+    /**
+     * 收藏
+     */
+    @FormUrlEncoded
+    @POST("nuke.php?__lib=topic_favor_v2&__act=add")
+    fun addFavorite(
+        @Field("tid") tid: Int,
+        @Field("folder") folder: Int,
+    ): Call<CommonResponse>
 }

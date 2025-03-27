@@ -214,7 +214,6 @@ fun PostReplyCard(
                     )
                 }
             }
-
         }
 
         // 消息

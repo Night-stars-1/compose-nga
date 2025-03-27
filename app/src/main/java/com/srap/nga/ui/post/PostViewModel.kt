@@ -21,7 +21,6 @@ class PostViewModel @AssistedInject constructor(
     @Assisted("id") var id: Int,
     networkRepo: NetworkRepo,
 ) : BaseRefreshLoadViewModel<PostResponse.Result>(networkRepo) {
-    private val TAG = javaClass.simpleName
 
     @AssistedFactory
     interface ViewModelFactory {

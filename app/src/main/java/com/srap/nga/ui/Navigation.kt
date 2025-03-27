@@ -13,8 +13,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.srap.nga.ui.favorite.FavoriteContentScreen
-import com.srap.nga.ui.favorite.FavoriteScreen
+import com.srap.nga.ui.fav.FavoriteContentScreen
+import com.srap.nga.ui.fav.FavoriteScreen
 import com.srap.nga.ui.image.ImagePreviewScreen
 import com.srap.nga.ui.login.qrcode.QRCodeLoginScreen
 import com.srap.nga.ui.main.MainScreen
@@ -23,7 +23,9 @@ import com.srap.nga.ui.search.SearchScreen
 import com.srap.nga.ui.search.result.SearchResultScreen
 import com.srap.nga.ui.topic.subject.TopicSubjectScreen
 import com.srap.nga.ui.userinfo.UserInfoScreen
+import com.srap.nga.ui.webview.WebViewScreen
 import com.srap.nga.utils.GlobalObject
+import com.srap.nga.utils.encode
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -75,6 +77,7 @@ fun AppNavigation(navController: NavHostController) {
                     onBackClick = navController::popBackStack,
                     onViewPost = navController::navigateToPost,
                     onUserInfo = navController::navigateToUserInfo,
+                    openUrl = navController::openUrl,
                 )
             } else {
                 Text("帖子ID为空")
@@ -235,6 +238,26 @@ fun AppNavigation(navController: NavHostController) {
                 Text("收藏ID或名称为空")
             }
         }
+
+        // 打开URL
+        composable(
+            "webview/{url}",
+            arguments = listOf(
+                navArgument("url") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            val url = it.arguments?.getString("url")
+            if (url != null) {
+                WebViewScreen(
+                    url = url,
+                    onBackClick = navController::popBackStack,
+                )
+            } else {
+                Text("链接为空")
+            }
+        }
     }
 }
 
@@ -286,4 +309,8 @@ fun NavHostController.navigateToFavorite() {
 }
 fun NavHostController.navigateToFavoriteContent(id: Int, title: String) {
     navigate("favorite/content/$id/$title")
+}
+
+fun NavHostController.openUrl(url: String) {
+    navigate("webview/${url.encode}")
 }

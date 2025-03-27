@@ -1,6 +1,5 @@
-package com.srap.nga.ui.component.card
+package com.srap.nga.ui.component.fav
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,27 +9,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * 文本描述及操作栏卡片
- * 左文本，右操作栏
- */
 @Composable
-fun ActionTextCard(
+fun FavCheckBox(
     title: String,
+    checked: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     description: String? = null,
-    isFillClick: Boolean = false,
-    onClick: () -> Unit,
-    icon: @Composable () -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -40,9 +38,6 @@ fun ActionTextCard(
                 shape = RoundedCornerShape(8.dp)
             )
             .fillMaxWidth()
-            .clickable(enabled = isFillClick) {
-                onClick()
-            }
     ) {
         Column(
             modifier = Modifier
@@ -63,9 +58,12 @@ fun ActionTextCard(
                         )
                 }
 
-                IconButton(onClick = { onClick() }) {
-                    icon()
-                }
+                Checkbox(
+                    checked = checked.value,
+                    onCheckedChange = {
+                        checked.value = it
+                    }
+                )
             }
         }
     }

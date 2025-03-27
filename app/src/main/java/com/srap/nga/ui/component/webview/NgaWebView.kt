@@ -1,10 +1,7 @@
 package com.srap.nga.ui.component.webview
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -13,7 +10,6 @@ import android.text.Html.ImageGetter
 import android.text.Spannable
 import android.text.method.LinkMovementMethod
 import android.text.style.URLSpan
-import android.util.Log
 import android.view.MotionEvent
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -30,10 +26,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
-import androidx.core.text.method.LinkMovementMethodCompat
 import coil3.Image
 import coil3.ImageLoader
-import coil3.request.ImageRequest
 import com.srap.nga.BuildConfig
 import com.srap.nga.myApplication
 import com.srap.nga.utils.ThemeUtil
@@ -42,7 +36,7 @@ import com.srap.nga.utils.provider.ThemeColorProvider
 import kotlin.text.toInt
 import androidx.core.text.parseAsHtml
 import androidx.core.net.toUri
-import androidx.core.graphics.createBitmap
+import com.srap.nga.constant.Constants.UTF8
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -86,7 +80,7 @@ fun NgaWebView(
                             onViewPost(tid.toInt())
                         }
                     } else {
-                        openUrl(request.url)
+                        openInBrowser(request.url)
                     }
                     return true
                 }
@@ -99,7 +93,7 @@ fun NgaWebView(
                 NgaProvider(context, images, openImage),
                 "NgaProvider"
             )
-            loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+            loadDataWithBaseURL(null, html, "text/html", UTF8, null)
         }
     }
 
@@ -109,13 +103,13 @@ fun NgaWebView(
     )
 }
 
-fun openUrl(url: Uri) {
+fun openInBrowser(url: Uri) {
     val intent = Intent(Intent.ACTION_VIEW, url)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     myApplication.startActivity(intent)
 }
 
-fun openUrl(url: String) {
+fun openInBrowser(url: String) {
     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     myApplication.startActivity(intent)
@@ -162,7 +156,8 @@ open class CoilImageGetter(
 }
 
 class CustomLinkMovementMethod(
-    private val onViewPost: (Int) -> Unit
+    private val onViewPost: (Int) -> Unit,
+    private val openUrl: (String) -> Unit,
 ) : LinkMovementMethod() {
     override fun onTouchEvent(widget: TextView , buffer: Spannable , event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return super.onTouchEvent(widget, buffer, event)
@@ -190,9 +185,13 @@ class CustomLinkMovementMethod(
             if (tid != null) {
                 onViewPost(tid.toInt())
             }
-        } else {
-            openUrl(uri)
+            return
         }
+        if (url.contains("nga.cn/")) {
+            openUrl(url)
+            return
+        }
+        openInBrowser(uri)
     }
 }
 
@@ -200,7 +199,8 @@ class CustomLinkMovementMethod(
 fun HtmlText(
     html: String,
     modifier: Modifier = Modifier,
-    onViewPost: (Int) -> Unit
+    onViewPost: (Int) -> Unit,
+    openUrl: (String) -> Unit,
 ) {
     val contentColor = LocalContentColor.current.toArgb()
     val primary = MaterialTheme.colorScheme.primary.toArgb()
@@ -209,7 +209,7 @@ fun HtmlText(
         modifier = modifier,
         factory = { context ->
             TextView(context).apply {
-                movementMethod = CustomLinkMovementMethod(onViewPost)
+                movementMethod = CustomLinkMovementMethod(onViewPost, openUrl)
                 setTextColor(contentColor)
                 setLinkTextColor(primary)
                 text = html.parseAsHtml(

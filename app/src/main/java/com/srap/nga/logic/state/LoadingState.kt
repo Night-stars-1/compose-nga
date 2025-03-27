@@ -5,9 +5,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 sealed class LoadingState<out T> : State() {
+    val gson = Gson()
     inline fun <reified T> parseItem(item: Any?): List<T>? {
         return try {
-            val gson = Gson()
             val json = gson.toJson(item)
             val type = object : TypeToken<List<T>>() {}.type
             gson.fromJson(json, type)

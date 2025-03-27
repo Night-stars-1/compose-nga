@@ -1,19 +1,14 @@
-package com.srap.nga.ui.favorite
+package com.srap.nga.ui.fav
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Grade
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,10 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.srap.nga.ui.component.button.BackButton
-import com.srap.nga.ui.component.card.ExpandableCard
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.topic.TopicSubjectCard
-import com.srap.nga.utils.ToastUtil
 
 /**
  * 收藏夹内容
@@ -40,7 +33,7 @@ fun FavoriteContentScreen(
     onViewPost: (id: Int) -> Unit,
     onBackClick: (() -> Unit)?,
 ) {
-    val viewModel: FavoriteContentViewModel = hiltViewModel<FavoriteContentViewModel, FavoriteContentViewModel.ViewModelFactory>(key = "${id}favorite"){ factory ->
+    val viewModel: FavContentViewModel = hiltViewModel<FavContentViewModel, FavContentViewModel.ViewModelFactory>(key = "${id}favorite"){ factory ->
         factory.create(id)
     }
     Scaffold(
@@ -68,18 +61,20 @@ fun FavoriteContentScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(innerPadding)
-        ) { item ->
-            TopicSubjectCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .clickable {
-                        onViewPost(item.tid)
-                    },
-                title = item.subject,
-                name = item.author,
-                count = item.replies,
-            )
+        ) {
+            items(viewModel.list) {
+                TopicSubjectCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .clickable {
+                            onViewPost(it.tid)
+                        },
+                    title = it.subject,
+                    name = it.author,
+                    count = it.replies,
+                )
+            }
         }
     }
 }

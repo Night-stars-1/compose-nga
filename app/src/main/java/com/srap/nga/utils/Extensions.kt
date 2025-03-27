@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.srap.nga.constant.Constants.UTF8
 import com.srap.nga.myApplication
 import com.srap.nga.ui.component.state.SwipeableState
 import com.srap.nga.ui.component.state.nestedScrollConnection
@@ -20,6 +21,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.net.URLDecoder
+import java.net.URLEncoder
+
+inline val String?.encode: String
+    get() = URLEncoder.encode(this?.replace("%", "%25")?.replace("+", "%2B"), UTF8)
+inline val String.decode: String
+    get() = URLDecoder.decode(this, UTF8)
 
 @Composable
 inline fun debounce(

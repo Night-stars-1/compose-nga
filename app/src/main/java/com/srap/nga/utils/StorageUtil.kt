@@ -4,13 +4,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.srap.nga.myApplication
 import androidx.core.content.edit
+import com.srap.nga.constant.Constants.EMPTY_STRING
 
 object StorageUtil {
     private val pref: SharedPreferences = myApplication.baseContext.getSharedPreferences("ngaPrefs", Context.MODE_PRIVATE)
     private const val TOKEN = "Token"
     private const val UID = "Uid"
 
-    private var _token = pref.getString(TOKEN, "").toString()
+    private var _token = pref.getString(TOKEN, EMPTY_STRING).toString()
 
     // 用户Token
     var Token: String

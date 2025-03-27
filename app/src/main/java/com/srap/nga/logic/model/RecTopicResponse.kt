@@ -1,6 +1,5 @@
 package com.srap.nga.logic.model
 
-import com.srap.nga.logic.state.Code
 import com.google.gson.annotations.SerializedName
 import com.srap.nga.logic.model.base.BaseResponse
 
@@ -85,8 +84,13 @@ data class RecTopicResponse(
 
     data class Attach(
         @SerializedName("attachurl")
-        val attachurl: String,
+        val attachUrl: String,
         @SerializedName("score")
         val score: Int
+    )
+
+    data class PageInfo(
+        val currentPage: Int,
+        val perPage: Int,
     )
 }

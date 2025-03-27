@@ -1,4 +1,4 @@
-package com.srap.nga.ui.favorite
+package com.srap.nga.ui.fav
 
 import androidx.lifecycle.viewModelScope
 import com.srap.nga.logic.model.FavoriteContentResponse
@@ -12,15 +12,15 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 
-@HiltViewModel(assistedFactory = FavoriteContentViewModel.ViewModelFactory::class)
-class FavoriteContentViewModel @AssistedInject constructor(
+@HiltViewModel(assistedFactory = FavContentViewModel.ViewModelFactory::class)
+class FavContentViewModel @AssistedInject constructor(
     @Assisted var id: Int,
     networkRepo: NetworkRepo,
 ) : BaseRefreshLoadViewModel<FavoriteContentResponse.Result.Data>(networkRepo) {
 
     @AssistedFactory
     interface ViewModelFactory {
-        fun create(id: Int): FavoriteContentViewModel
+        fun create(id: Int): FavContentViewModel
     }
 
     override fun fetchData() {

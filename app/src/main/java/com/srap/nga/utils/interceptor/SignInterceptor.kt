@@ -1,15 +1,18 @@
 package com.srap.nga.utils.interceptor
 
 import android.util.Log
+import com.srap.nga.constant.Constants.EMPTY_STRING
 import com.srap.nga.utils.StorageUtil
 import com.srap.nga.utils.StringUtil
 import okhttp3.FormBody
 import okhttp3.Interceptor
 import okhttp3.RequestBody
 import okhttp3.Response
+import kotlin.jvm.javaClass
+
+private const val TAG = "SignInterceptor"
 
 class SignInterceptor : Interceptor {
-    private val TAG = javaClass.simpleName
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
@@ -30,10 +33,10 @@ class SignInterceptor : Interceptor {
             // 解析请求体
             val formData = parseFormBody(originalBody)
 
-            val fid = formData.getOrDefault("fid", "")
-            val tid = formData.getOrDefault("tid", "")
-            val uid = formData.getOrDefault("uid", "")
-            val key = formData.getOrDefault("key", "")
+            val fid = formData.getOrDefault("fid", EMPTY_STRING)
+            val tid = formData.getOrDefault("tid", EMPTY_STRING)
+            val uid = formData.getOrDefault("uid", EMPTY_STRING)
+            val key = formData.getOrDefault("key", EMPTY_STRING)
 
 //            val sortedKeys = formData.keys.filter { !it.startsWith("__") }.sorted()
 //            val combinedValues = sortedKeys.joinToString("") { formData[it] ?: "" }
@@ -47,6 +50,7 @@ class SignInterceptor : Interceptor {
                 .add("app_id", appId)
                 .add("t", timestamp)
                 .add("sign", md5Signature)
+                .add("__output", "14")
 
             formData.forEach {
                 newBodyBuilder.add(it.key, it.value)

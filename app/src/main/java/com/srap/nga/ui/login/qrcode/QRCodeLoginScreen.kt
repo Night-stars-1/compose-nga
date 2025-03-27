@@ -22,7 +22,7 @@ import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.QrCodeView
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.card.LoadingCard
-import com.srap.nga.ui.component.webview.openUrl
+import com.srap.nga.ui.component.webview.openInBrowser
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +66,7 @@ fun QRCodeLoginScreen(
                     data = url,
                     modifier = Modifier
                         .clickable {
-                            openUrl(url)
+                            openInBrowser(url)
                         }
                 )
             }

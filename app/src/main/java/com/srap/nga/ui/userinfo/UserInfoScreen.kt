@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Grade
@@ -126,7 +127,8 @@ fun UserInfoScreen(
                     .fillMaxWidth()
                     .padding(innerPadding),
                 listState = listState,
-                header = {
+            ) {
+                item {
                     val result = viewModel.result
                     if (result != null) {
                         UserInfoCard(
@@ -137,24 +139,26 @@ fun UserInfoScreen(
                         )
                     }
                 }
-            ) { item ->
-                TopicSubjectCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .clickable {
-                            onViewPost(item.tid)
+
+                items(viewModel.list) { item ->
+                    TopicSubjectCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                            .clickable {
+                                onViewPost(item.tid)
+                            },
+                        title = item.subject,
+                        images = item.attachs?.map {
+                            Pair(
+                                NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl),
+                                "${item.authorId}${it.attachUrl}"
+                            )
                         },
-                    title = item.subject,
-                    images = item.attachs?.map {
-                        Pair(
-                            NetworkModule.NGA_ATTACHMENTS_URL.format(it.attachUrl),
-                            "${item.authorId}${it.attachUrl}"
-                        )
-                    },
-                    name = item.author,
-                    count = item.replies,
-                )
+                        name = item.author,
+                        count = item.replies,
+                    )
+                }
             }
         }
     }

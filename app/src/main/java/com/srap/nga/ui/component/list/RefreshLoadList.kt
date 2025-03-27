@@ -2,11 +2,11 @@ package com.srap.nga.ui.component.list
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,57 +18,19 @@ fun <T> RefreshLoadList(
     viewModel: BaseRefreshLoadViewModel<T>,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    header: @Composable (() -> Unit) = {},
-    itemWidget: @Composable (index: Int, item: T) -> Unit,
+    content: LazyListScope.() -> Unit
 ) {
     RefreshLoadBase(
         viewModel = viewModel,
         modifier = modifier,
-        listState = listState
+        state = listState
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .padding(horizontal = 8.dp),
-            horizontalAlignment = Alignment.Companion.CenterHorizontally
-        ) {
-            item {
-                header()
-            }
-
-            itemsIndexed(viewModel.list) { index, item ->
-                itemWidget(index, item)
-            }
-        }
-    }
-}
-
-@Composable
-fun <T> RefreshLoadList(
-    viewModel: BaseRefreshLoadViewModel<T>,
-    modifier: Modifier = Modifier,
-    listState: LazyListState = rememberLazyListState(),
-    header: @Composable (() -> Unit) = {},
-    itemWidget: @Composable (item: T) -> Unit,
-) {
-    RefreshLoadBase(
-        viewModel = viewModel,
-        modifier = modifier,
-        listState = listState
-    ) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .padding(horizontal = 8.dp),
-            horizontalAlignment = Alignment.Companion.CenterHorizontally
-        ) {
-            item {
-                header()
-            }
-
-            items(viewModel.list) { item ->
-                itemWidget(item)
-            }
-        }
+            horizontalAlignment = Alignment.Companion.CenterHorizontally,
+            content = content
+        )
     }
 }

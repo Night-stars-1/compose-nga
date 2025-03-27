@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.srap.nga.constant.Constants.EMPTY_STRING
 import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.ImagePreviewer
 import com.srap.nga.ui.component.card.ExpandableCard
@@ -23,7 +24,7 @@ object HtmlUtil {
 
     private fun parseNgaHtml(html: String): SplitQuote {
         var result = html
-        result = result.replace("<div style=\"text-align:center\">", "")
+        result = result.replace("<div style=\"text-align:center\">", EMPTY_STRING)
         // 去掉一个<br/>
 //        result = result.replace("""<br/><br/>""", """<br||||/>""").replace("""<br/>""", "").replace("""<br||||/>""", """<br/>""")
         // [img]https://ngabbs.com/read.php?tid=42886511[/img]
@@ -58,6 +59,7 @@ object HtmlUtil {
         images: List<Pair<String, String>>,
         modifier: Modifier = Modifier,
         onViewPost: (Int) -> Unit,
+        openUrl: (String) -> Unit,
     ) {
         Column(
             modifier = modifier
@@ -69,8 +71,9 @@ object HtmlUtil {
                             // 排除空格和只有换行符的情况
                             HtmlText(
                                 html = it.content,
+                                modifier = modifier.fillMaxSize(),
                                 onViewPost = onViewPost,
-                                modifier = modifier.fillMaxSize()
+                                openUrl = openUrl,
                             )
                         }
                     }
@@ -101,7 +104,8 @@ object HtmlUtil {
                                         uid,
                                         images,
                                         modifier,
-                                        onViewPost
+                                        onViewPost,
+                                        openUrl,
                                     )
                                 }
                             }
@@ -121,7 +125,8 @@ object HtmlUtil {
                                         uid,
                                         images,
                                         modifier,
-                                        onViewPost
+                                        onViewPost,
+                                        openUrl,
                                     )
                                 }
                             }
@@ -138,9 +143,10 @@ object HtmlUtil {
         uid: String,
         modifier: Modifier = Modifier,
         onViewPost: (Int) -> Unit,
+        openUrl: (String) -> Unit,
     ) {
         val data = parseNgaHtml(html)
         val newImages = data.imageList.map { Pair(it, "$it$uid") }
-        RenderNgaContent(data.data, uid, newImages, modifier, onViewPost)
+        RenderNgaContent(data.data, uid, newImages, modifier, onViewPost, openUrl)
     }
 }

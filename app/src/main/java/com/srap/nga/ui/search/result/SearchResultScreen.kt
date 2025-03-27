@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -132,34 +133,38 @@ fun SearchResultScreen(
                         // 帖子
                         RefreshLoadList(
                             viewModel = viewModel,
-                        ) { index, item ->
-                            TopicSubjectCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp)
-                                    .clickable {
-                                        onViewPost(item.tid)
-                                    },
-                                title = item.subject,
-                                name = item.author,
-                                count = item.replies,
-                            )
+                        ) {
+                            items(viewModel.list) {
+                                TopicSubjectCard(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp)
+                                        .clickable {
+                                            onViewPost(it.tid)
+                                        },
+                                    title = it.subject,
+                                    name = it.author,
+                                    count = it.replies,
+                                )
+                            }
                         }
                     }
                     is SearchForumResultLoadViewModel -> {
                         // 社区
                         RefreshLoadList(
                             viewModel = viewModel,
-                        ) { index, item ->
-                            ImageTextCard(
-                                image= NetworkModule.NGA_APP_ICON_URL.format(item.id),
-                                title = item.name,
-                                description = item.parent.name,
-                                modifier = Modifier
-                                    .clickable {
-                                        onViewTopicSubject(item.fid, null)
-                                    }
-                            )
+                        ) {
+                            items(viewModel.list) {
+                                ImageTextCard(
+                                    image = NetworkModule.NGA_APP_ICON_URL.format(it.id),
+                                    title = it.name,
+                                    description = it.parent.name,
+                                    modifier = Modifier
+                                        .clickable {
+                                            onViewTopicSubject(it.fid, null)
+                                        }
+                                )
+                            }
                         }
                     }
                     else -> Text("异常")

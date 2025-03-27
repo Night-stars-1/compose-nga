@@ -1,5 +1,6 @@
 package com.srap.nga.utils.nga.parse
 
+import com.srap.nga.constant.Constants.EMPTY_STRING
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -15,7 +16,7 @@ class SplitCollapse {
             return null
         }
         val bodyChildren = body.childNodes()
-        var text = ""
+        var text = EMPTY_STRING
 
         for (child in bodyChildren) {
             if (child is Element) {
@@ -33,7 +34,7 @@ class SplitCollapse {
                     text += child.outerHtml()
                 } else {
                     val content = SplitImage().splitImage(text)
-                    text = ""
+                    text = EMPTY_STRING
                     content?.let {
                         it.forEach { item ->
                             if (item is NgaContent.Image) {

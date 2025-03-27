@@ -29,8 +29,8 @@ class NetworkRepo @Inject constructor(
     /**
      * 获取推荐话题
      */
-    fun getRecTopic() = fire {
-        apiService.getRecTopic().await()
+    fun getRecTopic(page: Int = 1) = fire {
+        apiService.getRecTopic(page).await()
     }
 
     /**
@@ -127,7 +127,7 @@ class NetworkRepo @Inject constructor(
     /**
      * 获取收藏夹
      */
-    fun getFavorite(page: Int) = fire {
+    fun getFavorite(page: Int = 0) = fire {
         apiService.getFavorite(page).await()
     }
 
@@ -136,6 +136,15 @@ class NetworkRepo @Inject constructor(
      */
     fun getFavoriteContent(folder: Int, page: Int) = fire {
         apiService.getFavoriteContent(folder, page).await()
+    }
+
+    /**
+     * 收藏
+     * @param tid 帖子ID
+     * @param folder 收藏夹ID
+     */
+    fun addFavorite(tid: Int, folder: Int) = fire {
+        apiService.addFavorite(tid, folder).await()
     }
 
     private suspend fun <T> Call<T>.await(): T {
