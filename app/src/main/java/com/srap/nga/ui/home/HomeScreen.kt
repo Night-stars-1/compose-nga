@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
@@ -110,6 +111,7 @@ fun HomeCard(
                     text = item.subject,
                     modifier = Modifier.padding(8.dp),
                     maxLines = 2,
+                    minLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
