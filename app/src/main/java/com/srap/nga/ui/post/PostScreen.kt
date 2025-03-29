@@ -122,22 +122,25 @@ fun PostScreen(
             }
 
             itemsIndexed(viewModel.list) { index, item ->
-                // 帖子评论
-                PostReplyCard(
-                    avatar = item.author.avatar,
-                    name = item.author.username,
-                    onAvatarClick = {
-                        onUserInfo(item.author.uid)
+                // 去除帖子内容
+                if (index != 0) {
+                    // 帖子评论
+                    PostReplyCard(
+                        avatar = item.author.avatar,
+                        name = item.author.username,
+                        onAvatarClick = {
+                            onUserInfo(item.author.uid)
+                        }
+                    ) {
+                        HtmlUtil.FromHtml(
+                            item.content,
+                            uid = item.author.uid.toString(),
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            onViewPost = onViewPost,
+                            openUrl = openUrl,
+                        )
                     }
-                ) {
-                    HtmlUtil.FromHtml(
-                        item.content,
-                        uid = item.author.uid.toString(),
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        onViewPost = onViewPost,
-                        openUrl = openUrl,
-                    )
                 }
             }
         }
