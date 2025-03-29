@@ -64,7 +64,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.ui.tooling.preview.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -72,7 +71,8 @@ dependencies {
     // ui
     implementation(libs.constraintlayout.compose)
     // UI预览
-    implementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.androidx.ui.tooling.preview.android)
 
     // 网络请求
     implementation(libs.retrofit)

@@ -1,6 +1,5 @@
 package com.srap.nga.ui.component.list
 
-import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -152,7 +151,6 @@ fun <T> RefreshLoadBase(
             .collect { layoutInfo ->
                 val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
                 val totalItemsCount = layoutInfo.totalItemsCount
-                Log.i("TAG", "RefreshLoadBase: ${lastVisibleItemIndex >= totalItemsCount + columns.hashCode()} ${!viewModel.isLoadMore} ${!viewModel.isRefreshing} ${!viewModel.isEmpty}}")
                 // 判断是否滚动到底部并触发加载更多
                 if (
                     lastVisibleItemIndex >= totalItemsCount + columns.hashCode()

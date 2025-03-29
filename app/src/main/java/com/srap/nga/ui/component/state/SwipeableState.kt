@@ -10,6 +10,9 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -34,7 +37,11 @@ fun rememberSwipeableState(
     anchors: Triple<Float, Float, Float>,
     heightRange: Pair<Float, Float> = Pair(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY)
 ): SwipeableState {
-    return SwipeableState(anchors, heightRange)
+    return rememberSaveable(
+        saver = SwipeableState.Saver(anchors, heightRange)
+    ) {
+        SwipeableState(anchors, heightRange)
+    }
 }
 
 @Stable
@@ -144,6 +151,26 @@ open class SwipeableState(
             draggableState.dispatchRawDelta(deltaToConsume)
         }
         return deltaToConsume
+    }
+
+
+    companion object {
+        fun Saver(
+            anchors: Triple<Float, Float, Float>,
+            heightRange: Pair<Float, Float>,
+            animationSpec: AnimationSpec<Float> = SpringSpec()
+        ): Saver<SwipeableState, *> = Saver(
+            save = { state ->
+                listOf(state.currentValue)
+            },
+            restore = { restored ->
+                val current = restored[0]
+                SwipeableState(anchors, heightRange, animationSpec).apply {
+                    currentValue = current
+                    offsetState.floatValue = current
+                }
+            }
+        )
     }
 }
 
