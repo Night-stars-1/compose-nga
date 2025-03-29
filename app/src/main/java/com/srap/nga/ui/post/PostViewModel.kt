@@ -8,13 +8,12 @@ import com.srap.nga.logic.model.PostResponse
 import com.srap.nga.logic.repository.NetworkRepo
 import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseRefreshLoadViewModel
-import com.srap.nga.utils.ToastUtil
+import com.srap.nga.utils.ToastUtils
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlin.jvm.javaClass
 
 @HiltViewModel(assistedFactory = PostViewModel.ViewModelFactory::class)
 class PostViewModel @AssistedInject constructor(
@@ -38,7 +37,7 @@ class PostViewModel @AssistedInject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show(state.errMsg)
+                            ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             response = state.response

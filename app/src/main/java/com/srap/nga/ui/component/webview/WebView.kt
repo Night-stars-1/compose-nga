@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.srap.nga.constant.Constants.NGA_TAG
 import com.srap.nga.constant.Constants.UTF8
-import com.srap.nga.utils.StorageUtil
+import com.srap.nga.utils.StorageUtils
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -37,8 +37,8 @@ fun WebView(
                 CookieManager.getInstance().let {
                     it.setAcceptCookie(true)
                     it.setAcceptThirdPartyCookies(this@apply, true)
-                    it.setCookie(".nga.cn", "access_uid=${StorageUtil.Uid}")
-                    it.setCookie(".nga.cn", "access_token=${StorageUtil.Token}")
+                    it.setCookie(".nga.cn", "access_uid=${StorageUtils.Uid}")
+                    it.setCookie(".nga.cn", "access_token=${StorageUtils.Token}")
                 }
 
                 settings.apply {

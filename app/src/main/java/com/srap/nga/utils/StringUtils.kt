@@ -6,7 +6,7 @@ import kotlin.collections.joinToString
 import kotlin.text.format
 import kotlin.text.toByteArray
 
-object StringUtil {
+object StringUtils {
     val UPPERCASE_LETTERS = 'A'..'Z'
     val LOWERCASE_LETTERS = 'a'..'z'
     val DIGiTS = '0'..'9'

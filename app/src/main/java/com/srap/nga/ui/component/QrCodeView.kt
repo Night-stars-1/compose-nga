@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import com.srap.nga.utils.QRCodeUtil.generateQRCode
+import com.srap.nga.utils.QRCodeUtils.generateQRCode
 
 @Composable
 fun QrCodeView(

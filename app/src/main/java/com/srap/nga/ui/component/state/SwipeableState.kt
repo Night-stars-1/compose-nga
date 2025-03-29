@@ -210,7 +210,6 @@ internal val SwipeableState.nestedScrollConnection: NestedScrollConnection
         }
 
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-            Log.i("TAG", "onPostFling")
             performFling()
             return available
         }

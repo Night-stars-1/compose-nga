@@ -176,6 +176,7 @@ fun TopicSubjectScreen(
                             TopicSubjectCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .padding(horizontal = 8.dp)
                                     .padding(top = 8.dp)
                                     .clickable {
                                         onViewPost(item.tid)

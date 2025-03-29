@@ -37,13 +37,13 @@ object HtmlUtil {
         result = result.replace(Regex("""\[tid=([0-9]*)](.+?)\[/tid]"""), """<a href="https://bbs.nga.cn/read.php?tid=$1">$2</a>""")
         // [uid=60413566]MissRabbit丶[/uid]
         result = result.replace(Regex("""\[uid=([0-9]*)](.+?)\[/uid]"""), """<a href="https://bbs.nga.cn/nuke.php?func=ucp&uid=$1">$2</a>""")
-        // [s:ac:无语]
-        result = result.replace(Regex("""\[s:([A-Za-z0-9]+):(.+?)]""")) { matchResult ->
-            val key = matchResult.groups[1]?.value // ac
-            val value = matchResult.groups[2]?.value // 无语
-            val smilePath = smileMap[key]?.get(value)
-            """<img src="${NetworkModule.NGA_SMILE_URL.format(smilePath)}" class="smile" />"""
-        }
+//        // [s:ac:无语]
+//        result = result.replace(Regex("""\[s:([A-Za-z0-9]+):(.+?)]""")) { matchResult ->
+//            val key = matchResult.groups[1]?.value // ac
+//            val value = matchResult.groups[2]?.value // 无语
+//            val smilePath = smileMap[key]?.get(value)
+//            """<img src="${NetworkModule.NGA_SMILE_URL.format(smilePath)}" class="smile" />"""
+//        }
         // [flash]https://www.bilibili.com/video/BV1q16DY1E6M/[/flash]
         result = result.replace(Regex("""\[flash](https?://.+?)\[/flash]"""), """<a href="$1">点击查看视频</a>""")
 //        result = result.replace(Regex("""\[(\w+)](.+?)\[/\1]"""), """<$1>$2</$1>""")

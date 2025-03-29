@@ -8,7 +8,7 @@ import com.srap.nga.logic.model.FavoriteResponse
 import com.srap.nga.logic.repository.NetworkRepo
 import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseViewModel
-import com.srap.nga.utils.ToastUtil
+import com.srap.nga.utils.ToastUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,7 +29,7 @@ class FavViewModel @Inject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show(state.errMsg)
+                            ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             list = state.response.result

@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -74,7 +73,7 @@ fun Context.copyText(text: String?, showToast: Boolean = true) {
         val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         ClipData.newPlainText("复制", it)?.let { clipboardManager.setPrimaryClip(it) }
         if (showToast)
-            ToastUtil.show("已复制: $it")
+            ToastUtils.show("已复制: $it")
     }
 }
 

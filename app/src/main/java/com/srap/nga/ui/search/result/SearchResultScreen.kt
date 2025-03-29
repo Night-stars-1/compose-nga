@@ -138,6 +138,7 @@ fun SearchResultScreen(
                                 TopicSubjectCard(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .padding(horizontal = 8.dp)
                                         .padding(top = 8.dp)
                                         .clickable {
                                             onViewPost(it.tid)
@@ -160,6 +161,7 @@ fun SearchResultScreen(
                                     title = it.name,
                                     description = it.parent.name,
                                     modifier = Modifier
+                                        .padding(horizontal = 8.dp)
                                         .clickable {
                                             onViewTopicSubject(it.fid, null)
                                         }

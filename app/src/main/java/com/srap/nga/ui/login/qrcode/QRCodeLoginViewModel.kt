@@ -11,8 +11,8 @@ import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseViewModel
 import com.srap.nga.ui.navigateToHome
 import com.srap.nga.utils.GlobalObject
-import com.srap.nga.utils.StorageUtil
-import com.srap.nga.utils.ToastUtil
+import com.srap.nga.utils.StorageUtils
+import com.srap.nga.utils.ToastUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -44,7 +44,7 @@ class QRCodeLoginViewModel @Inject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show(state.errMsg)
+                            ToastUtils.show(state.errMsg)
                         }
 
                         is LoadingState.Success -> {
@@ -88,15 +88,15 @@ class QRCodeLoginViewModel @Inject constructor(
                     .collect { state ->
                         when (state) {
                             is LoadingState.Error -> {
-                                ToastUtil.show(state.errMsg)
+                                ToastUtils.show(state.errMsg)
                             }
 
                             is LoadingState.Success -> {
                                 val result = state.response.result
                                 if (result != null) {
                                     stopQRCodeCheckLoop()
-                                    StorageUtil.Token = result.token
-                                    StorageUtil.Uid = result.uid
+                                    StorageUtils.Token = result.token
+                                    StorageUtils.Uid = result.uid
                                     // 更改登录状态为登录
                                     GlobalObject.isLogin = true
                                     Handler(Looper.getMainLooper()).post {

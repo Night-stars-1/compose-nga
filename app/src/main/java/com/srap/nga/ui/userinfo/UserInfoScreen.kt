@@ -135,7 +135,9 @@ fun UserInfoScreen(
                             avatar = result.avatar,
                             name = result.username,
                             description = "级别: ${result.group} | IP属地: ${result.ipLoc}\n" +
-                                    "UID: ${result.uid} | 威望: ${result.rvrc}"
+                                    "UID: ${result.uid} | 威望: ${result.rvrc}",
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
                         )
                     }
                 }
@@ -144,6 +146,7 @@ fun UserInfoScreen(
                     TopicSubjectCard(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
                             .padding(top = 8.dp)
                             .clickable {
                                 onViewPost(item.tid)

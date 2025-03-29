@@ -14,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.srap.nga.utils.ToastUtil
+import com.srap.nga.utils.ToastUtils
 
 @Composable
 fun ThemeColorCard(
@@ -47,7 +47,7 @@ fun ThemeColorCard(
                     .clip(CircleShape)
                     .background(color)
                     .clickable {
-                        ToastUtil.show(color.toString())
+                        ToastUtils.show(color.toString())
                     }
             )
         }

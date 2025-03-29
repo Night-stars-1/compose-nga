@@ -5,7 +5,7 @@ import android.os.Looper
 import android.widget.Toast
 import com.srap.nga.myApplication
 
-object ToastUtil {
+object ToastUtils {
     fun show(msg: String) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             Toast.makeText(myApplication, msg, Toast.LENGTH_SHORT).show()

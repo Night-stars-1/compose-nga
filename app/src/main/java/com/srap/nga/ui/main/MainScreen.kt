@@ -19,10 +19,9 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.srap.nga.ui.home.HomeScreen
-import com.srap.nga.ui.navigateToFavorite
 import com.srap.nga.ui.topic.category.TopicCateGoryScreen
 import com.srap.nga.ui.userinfo.UserInfoScreen
-import com.srap.nga.utils.StorageUtil
+import com.srap.nga.utils.StorageUtils
 
 data class NavigationItem(
     val name: String,
@@ -53,7 +52,7 @@ fun MainScreen(
             name = "我的",
             icon = Icons.Filled.PersonOutline,
             content = { UserInfoScreen(
-                id = StorageUtil.Uid,
+                id = StorageUtils.Uid,
                 onViewPost = onViewPost,
                 onViewLogin = onViewLogin,
                 onBackClick = null,

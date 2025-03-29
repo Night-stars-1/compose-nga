@@ -2,13 +2,12 @@ package com.srap.nga.utils.interceptor
 
 import android.util.Log
 import com.srap.nga.constant.Constants.EMPTY_STRING
-import com.srap.nga.utils.StorageUtil
-import com.srap.nga.utils.StringUtil
+import com.srap.nga.utils.StorageUtils
+import com.srap.nga.utils.StringUtils
 import okhttp3.FormBody
 import okhttp3.Interceptor
 import okhttp3.RequestBody
 import okhttp3.Response
-import kotlin.jvm.javaClass
 
 private const val TAG = "SignInterceptor"
 
@@ -25,8 +24,8 @@ class SignInterceptor : Interceptor {
         if (originalBody != null) {
 
             val appId = "1010"
-            val accessUid = StorageUtil.Uid.toString()
-            val accessToken = StorageUtil.Token
+            val accessUid = StorageUtils.Uid.toString()
+            val accessToken = StorageUtils.Token
             val salt = "392e916a6d1d8b7523e2701470000c30bc2165a1"
             val timestamp = System.currentTimeMillis().toString()
 
@@ -42,7 +41,7 @@ class SignInterceptor : Interceptor {
 //            val combinedValues = sortedKeys.joinToString("") { formData[it] ?: "" }
             val md5String = "$appId$accessUid$accessToken$fid$tid$uid$key${timestamp}$salt"
             Log.d(TAG, "intercept: $md5String")
-            val md5Signature = StringUtil.md5(md5String)
+            val md5Signature = StringUtils.md5(md5String)
 
             val newBodyBuilder = FormBody.Builder()
                 .add("access_uid", accessUid)

@@ -97,7 +97,6 @@ fun AppNavigation(navController: NavHostController) {
             ),
         ) {
             val id = it.arguments?.getInt("id")
-            Log.i("TAG", "AppNavigation: $id")
             val isFavorString = it.arguments?.getString("isFavor")
             val isFavor = when (isFavorString) {
                 "true" -> true

@@ -1,16 +1,14 @@
 package com.srap.nga.ui.search.result
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.srap.nga.logic.model.SubjectBySearchResponse
-import com.srap.nga.logic.model.TopicSubjectResponse
 import com.srap.nga.logic.repository.NetworkRepo
 import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseRefreshLoadViewModel
-import com.srap.nga.utils.ToastUtil
+import com.srap.nga.utils.ToastUtils
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -41,7 +39,7 @@ class SearchSubjectResultLoadViewModel @AssistedInject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show(state.errMsg)
+                            ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             val response = state.response

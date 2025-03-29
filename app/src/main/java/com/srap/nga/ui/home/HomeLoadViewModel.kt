@@ -6,7 +6,7 @@ import com.srap.nga.logic.model.RecTopicResponse
 import com.srap.nga.logic.repository.NetworkRepo
 import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseRefreshLoadViewModel
-import com.srap.nga.utils.ToastUtil
+import com.srap.nga.utils.ToastUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,7 +23,7 @@ class HomeLoadViewModel @Inject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show(state.errMsg)
+                            ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             val result = state.response.result as List<*>

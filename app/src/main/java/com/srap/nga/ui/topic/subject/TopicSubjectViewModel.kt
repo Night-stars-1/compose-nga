@@ -1,6 +1,5 @@
 package com.srap.nga.ui.topic.subject
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,13 +8,12 @@ import com.srap.nga.logic.model.TopicSubjectResponse
 import com.srap.nga.logic.repository.NetworkRepo
 import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseViewModel
-import com.srap.nga.utils.ToastUtil
+import com.srap.nga.utils.ToastUtils
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlin.jvm.javaClass
 
 private const val TAG = "TopicSubjectViewModel"
 
@@ -42,7 +40,7 @@ class TopicSubjectViewModel @AssistedInject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show(state.errMsg)
+                            ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             result = state.response
@@ -58,13 +56,13 @@ class TopicSubjectViewModel @AssistedInject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show(state.errMsg)
+                            ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             if (state.response.result.isNotEmpty()) {
-                                ToastUtil.show(state.response.result[0])
+                                ToastUtils.show(state.response.result[0])
                             } else {
-                                ToastUtil.show(state.response.msg)
+                                ToastUtils.show(state.response.msg)
                             }
                         }
                     }
@@ -78,13 +76,13 @@ class TopicSubjectViewModel @AssistedInject constructor(
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
-                            ToastUtil.show(state.errMsg)
+                            ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
                             if (state.response.result.isNotEmpty()) {
-                                ToastUtil.show(state.response.result[0])
+                                ToastUtils.show(state.response.result[0])
                             } else {
-                                ToastUtil.show(state.response.msg)
+                                ToastUtils.show(state.response.msg)
                             }
                         }
                     }

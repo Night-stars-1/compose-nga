@@ -19,12 +19,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
+private const val TAG = "NetworkRepo"
+
 @Singleton
 class NetworkRepo @Inject constructor(
     @NgaService
     private val apiService: ApiService,
 ) {
-    val tag = "NetworkRepo"
 
     /**
      * 获取推荐话题
@@ -174,7 +175,7 @@ class NetworkRepo @Inject constructor(
                 LoadingState.Success(response as T)
             }
         } catch (e: Exception) {
-            Log.e(tag, e.message, e)
+            Log.e(TAG, e.message, e)
             LoadingState.Error(e.message ?: "unknown error")
         }
         emit(result)
