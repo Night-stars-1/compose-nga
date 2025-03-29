@@ -27,8 +27,6 @@ fun <T> RefreshLoadList(
     ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .padding(horizontal = 8.dp),
             horizontalAlignment = Alignment.Companion.CenterHorizontally,
             content = content
         )

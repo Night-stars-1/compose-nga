@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -130,7 +131,10 @@ fun PostScreen(
                         name = item.author.username,
                         onAvatarClick = {
                             onUserInfo(item.author.uid)
-                        }
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .padding(bottom = 16.dp)
                     ) {
                         HtmlUtil.FromHtml(
                             item.content,
@@ -141,6 +145,10 @@ fun PostScreen(
                             openUrl = openUrl,
                         )
                     }
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = DividerDefaults.color.copy(alpha = 0.3f)
+                    )
                 }
             }
         }
@@ -160,6 +168,8 @@ fun PostHeader(
         val item = viewModel.list[0]
         // 帖子内容
         PostContentCard(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
             avatar = item.author.avatar,
             name = item.author.username,
             onAvatarClick = {
@@ -187,6 +197,7 @@ fun PostHeader(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 8.dp)
                 .padding(bottom = 4.dp)
         ) {
             Text("共${viewModel.replyQuantity}个评论")
