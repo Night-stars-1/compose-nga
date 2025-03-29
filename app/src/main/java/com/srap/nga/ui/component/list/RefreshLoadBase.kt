@@ -78,7 +78,7 @@ fun <T> RefreshLoadContent(
                 .wrapContentWidth(Alignment.CenterHorizontally)
         ) {
             content()
-            Text(swipeableState.offset.value.toString())
+            Text("${swipeableState.isVisible} ${swipeableState.offset.value}")
 
             Box(modifier = Modifier
                 .align(Alignment.BottomCenter)

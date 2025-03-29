@@ -8,6 +8,7 @@ import androidx.compose.runtime.State
 import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +22,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 import kotlin.math.abs
 
+private const val VisibleThreshold = 100
 /**
  * @param SwipeableState
  * first - 滑动的最小范围，用于用户松手后的复位
@@ -64,6 +66,13 @@ open class SwipeableState(
      */
     var isAnimationRunning by mutableStateOf(false)
         private set
+
+    /**
+     * 提示框是否不可见
+     */
+    val isVisible by derivedStateOf {
+        offset.value > VisibleThreshold
+    }
 
     /**
      * 滑动偏移量，< 0 为屏幕上方
@@ -183,7 +192,7 @@ internal val SwipeableState.nestedScrollConnection: NestedScrollConnection
              * 只在底部提示框出现的时候抵消父组件的滚动
              * 100 是为了让提示框完全滚动下去
              */
-            return if (delta > 0 && offset.value < 100 && source == NestedScrollSource.UserInput) {
+            return if (delta > 0 && offset.value < VisibleThreshold && source == NestedScrollSource.UserInput) {
                 // 该次滚动消费的available
                 // 用来在底部提示框出现的时候抵消父组件的滚动
                 performDrag(delta).toOffset()
@@ -201,6 +210,7 @@ internal val SwipeableState.nestedScrollConnection: NestedScrollConnection
         }
 
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+            Log.i("TAG", "onPostFling")
             performFling()
             return available
         }

@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -115,7 +116,7 @@ fun Modifier.swipeable(
             enabled = enabled,
             reverseDirection = reverseDirection,
             interactionSource = interactionSource,
-            startDragImmediately = state.isAnimationRunning,
+            startDragImmediately = !state.isVisible,
             onDragStopped = { state.performFling() },
             state = state.draggableState
         )
