@@ -1,6 +1,7 @@
 package com.srap.nga.utils.interceptor
 
 import android.util.Log
+import com.srap.nga.constant.Constants
 import com.srap.nga.constant.Constants.EMPTY_STRING
 import com.srap.nga.utils.StorageUtils
 import com.srap.nga.utils.StringUtils
@@ -12,10 +13,23 @@ import okhttp3.Response
 private const val TAG = "SignInterceptor"
 
 class SignInterceptor : Interceptor {
+    /**
+     * 解析 FormBody 并转换为 Map<String, String>
+     */
+    private fun parseFormBody(requestBody: RequestBody?): MutableMap<String, String> {
+        val formData = mutableMapOf<String, String>()
+
+        if (requestBody is FormBody) {
+            for (i in 0 until requestBody.size) {
+                formData[requestBody.name(i)] = requestBody.value(i)
+            }
+        }
+        return formData
+    }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        Log.i(TAG, "intercept: $request")
+        Log.d(TAG, "intercept: $request")
         // 构建新的请求
         val signedRequest = request.newBuilder()
             .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Build/UKQ1.230917.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/123.0.6312.118 Mobile Safari/537.36")
@@ -26,7 +40,6 @@ class SignInterceptor : Interceptor {
             val appId = "1010"
             val accessUid = StorageUtils.Uid.toString()
             val accessToken = StorageUtils.Token
-            val salt = "392e916a6d1d8b7523e2701470000c30bc2165a1"
             val timestamp = System.currentTimeMillis().toString()
 
             // 解析请求体
@@ -39,7 +52,7 @@ class SignInterceptor : Interceptor {
 
 //            val sortedKeys = formData.keys.filter { !it.startsWith("__") }.sorted()
 //            val combinedValues = sortedKeys.joinToString("") { formData[it] ?: "" }
-            val md5String = "$appId$accessUid$accessToken$fid$tid$uid$key${timestamp}$salt"
+            val md5String = "$appId$accessUid$accessToken$fid$tid$uid$key${timestamp}${Constants.SALT}"
             Log.d(TAG, "intercept: $md5String")
             val md5Signature = StringUtils.md5(md5String)
 
@@ -60,19 +73,4 @@ class SignInterceptor : Interceptor {
 
         return chain.proceed(signedRequest.build())
     }
-}
-
-
-/**
- * 解析 FormBody 并转换为 Map<String, String>
- */
-fun parseFormBody(requestBody: RequestBody?): MutableMap<String, String> {
-    val formData = mutableMapOf<String, String>()
-
-    if (requestBody is FormBody) {
-        for (i in 0 until requestBody.size) {
-            formData[requestBody.name(i)] = requestBody.value(i)
-        }
-    }
-    return formData
 }
