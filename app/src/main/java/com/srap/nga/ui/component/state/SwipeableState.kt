@@ -1,5 +1,6 @@
 package com.srap.nga.ui.component.state
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
@@ -159,14 +160,13 @@ open class SwipeableState(
             anchors: Triple<Float, Float, Float>,
             heightRange: Pair<Float, Float>,
             animationSpec: AnimationSpec<Float> = SpringSpec()
-        ): Saver<SwipeableState, *> = Saver(
+        ): Saver<SwipeableState, List<Float>> = Saver(
             save = { state ->
-                listOf(state.currentValue)
+                listOf(state.offsetState.floatValue)
             },
             restore = { restored ->
                 val current = restored[0]
                 SwipeableState(anchors, heightRange, animationSpec).apply {
-                    currentValue = current
                     offsetState.floatValue = current
                 }
             }

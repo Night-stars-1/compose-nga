@@ -31,11 +31,14 @@ abstract class BaseRefreshLoadViewModel<T>(
     var isRefreshing by mutableStateOf(false)
     /** 是否正在加载更多内容 */
     var isLoadMore by mutableStateOf(false)
+    /** 数据请求完成后调用 */
+    var loadedCallback: () -> Unit = {}
 
     open fun fetchData() {
         isLoaded = true
         isLoadMore = false
         isRefreshing = false
+        loadedCallback.invoke()
     }
 
     open fun refresh() {

@@ -1,5 +1,6 @@
 package com.srap.nga.ui.component.list
 
+import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.srap.nga.ui.base.BaseRefreshLoadViewModel
 import com.srap.nga.ui.component.state.rememberSwipeableState
 import com.srap.nga.utils.swipeable
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,6 +42,7 @@ fun <T> RefreshLoadContent(
 ) {
     // 刷新功能
     val state = rememberPullToRefreshState()
+    val coroutineScope = rememberCoroutineScope()
     val loadDistance = with(LocalDensity.current) { 70.dp.toPx() }
     val swipeableState = rememberSwipeableState(
         anchors = Triple(-loadDistance, -30f, loadDistance),
@@ -52,10 +56,10 @@ fun <T> RefreshLoadContent(
             viewModel.refresh()
         }
     }
-
-    // 关闭底部加载框
-    LaunchedEffect(viewModel.isLoadMore) {
-        if (!viewModel.isLoadMore) swipeableState.close()
+    viewModel.loadedCallback = {
+        coroutineScope.launch {
+            swipeableState.close()
+        }
     }
 
     PullToRefreshBox(
@@ -74,6 +78,7 @@ fun <T> RefreshLoadContent(
                 .wrapContentWidth(Alignment.CenterHorizontally)
         ) {
             content()
+            Text(swipeableState.offset.value.toString())
 
             Box(modifier = Modifier
                 .align(Alignment.BottomCenter)
