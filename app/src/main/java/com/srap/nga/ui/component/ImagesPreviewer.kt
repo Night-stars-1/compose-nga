@@ -1,14 +1,16 @@
 package com.srap.nga.ui.component
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
@@ -16,11 +18,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jvziyaoyao.scale.image.previewer.TransformImageView
@@ -82,6 +82,7 @@ fun ImagesPreviewer(
  * @param image 需要预览的图片 Pair(url, id)
  * @param images 所有图片 [Pair(url, id)]
  */
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ImagePreviewer(
     image: Pair<String, String>,
@@ -117,17 +118,18 @@ fun ImagePreviewer(
     val imageHeight = rememberSaveable(stateSaver = dpSaver) { mutableStateOf(0.dp) }
     val current = LocalDensity.current
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-
-    Box(
+    BoxWithConstraints(
         modifier = Modifier.fillMaxWidth()
     ) {
+        val maxWidth = maxWidth
+
         TransformImageView(
             modifier = modifier
+                .fillMaxSize()
 //                .shadow(4.dp, shape = RoundedCornerShape(14.dp))
                 .clip(RoundedCornerShape(14.dp))
                 .height(imageHeight.value)
+                .width(maxWidth)
                 .clickable {
                     scope.launch {
                         ImagePreview.openImage(newImages, previewerState)
@@ -144,20 +146,20 @@ fun ImagePreviewer(
                 // 缩略图
                 val painter = rememberAsyncImagePainter(
                     newImage.first,
+                    onSuccess = { state ->
+                        if (state.painter.intrinsicSize != Size.Unspecified) {
+                            // 计算图片的高度,让图片完整显示
+                            val curImageWidth = with(current) { state.painter.intrinsicSize.width.toDp() }
+                            val imageScale = curImageWidth / maxWidth
+                            val curImageHeight = with(current) { state.painter.intrinsicSize.height.toDp() }
+                            val newHeight = curImageHeight / imageScale
+                            if (imageHeight.value == 0.dp) {
+                                imageHeight.value = newHeight
+                            }
+                        }
+                    },
                     contentScale = contentScale,
                 )
-                LaunchedEffect(painter.intrinsicSize) {
-                    if (painter.intrinsicSize != Size.Unspecified) {
-                        // 计算图片的高度,让图片完整显示
-                        val imageWidth = with(current) { painter.intrinsicSize.width.toDp() }
-                        val imageScale = imageWidth / screenWidth
-                        val curImageHeight = with(current) { painter.intrinsicSize.height.toDp() }
-                        val newHeight = curImageHeight / imageScale
-                        if (imageHeight.value == 0.dp) {
-                            imageHeight.value = newHeight
-                        }
-                    }
-                }
                 // 必须依次返回key、图片数据、图片的尺寸
                 Triple(newImage.second, painter, painter.intrinsicSize)
             },
