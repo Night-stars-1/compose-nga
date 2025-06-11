@@ -36,12 +36,19 @@ fun MainScreen(
     onSearch: () -> Unit,
     onViewLogin: () -> Unit,
     onViewFavorite: () -> Unit = {},
+    openUrl: (String) -> Unit,
 ) {
     val navigationData = listOf(
         NavigationItem(
             name = "主页",
             icon = Icons.Filled.Home,
-            content = { HomeScreen(onViewPost, onSearch) }
+            content = {
+                HomeScreen(
+                    onViewPost=onViewPost,
+                    onSearch=onSearch,
+                    openUrl=openUrl,
+                )
+            }
         ),
         NavigationItem(
             name = "社区",

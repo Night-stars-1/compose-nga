@@ -44,6 +44,7 @@ import com.srap.nga.ui.component.list.RefreshLoadVerticalGrid
 fun HomeScreen(
     onViewPost: (Int) -> Unit,
     onSearch: () -> Unit,
+    openUrl: (String) -> Unit,
 ) {
     val viewModel: HomeLoadViewModel = hiltViewModel()
 
@@ -77,7 +78,7 @@ fun HomeScreen(
                 .padding(innerPadding),
         ) {
             items(viewModel.list) { item ->
-                HomeCard(item=item, onViewPost=onViewPost)
+                HomeCard(item=item, onViewPost=onViewPost, openUrl=openUrl)
             }
         }
     }
@@ -87,10 +88,15 @@ fun HomeScreen(
 fun HomeCard(
     item: RecTopicResponse.Result,
     onViewPost: (Int) -> Unit,
+    openUrl: (String) -> Unit,
 ) {
     Card(
         onClick = {
-            onViewPost(item.tid)
+            if (item.url != null) {
+                openUrl(item.url)
+            } else {
+                onViewPost(item.tid)
+            }
         },
         modifier = Modifier.padding(8.dp)
     ) {
@@ -116,23 +122,25 @@ fun HomeCard(
                 )
             }
 
-            // 左上角 Badge
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(2.dp)
-                    .background(
-                        color = Color.Black.copy(alpha = 0.6f), // 半透明背景
-                        shape = RoundedCornerShape(4.dp)
+            if (item.topic != null) {
+                // 左上角 Badge
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(2.dp)
+                        .background(
+                            color = Color.Black.copy(alpha = 0.6f), // 半透明背景
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp)
+                ) {
+                    Text(
+                        text = item.topic.parent[1].toString(),
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Center
                     )
-                    .padding(horizontal = 8.dp)
-            ) {
-                Text(
-                    text = item.topic.parent[1].toString(),
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    textAlign = TextAlign.Center
-                )
+                }
             }
         }
     }

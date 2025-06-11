@@ -58,6 +58,7 @@ fun AppNavigation(navController: NavHostController) {
                 onSearch = navController::navigateToSearch,
                 onViewLogin = navController::navigateToLogin,
                 onViewFavorite = navController::navigateToFavorite,
+                openUrl = navController::openUrl,
             )
         }
 

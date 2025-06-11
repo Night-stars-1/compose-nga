@@ -40,9 +40,11 @@ data class RecTopicResponse(
         @SerializedName("tid")
         val tid: Int,
         @SerializedName("topic")
-        val topic: Topic,
+        val topic: Topic?,
         @SerializedName("type")
-        val type: Int
+        val type: Int,
+        @SerializedName("url")
+        val url: String?
     )
 
     data class Topic(
