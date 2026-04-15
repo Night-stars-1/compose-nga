@@ -129,6 +129,7 @@ fun PostScreen(
                     PostReplyCard(
                         avatar = item.author.avatar,
                         name = item.author.username,
+                        time = item.postdate,
                         onAvatarClick = {
                             onUserInfo(item.author.uid)
                         },
@@ -172,6 +173,7 @@ fun PostHeader(
                 .padding(horizontal = 8.dp),
             avatar = item.author.avatar,
             name = item.author.username,
+            time = item.postdate,
             onAvatarClick = {
                 onUserInfo(item.author.uid)
             }

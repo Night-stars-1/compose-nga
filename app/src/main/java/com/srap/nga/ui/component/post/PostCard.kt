@@ -3,6 +3,7 @@ package com.srap.nga.ui.component.post
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -35,6 +36,7 @@ import com.srap.nga.utils.toHttps
 fun PostContentCard(
     avatar: String,
     name: String,
+    time: String = "",
     modifier: Modifier = Modifier,
     onAvatarClick: () -> Unit = {},
     message: @Composable () -> Unit
@@ -64,15 +66,26 @@ fun PostContentCard(
                 },
         )
 
-        // 名称
-        Text(
-            text = name,
-            style = MaterialTheme.typography.bodyMedium,
+        // 名称和时间
+        Row(
             modifier = Modifier.constrainAs(nameRef) {
                 top.linkTo(avatarRef.top)
                 start.linkTo(avatarRef.end, margin = 4.dp)
             }
-        )
+        ) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (time.isNotEmpty()) {
+                Text(
+                    text = " · $time",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        }
 
         // 操作栏
         Box(
@@ -137,6 +150,7 @@ fun PostContentCard(
 fun PostReplyCard(
     avatar: String,
     name: String,
+    time: String = "",
     modifier: Modifier = Modifier,
     onAvatarClick: () -> Unit = {},
     message: @Composable () -> Unit
@@ -166,15 +180,26 @@ fun PostReplyCard(
                 },
         )
 
-        // 名称
-        Text(
-            text = name,
-            style = MaterialTheme.typography.bodyMedium,
+        // 名称和时间
+        Row(
             modifier = Modifier.constrainAs(nameRef) {
                 top.linkTo(avatarRef.top)
                 start.linkTo(avatarRef.end, margin = 4.dp)
             }
-        )
+        ) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (time.isNotEmpty()) {
+                Text(
+                    text = " · $time",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        }
 
         // 操作栏
         Box(

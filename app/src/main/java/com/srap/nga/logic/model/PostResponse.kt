@@ -65,6 +65,10 @@ data class PostResponse(
         val author: Author,
         val content: String,
         val attches: List<Attche>?,
+        /**
+         * 发帖时间
+         */
+        val postdate: String = "",
     ) {
         data class Author(
             val uid: Int,
