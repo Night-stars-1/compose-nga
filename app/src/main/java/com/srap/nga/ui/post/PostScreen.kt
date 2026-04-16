@@ -135,7 +135,7 @@ fun PostScreen(
                         },
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
-                            .padding(bottom = 16.dp)
+                            .padding(bottom = 4.dp)
                     ) {
                         HtmlUtil.FromHtml(
                             item.content,
@@ -148,7 +148,7 @@ fun PostScreen(
                     }
                     HorizontalDivider(
                         thickness = 0.5.dp,
-                        color = DividerDefaults.color.copy(alpha = 0.3f)
+                        color = DividerDefaults.color.copy(alpha = 0.8f)
                     )
                 }
             }
