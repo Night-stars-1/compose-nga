@@ -27,7 +27,7 @@ fun SearchItemCard(
         Row {
             Icon(
                 imageVector = startIcon,
-                contentDescription = "头部图标"
+                contentDescription = null,
             )
             Text(
                text = title,
@@ -38,7 +38,7 @@ fun SearchItemCard(
 
         Icon(
             imageVector = endIcon,
-            contentDescription = "尾部图标"
+            contentDescription = null,
         )
     }
 }

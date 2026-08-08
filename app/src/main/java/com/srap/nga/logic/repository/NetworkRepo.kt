@@ -166,13 +166,13 @@ class NetworkRepo @Inject constructor(
         }
     }
 
-    private fun <T> fire(block: suspend () -> BaseResponse<T>): Flow<LoadingState<T>> = flow {
+    private fun <T : BaseResponse<T>> fire(block: suspend () -> T): Flow<LoadingState<T>> = flow {
         val result = try {
             val response = block()
             if (response.code != Code.SUCCESS) {
                 LoadingState.Error(response.msg)
             } else {
-                LoadingState.Success(response as T)
+                LoadingState.Success(response)
             }
         } catch (e: Exception) {
             Log.e(TAG, e.message, e)

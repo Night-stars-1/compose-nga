@@ -51,8 +51,9 @@ fun ImagePreviewTransformScreen() {
                 }
             }),
             imageLoader = {
-                Log.i(TAG, "ImagePreviewTransformScreen: $it ${images[it].first}")
-                val painter = rememberAsyncImagePainter(images[it].first)
+                val imageUrl = images.getOrNull(it)?.first
+                Log.i(TAG, "ImagePreviewTransformScreen: $it $imageUrl")
+                val painter = rememberAsyncImagePainter(imageUrl)
                 return@ScaleImagePreviewer Pair(painter, painter.intrinsicSize)
             }
         )

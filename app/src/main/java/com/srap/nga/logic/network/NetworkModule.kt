@@ -3,6 +3,7 @@ package com.srap.nga.logic.network
 import com.google.gson.GsonBuilder
 import com.srap.nga.logic.state.Code
 import com.srap.nga.logic.state.CodeAdapter
+import com.srap.nga.logic.session.SessionManager
 import com.srap.nga.utils.interceptor.AuthInterceptor
 import com.srap.nga.utils.interceptor.SignInterceptor
 import dagger.Module
@@ -23,10 +24,10 @@ annotation class NgaService
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     private const val NGA_BASE_URL = "https://ngabbs.com"
-    const val NGA_APP_ICON_URL = "https://img4.nga.178.com/ngabbs/nga_classic/f/app/%s.png"
-    const val NGA_ATTACHMENTS_URL = "https://img.nga.178.com/attachments/%s"
-    const val NGA_SMILE_URL = "https://img4.nga.178.com/ngabbs/post/smile/%s"
-    const val NGA_APP_IMAGE_URL = "http://img4.nga.178.com/ngabbs/nga_classic/f/app/%s.png"
+    const val NGA_APP_ICON_URL = "https://img4.nga.cn/ngabbs/nga_classic/f/app/%s.png"
+    const val NGA_ATTACHMENTS_URL = "https://img4.nga.cn/attachments/%s"
+    const val NGA_SMILE_URL = "https://img4.nga.cn/ngabbs/post/smile/%s"
+    const val NGA_APP_IMAGE_URL = "http://img4.nga.cn/ngabbs/nga_classic/f/app/%s.png"
     const val NGA_QR_LOGIN_URL = "https://ngabbs.com/nuke.php?__lib=login&__act=qrlogin_ui&qrkey=%s"
 
     @NgaService
@@ -54,10 +55,10 @@ object NetworkModule {
     @NgaService
     @Singleton
     @Provides
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(sessionManager: SessionManager): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(SignInterceptor()) // 添加请求签名拦截器
-            .addInterceptor(AuthInterceptor())
+            .addInterceptor(AuthInterceptor(sessionManager))
             .build()
     }
 

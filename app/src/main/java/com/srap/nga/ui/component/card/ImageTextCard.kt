@@ -1,10 +1,11 @@
 package com.srap.nga.ui.component.card
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,14 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Topic
+import androidx.compose.material3.Icon
 import coil3.compose.AsyncImage
+import com.srap.nga.utils.toHttps
 
 @Composable
 fun ImageTextCard(
@@ -37,14 +40,26 @@ fun ImageTextCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 头像
-        AsyncImage(
-            model = image,
-            contentDescription = "头像",
+        Box(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Topic,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(20.dp),
+            )
+            AsyncImage(
+                model = image.toHttps(),
+                contentDescription = "头像",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        }
 
         // 内容
         Column(
@@ -53,18 +68,12 @@ fun ImageTextCard(
         ) {
             Text(
                 text = title,
-                style = TextStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                ),
+                style = MaterialTheme.typography.titleMedium,
             )
             Text(
                 text = description ?: "",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Gray
-                )
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -81,7 +90,7 @@ fun ImageTextVerticalCard(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    val color = MaterialTheme.colorScheme.outline
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         verticalArrangement = Arrangement.Center,
         modifier = modifier
@@ -95,8 +104,7 @@ fun ImageTextVerticalCard(
         )
         Text(
             text = text,
-            lineHeight = 14.sp,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.labelMedium,
             color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

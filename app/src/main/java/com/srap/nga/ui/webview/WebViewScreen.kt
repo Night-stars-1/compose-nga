@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import com.srap.nga.constant.Constants.EMPTY_STRING
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.webview.WebView
-import com.srap.nga.utils.decode
+import com.srap.nga.ui.component.webview.openInBrowser
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,8 +50,9 @@ fun WebViewScreen(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 navigationIcon = {
                     BackButton { onBackClick() }
@@ -70,7 +71,7 @@ fun WebViewScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = null
+                            contentDescription = "网页操作",
                         )
                     }
                     DropdownMenu(
@@ -80,8 +81,11 @@ fun WebViewScreen(
                         },
                     ) {
                         DropdownMenuItem(
-                            text = { Text("收藏") },
-                            onClick = {}
+                            text = { Text("在浏览器中打开") },
+                            onClick = {
+                                dropdownMenuExpanded = false
+                                openInBrowser(url)
+                            }
                         )
                     }
                 }
@@ -100,7 +104,7 @@ fun WebViewScreen(
                 )
             }
             WebView(
-                url = url.decode,
+                url = url,
                 onFinish = onBackClick,
                 onUpdateProgress = { progress = it },
                 onUpdateTitle = { title = it },

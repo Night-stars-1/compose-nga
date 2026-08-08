@@ -19,8 +19,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.card.ActionTextCard
 import com.srap.nga.ui.component.card.LoadingCard
@@ -32,17 +33,21 @@ fun FavoriteScreen(
     onBackClick: (() -> Unit)?,
 ) {
     val viewModel: FavViewModel = hiltViewModel()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
                 windowInsets = WindowInsets.systemBars
                     .only(
                         WindowInsetsSides.Top + WindowInsetsSides.Start
                     ),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 navigationIcon = {
                     if (onBackClick != null) BackButton { onBackClick() }

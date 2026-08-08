@@ -1,12 +1,15 @@
 package com.srap.nga.ui
 
-import android.util.Log
+import android.net.Uri
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -24,12 +27,26 @@ import com.srap.nga.ui.search.result.SearchResultScreen
 import com.srap.nga.ui.topic.subject.TopicSubjectScreen
 import com.srap.nga.ui.userinfo.UserInfoScreen
 import com.srap.nga.ui.webview.WebViewScreen
-import com.srap.nga.utils.GlobalObject
-import com.srap.nga.utils.encode
+import com.srap.nga.logic.session.SessionManager
+import com.srap.nga.logic.session.SessionNavigationEvent
+import org.json.JSONArray
 
 @Composable
-fun AppNavigation(navController: NavHostController) {
-    GlobalObject.navController = navController
+fun AppNavigation(
+    navController: NavHostController,
+    sessionManager: SessionManager,
+) {
+    val userId by sessionManager.userId.collectAsState()
+    val isLoggedIn by sessionManager.isLoggedIn.collectAsState()
+
+    LaunchedEffect(navController) {
+        sessionManager.navigationEvents.collect { event ->
+            when (event) {
+                SessionNavigationEvent.Home -> navController.navigateToHome()
+                SessionNavigationEvent.Login -> navController.navigateToLogin()
+            }
+        }
+    }
 
     NavHost(
         navController,
@@ -53,6 +70,8 @@ fun AppNavigation(navController: NavHostController) {
     ) {
         composable("home") {
             MainScreen(
+                userId = userId,
+                isLoggedIn = isLoggedIn,
                 onViewPost = navController::navigateToPost,
                 onViewTopicSubject = navController::navigateToTopicSubject,
                 onSearch = navController::navigateToSearch,
@@ -124,12 +143,19 @@ fun AppNavigation(navController: NavHostController) {
                     type = NavType.StringType
                 },
                 navArgument("images") {
-                    type = NavType.StringListType
+                    type = NavType.StringType
                 },
             ),
         ) {
             val image = it.arguments?.getString("image")
-            val images = NavType.StringListType[it.arguments!!, "images"]
+            val images = it.arguments
+                ?.getString("images")
+                ?.let { value ->
+                    runCatching {
+                        val json = JSONArray(value)
+                        List(json.length()) { index -> json.getString(index) }
+                    }.getOrNull()
+                }
             if (image != null && images != null) {
                 ImagePreviewScreen(
                     image=image,
@@ -153,6 +179,7 @@ fun AppNavigation(navController: NavHostController) {
             if (id != null) {
                 UserInfoScreen(
                     id = id,
+                    isLoggedIn = isLoggedIn,
                     onViewPost = navController::navigateToPost,
                     onViewLogin = navController::navigateToLogin,
                     onBackClick = navController::popBackStack,
@@ -296,21 +323,22 @@ fun NavHostController.navigateToSearch() {
 fun NavHostController.navigateToSearchResult(key: String) {
     // 搜索词不为空才调整
     if (key.isNotEmpty()) {
-        navigate("search/result/$key")
+        navigate("search/result/${Uri.encode(key)}")
     }
 }
 
 fun NavHostController.navigateToImagePreView(image: String, images: List<String>) {
-    navigate("image/preview?image=$image&images=${images.joinToString("&images=")}")
+    val encodedImages = Uri.encode(JSONArray(images).toString())
+    navigate("image/preview?image=${Uri.encode(image)}&images=$encodedImages")
 }
 
 fun NavHostController.navigateToFavorite() {
     navigate("favorite")
 }
 fun NavHostController.navigateToFavoriteContent(id: Int, title: String) {
-    navigate("favorite/content/$id/$title")
+    navigate("favorite/content/$id/${Uri.encode(title)}")
 }
 
 fun NavHostController.openUrl(url: String) {
-    navigate("webview/${url.encode}")
+    navigate("webview/${Uri.encode(url)}")
 }

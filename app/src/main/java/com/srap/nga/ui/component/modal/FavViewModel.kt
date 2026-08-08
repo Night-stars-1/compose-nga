@@ -19,8 +19,6 @@ class FavViewModel @Inject constructor(
 ) : BaseViewModel(networkRepo) {
     var list by mutableStateOf(emptyList<FavoriteResponse.Data>())
 
-    var onDataFetched: (() -> Unit)? = null
-
      fun fetchData() {
          viewModelScope.launch {
              networkRepo.getFavorite()
@@ -34,7 +32,6 @@ class FavViewModel @Inject constructor(
                              list = state.response.result
                          }
                      }
-                     onDataFetched?.invoke()
                  }
          }
     }

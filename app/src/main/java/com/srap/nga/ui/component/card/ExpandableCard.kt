@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -25,7 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.srap.nga.ui.theme.AppMotion
 
 /**
  * 折叠卡片
@@ -44,9 +43,9 @@ fun ExpandableCard(
             .padding(bottom = 2.dp)
             .background(
                 MaterialTheme.colorScheme.surfaceContainerHighest,
-                shape = RoundedCornerShape(8.dp)
+                shape = MaterialTheme.shapes.medium,
             )
-            .animateContentSize()
+            .animateContentSize(animationSpec = AppMotion.defaultSpatial())
             .fillMaxWidth()
             .clickable(enabled = isFillClick) {
                 expanded = !expanded
@@ -62,20 +61,20 @@ fun ExpandableCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(title)
+                    Text(title, style = MaterialTheme.typography.titleSmall)
                     if (description != null)
                         Text(
                             description,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.outline
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                 }
 
                 IconButton(onClick = { expanded = !expanded }) {
                     if (expanded) {
-                        Icon(Icons.Default.KeyboardArrowUp, contentDescription = "展开")
+                        Icon(Icons.Default.KeyboardArrowUp, contentDescription = "折叠")
                     } else {
-                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "折叠")
+                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "展开")
                     }
                 }
             }

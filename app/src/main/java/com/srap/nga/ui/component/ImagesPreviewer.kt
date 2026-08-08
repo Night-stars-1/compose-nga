@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,6 +30,60 @@ import kotlinx.coroutines.launch
 import coil3.compose.rememberAsyncImagePainter
 import com.srap.nga.ui.component.state.ImagePreview
 
+internal data class PreparedImagePreview(
+    val currentImage: Pair<String, String>,
+    val images: List<Pair<String, String>>,
+    val initialIndex: Int,
+)
+
+private fun normalizePreviewIdentity(value: String): String =
+    value.replace(".medium.jpg", "", ignoreCase = true)
+
+private fun uniquePreviewKey(identity: String, index: Int): String =
+    "${identity.length}:$identity:$index"
+
+internal fun preparePreviewImages(
+    images: List<Pair<String, String>>,
+): List<Pair<String, String>> = images.mapIndexed { index, image ->
+    image.first to uniquePreviewKey(normalizePreviewIdentity(image.second), index)
+}
+
+internal fun prepareImagePreview(
+    image: Pair<String, String>,
+    images: List<Pair<String, String>>,
+): PreparedImagePreview {
+    val normalizedCurrentUrl = normalizePreviewIdentity(image.first)
+    val normalizedCurrentKey = normalizePreviewIdentity(image.second)
+    val initialIndex = images.indexOfFirst { it == image }
+        .takeIf { it >= 0 }
+        ?: images.indexOfFirst {
+            normalizePreviewIdentity(it.first) == normalizedCurrentUrl &&
+                normalizePreviewIdentity(it.second) == normalizedCurrentKey
+        }.takeIf { it >= 0 }
+        ?: images.indexOfFirst {
+            normalizePreviewIdentity(it.second) == normalizedCurrentKey
+        }.takeIf { it >= 0 }
+        ?: images.indexOfFirst {
+            normalizePreviewIdentity(it.first) == normalizedCurrentUrl
+        }.takeIf { it >= 0 }
+
+    if (initialIndex == null) {
+        val fallback = image.first to uniquePreviewKey(normalizedCurrentKey, 0)
+        return PreparedImagePreview(
+            currentImage = fallback,
+            images = listOf(fallback),
+            initialIndex = 0,
+        )
+    }
+
+    val preparedImages = preparePreviewImages(images)
+    return PreparedImagePreview(
+        currentImage = image.first to preparedImages[initialIndex].second,
+        images = preparedImages,
+        initialIndex = initialIndex,
+    )
+}
+
 /**
  * 预览图片列表组件
  */
@@ -36,16 +91,17 @@ import com.srap.nga.ui.component.state.ImagePreview
 fun ImagesPreviewer(
     images: List<Pair<String, String>>,
 ) {
+    val previewImages = remember(images) { preparePreviewImages(images) }
     val previewerState = rememberPreviewerState(
-        pageCount = { images.size },
-        getKey = { images[it].second }
+        pageCount = { previewImages.size },
+        getKey = { previewImages[it].second }
     )
     val scope = rememberCoroutineScope()
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        images.forEachIndexed { index, image ->
+        previewImages.forEachIndexed { index, image ->
             TransformImageView(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
@@ -53,7 +109,7 @@ fun ImagesPreviewer(
                     .height(130.dp)
                     .clickable {
                         scope.launch {
-                            ImagePreview.openImage(images, previewerState)
+                            ImagePreview.openImage(previewImages, previewerState)
 
                             // 点击事件触发动效
                             withFrameMillis {
@@ -64,8 +120,8 @@ fun ImagesPreviewer(
                         }
                     },
                 imageLoader = {
-                    val key = images[index].second
-                    val imageUrl = images[index].first
+                    val key = image.second
+                    val imageUrl = image.first
                     // 缩略图
                     val painter = rememberAsyncImagePainter(imageUrl)
                     // 必须依次返回key、图片数据、图片的尺寸
@@ -94,21 +150,10 @@ fun ImagePreviewer(
         save = { it.value },
         restore = { it.dp }
     )
-    var index = -1
-    var newImage = Pair(image.first, image.second.replace(".medium.jpg", ""))
-    val newImages = if (images.any { it.second == newImage.second }) {
-        images.mapIndexed { itIndex, item ->
-            // 避免images有多个key一样的图片
-            if (item.second == newImage.second && index == -1) {
-                index = itIndex
-                newImage = Pair(newImage.first, "${newImage.second}${itIndex}")
-            }
-            Pair(item.first, "${item.second}${itIndex}")
-        }
-    } else {
-        index = 0
-        listOf(newImage)
-    }
+    val preview = remember(image, images) { prepareImagePreview(image, images) }
+    val index = preview.initialIndex
+    val newImage = preview.currentImage
+    val newImages = preview.images
 
     val previewerState = rememberPreviewerState(
         pageCount = { newImages.size },

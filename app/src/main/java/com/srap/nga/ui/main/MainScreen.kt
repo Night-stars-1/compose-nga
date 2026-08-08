@@ -19,18 +19,19 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.srap.nga.ui.home.HomeScreen
+import com.srap.nga.ui.theme.AppMotion
 import com.srap.nga.ui.topic.category.TopicCateGoryScreen
 import com.srap.nga.ui.userinfo.UserInfoScreen
-import com.srap.nga.utils.StorageUtils
 
 data class NavigationItem(
     val name: String,
     val icon: ImageVector,
-    val content: @Composable () -> Unit,
 )
 
 @Composable
 fun MainScreen(
+    userId: Int,
+    isLoggedIn: Boolean,
     onViewPost: (Int) -> Unit,
     onViewTopicSubject: (Int, Boolean?) -> Unit,
     onSearch: () -> Unit,
@@ -42,29 +43,14 @@ fun MainScreen(
         NavigationItem(
             name = "主页",
             icon = Icons.Filled.Home,
-            content = {
-                HomeScreen(
-                    onViewPost=onViewPost,
-                    onSearch=onSearch,
-                    openUrl=openUrl,
-                )
-            }
         ),
         NavigationItem(
             name = "社区",
             icon = Icons.Filled.Topic,
-            content = { TopicCateGoryScreen(onViewTopicSubject, onSearch) }
         ),
         NavigationItem(
             name = "我的",
             icon = Icons.Filled.PersonOutline,
-            content = { UserInfoScreen(
-                id = StorageUtils.Uid,
-                onViewPost = onViewPost,
-                onViewLogin = onViewLogin,
-                onBackClick = null,
-                onViewFavorite = onViewFavorite,
-            ) }
         )
     )
 
@@ -82,7 +68,7 @@ fun MainScreen(
                 item(
                     selected = selectIndex == index,
                     label = {
-                        if (selectIndex == index) Text(item.name)
+                        Text(item.name)
                     },
                     onClick = {
                         setSelectIndex(index)
@@ -98,19 +84,41 @@ fun MainScreen(
             targetState = selectIndex,
             label = "MainScreen",
             transitionSpec = {
-                if (selectIndex >= previousIndex) {
-                    // 前进动画
-                    slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
+                if (targetState >= previousIndex) {
+                    slideInHorizontally(
+                        animationSpec = AppMotion.defaultSpatial(),
+                    ) { it } togetherWith slideOutHorizontally(
+                        animationSpec = AppMotion.fastSpatial(),
+                    ) { -it }
                 } else {
-                    // 后退动画
-                    slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
+                    slideInHorizontally(
+                        animationSpec = AppMotion.defaultSpatial(),
+                    ) { -it } togetherWith slideOutHorizontally(
+                        animationSpec = AppMotion.fastSpatial(),
+                    ) { it }
                 }
             },
         ) { index ->
             savableStateHolder.SaveableStateProvider(
                 key = index,
                 content = {
-                    navigationData[index].content()
+                    when (index) {
+                        0 -> HomeScreen(
+                            onViewPost = onViewPost,
+                            onSearch = onSearch,
+                            openUrl = openUrl,
+                        )
+
+                        1 -> TopicCateGoryScreen(onViewTopicSubject, onSearch)
+                        else -> UserInfoScreen(
+                            id = userId,
+                            isLoggedIn = isLoggedIn,
+                            onViewPost = onViewPost,
+                            onViewLogin = onViewLogin,
+                            onBackClick = null,
+                            onViewFavorite = onViewFavorite,
+                        )
+                    }
                 }
             )
         }

@@ -1,13 +1,10 @@
 package com.srap.nga.ui.component.userinfo
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,8 +29,8 @@ fun UserInfoCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 8.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(8.dp)
     ) {
         val (avatarRef, nameRef, descriptionRef) = createRefs()
@@ -54,7 +51,7 @@ fun UserInfoCard(
         // 名称
         Text(
             text = name,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.constrainAs(nameRef) {
                 top.linkTo(avatarRef.top)
                 start.linkTo(avatarRef.end, margin = 8.dp)
@@ -65,6 +62,7 @@ fun UserInfoCard(
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.constrainAs(descriptionRef) {
                 top.linkTo(nameRef.bottom, margin = 4.dp)
                 start.linkTo(avatarRef.end, margin = 8.dp)

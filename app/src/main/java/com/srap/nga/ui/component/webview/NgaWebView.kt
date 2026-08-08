@@ -6,6 +6,7 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.text.style.URLSpan
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.widget.TextView
 import androidx.compose.material3.LocalContentColor
@@ -14,13 +15,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.text.HtmlCompat
-import com.srap.nga.myApplication
-import kotlin.text.toInt
-import androidx.core.text.parseAsHtml
 import androidx.core.net.toUri
+import androidx.core.text.HtmlCompat
+import androidx.core.text.parseAsHtml
+import com.srap.nga.myApplication
 import com.srap.nga.utils.nga.handler.BBCodeHandler
 import com.srap.nga.utils.nga.handler.CoilImageGetter
+import com.srap.nga.utils.nga.parse.NgaMarkupNormalizer
+
+internal const val NGA_HTML_PARSE_FLAGS =
+    HtmlCompat.FROM_HTML_MODE_COMPACT or HtmlCompat.FROM_HTML_OPTION_USE_CSS_COLORS
 
 fun openInBrowser(url: Uri) {
     val intent = Intent(Intent.ACTION_VIEW, url)
@@ -34,40 +38,33 @@ fun openInBrowser(url: String) {
     myApplication.startActivity(intent)
 }
 
-
 class CustomLinkMovementMethod(
     private val onViewPost: (Int) -> Unit,
     private val openUrl: (String) -> Unit,
 ) : LinkMovementMethod() {
-    override fun onTouchEvent(widget: TextView , buffer: Spannable , event: MotionEvent): Boolean {
+    override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return super.onTouchEvent(widget, buffer, event)
 
         val x = event.x.toInt() - widget.totalPaddingLeft + widget.scrollX
         val y = event.y.toInt() - widget.totalPaddingTop + widget.scrollY
-
         val layout = widget.layout
         val line = layout.getLineForVertical(y)
-        val off = layout.getOffsetForHorizontal(line, x.toFloat())
+        val offset = layout.getOffsetForHorizontal(line, x.toFloat())
 
-        buffer.getSpans(off, off, URLSpan::class.java).firstOrNull()?.let { span ->
-            // 拦截点击事件
+        buffer.getSpans(offset, offset, URLSpan::class.java).firstOrNull()?.let { span ->
             handleCustomNavigation(span.url)
             return true
         }
-
         return super.onTouchEvent(widget, buffer, event)
     }
 
     private fun handleCustomNavigation(url: String) {
         val uri = url.toUri()
-        if (url.contains("nga") && url.contains("tid")) {
-            val tid = uri.getQueryParameter("tid")
-            if (tid != null) {
-                onViewPost(tid.toInt())
-            }
+        if (url.contains("nga", ignoreCase = true) && url.contains("tid", ignoreCase = true)) {
+            uri.getQueryParameter("tid")?.toIntOrNull()?.let(onViewPost)
             return
         }
-        if (url.contains("nga.cn/")) {
+        if (url.contains("nga.cn/", ignoreCase = true)) {
             openUrl(url)
             return
         }
@@ -84,22 +81,64 @@ fun HtmlText(
 ) {
     val contentColor = LocalContentColor.current.toArgb()
     val primary = MaterialTheme.colorScheme.primary.toArgb()
+    val bodyTextSizeSp = MaterialTheme.typography.bodyMedium.fontSize.value
+    val adaptedHtml = NgaMarkupNormalizer.adaptStyles(html)
 
     AndroidView(
         modifier = modifier,
         factory = { context ->
             TextView(context).apply {
-                movementMethod = CustomLinkMovementMethod(onViewPost, openUrl)
-                setTextColor(contentColor)
-                setLinkTextColor(primary)
-                val msg = html.parseAsHtml(
-                    HtmlCompat.FROM_HTML_OPTION_USE_CSS_COLORS,
-                    CoilImageGetter(this)
+                updateNgaHtmlText(
+                    html = adaptedHtml,
+                    contentColor = contentColor,
+                    linkColor = primary,
+                    textSizeSp = bodyTextSizeSp,
+                    onViewPost = onViewPost,
+                    openUrl = openUrl,
                 )
-                val builder = SpannableStringBuilder(msg)
-                BBCodeHandler.parse(context, builder)
-                text = builder
             }
-        }
+        },
+        update = { textView ->
+            textView.updateNgaHtmlText(
+                html = adaptedHtml,
+                contentColor = contentColor,
+                linkColor = primary,
+                textSizeSp = bodyTextSizeSp,
+                onViewPost = onViewPost,
+                openUrl = openUrl,
+            )
+        },
     )
+}
+
+private fun TextView.updateNgaHtmlText(
+    html: String,
+    contentColor: Int,
+    linkColor: Int,
+    textSizeSp: Float,
+    onViewPost: (Int) -> Unit,
+    openUrl: (String) -> Unit,
+) {
+    includeFontPadding = false
+    setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeSp)
+    movementMethod = CustomLinkMovementMethod(onViewPost, openUrl)
+    setTextColor(contentColor)
+    setLinkTextColor(linkColor)
+    if (tag == html) return
+
+    val parsed = html.parseAsHtml(
+        NGA_HTML_PARSE_FLAGS,
+        CoilImageGetter(this),
+    )
+    val builder = SpannableStringBuilder(parsed)
+    BBCodeHandler.parse(context, builder)
+    builder.trimTrailingLineBreaks()
+    text = builder
+    tag = html
+}
+
+internal fun SpannableStringBuilder.trimTrailingLineBreaks() {
+    while (isNotEmpty() && (last() == '\n' || last() == '\r')) {
+        delete(length - 1, length)
+    }
 }

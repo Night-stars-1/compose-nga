@@ -1,14 +1,13 @@
 package com.srap.nga.utils.interceptor
 
-import android.os.Handler
-import android.os.Looper
-import com.srap.nga.ui.navigateToLogin
-import com.srap.nga.utils.GlobalObject
+import com.srap.nga.logic.session.SessionManager
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.json.JSONObject
 
-class AuthInterceptor : Interceptor {
+class AuthInterceptor(
+    private val sessionManager: SessionManager,
+) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val response = chain.proceed(request)
@@ -20,10 +19,7 @@ class AuthInterceptor : Interceptor {
             val code = jsonObject.optInt("code")
             if (code == 46 || code == 2048) {
                 // 更改登录状态为未登录
-                GlobalObject.isLogin = false
-                Handler(Looper.getMainLooper()).post {
-                    GlobalObject.navController?.navigateToLogin()
-                }
+                sessionManager.markLoggedOut()
             }
         } catch (e: Exception) {
             e.printStackTrace()

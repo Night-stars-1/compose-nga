@@ -18,12 +18,16 @@ fun <T> RefreshLoadList(
     viewModel: BaseRefreshLoadViewModel<T>,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
+    showRefreshIndicator: Boolean = true,
+    initialLoadAsRefresh: Boolean = true,
     content: LazyListScope.() -> Unit
 ) {
     RefreshLoadBase(
         viewModel = viewModel,
         modifier = modifier,
-        state = listState
+        state = listState,
+        showRefreshIndicator = showRefreshIndicator,
+        initialLoadAsRefresh = initialLoadAsRefresh,
     ) {
         LazyColumn(
             state = listState,

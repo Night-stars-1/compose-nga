@@ -1,71 +1,123 @@
 package com.srap.nga.utils.nga.parse
 
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
+import org.jsoup.nodes.Node
+
 class SplitImage {
-    private val stack = mutableListOf<Int>()
-    private val dataStack = mutableListOf<NgaContent>()
-    private val startKey = "[img]"
-    private val startKeyLength = startKey.length
-    private val endKey = "[/img]"
-    private val endKeyLength = endKey.length
+    private companion object {
+        const val IMAGE_PLACEHOLDER_TAG = "nga-image-placeholder"
+
+        val imagePattern = Regex(
+            """\[img](.*?)\[/img]""",
+            setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
+        )
+        val leadingBreakPattern = Regex(
+            """^(?:\s*<br\s*/?>\s*)+""",
+            RegexOption.IGNORE_CASE,
+        )
+        val trailingBreakPattern = Regex(
+            """(?:\s*<br\s*/?>\s*)+$""",
+            RegexOption.IGNORE_CASE,
+        )
+    }
 
     fun splitImage(text: String, start: Int = 0): List<NgaContent>? {
-        var currentStart = start
+        val source = if (start == 0) text else text.substring(start)
+        val matches = imagePattern.findAll(source).toList()
+        if (matches.isEmpty()) {
+            return source.takeIf { it.isNotEmpty() }?.let { listOf(NgaContent.Text(it)) }
+        }
 
-        while (true) {
-            val startKeyIndex = text.indexOf(startKey, currentStart)
-            val endKeyIndex = text.indexOf(endKey, currentStart)
-            if (currentStart == 0) {
-                // 如果起始搜索位置为 0，则向数据堆栈添加关键词之前的内容
-                // 该内容对进行下一步切割
-                val newText = if (startKeyIndex != -1) text.substring(0, startKeyIndex) else text
-                if (newText.isNotEmpty()) {
-                    val content = NgaContent.Text(content = newText)
-                    dataStack.add(content)
-                }
-            } else if (currentStart < startKeyIndex && stack.isEmpty()) {
-                // 关键词堆栈为空，说明上一个[img][/img]已经匹配完成
-                // 由于图片的链接就是内容，只有两边的是文本，所以需要单独适配
-                // 如果起始位置 < 起始关键词位置
-                // 则中间还有文本
-                val newText = text.substring(currentStart + this.endKeyLength - 1, startKeyIndex)
-                val content = NgaContent.Text(content = newText)
-                dataStack.add(content)
+        val imageUrls = matches.map { it.groupValues[1] }
+        val markedHtml = buildString(source.length) {
+            var cursor = 0
+            matches.forEachIndexed { index, match ->
+                append(source, cursor, match.range.first)
+                append("<$IMAGE_PLACEHOLDER_TAG data-index=\"")
+                append(index)
+                append("\"></$IMAGE_PLACEHOLDER_TAG>")
+                cursor = match.range.last + 1
             }
-            when {
-                startKeyIndex != -1 && startKeyIndex < endKeyIndex -> {
-                    // 如果起始关键词位置 < 结束关键词位置
-                    // 向关键词栈添加起始关键词位置
-                    stack.add(startKeyIndex)
-                    currentStart = startKeyIndex + 1
-                    continue
+            append(source, cursor, source.length)
+        }
+
+        val document = Jsoup.parseBodyFragment(markedHtml)
+        document.outputSettings().prettyPrint(false)
+        val content = document.body().childNodes()
+            .flatMap { splitNode(it, imageUrls) }
+            .mergeAndTrimImageBoundaries()
+        return content.takeIf { it.isNotEmpty() }
+    }
+
+    private fun splitNode(node: Node, imageUrls: List<String>): List<NgaContent> {
+        if (node is Element && node.normalName() == IMAGE_PLACEHOLDER_TAG) {
+            val index = node.attr("data-index").toIntOrNull() ?: return emptyList()
+            return imageUrls.getOrNull(index)?.let { listOf(NgaContent.Image(it)) }.orEmpty()
+        }
+        if (node !is Element || node.getElementsByTag(IMAGE_PLACEHOLDER_TAG).isEmpty()) {
+            return listOf(NgaContent.Text(node.outerHtml()))
+        }
+
+        return node.childNodes()
+            .flatMap { splitNode(it, imageUrls) }
+            .mergeAndTrimImageBoundaries()
+            .map { content ->
+                if (content is NgaContent.Text) {
+                    NgaContent.Text(wrapWithElement(node, content.content))
+                } else {
+                    content
                 }
-                startKeyIndex > endKeyIndex || (startKeyIndex == -1 && endKeyIndex != -1 && stack.isNotEmpty()) -> {
-                    // 如果起始关键词位置 > 结束关键词位置，或者没有搜索到起始关键词，但是搜索到结束关键词且关键词栈不为空
-                    // 从关键词栈中弹出起始关键词位置
-                    val startIndex = stack.removeAt(stack.size - 1)
-                    if (stack.isEmpty()) {
-                        // 如果 statck 为空，则当前结果为一个区间
-                        val url = text.substring(startIndex + startKeyLength, endKeyIndex)
-                        dataStack.add(NgaContent.Image(url))
+            }
+    }
+
+    private fun wrapWithElement(element: Element, html: String): String =
+        element.clone().apply {
+            empty()
+            this.html(html)
+        }.outerHtml()
+
+    private fun List<NgaContent>.mergeAndTrimImageBoundaries(): List<NgaContent> {
+        val merged = mutableListOf<NgaContent>()
+        forEach { content ->
+            if (content is NgaContent.Text && merged.lastOrNull() is NgaContent.Text) {
+                val previous = merged.removeAt(merged.lastIndex) as NgaContent.Text
+                merged.add(NgaContent.Text(previous.content + content.content))
+            } else {
+                merged.add(content)
+            }
+        }
+
+        val result = mutableListOf<NgaContent>()
+        var followsImage = false
+        merged.forEach { content ->
+            when (content) {
+                is NgaContent.Image -> {
+                    val previous = result.lastOrNull()
+                    if (previous is NgaContent.Text) {
+                        result.removeAt(result.lastIndex)
+                        previous.content.replace(trailingBreakPattern, "")
+                            .takeIf { it.isNotBlank() }
+                            ?.let { result.add(NgaContent.Text(it)) }
                     }
-                    currentStart = endKeyIndex + 1
-                    continue
+                    result.add(content)
+                    followsImage = true
                 }
-                startKeyIndex == -1 && endKeyIndex == -1 -> {
-                    if (currentStart == 0) {
-                        // 如果未搜索到 起始关键词和结束关键词，且起始位置为 0(未进行搜索)
-                        // 直接返回文本
-                        return if (text.isNotEmpty()) listOf(NgaContent.Text(text, "text")) else null
+                is NgaContent.Text -> {
+                    val html = if (followsImage) {
+                        content.content.replace(leadingBreakPattern, "")
                     } else {
-                        // 如果起始位置不为 0
-                        // aaa[img]bbb[/img]ccc
-                        // 将之后的结果添加到数据堆栈 -> ccc
-                        val newText = text.substring(currentStart + endKeyLength - 1)
-                        dataStack.add(NgaContent.Text(newText, "text"))
-                        return dataStack.takeIf { it.isNotEmpty() }
+                        content.content
                     }
+                    if (html.isNotBlank()) result.add(NgaContent.Text(html))
+                    followsImage = false
+                }
+                else -> {
+                    result.add(content)
+                    followsImage = false
                 }
             }
         }
+        return result
     }
 }

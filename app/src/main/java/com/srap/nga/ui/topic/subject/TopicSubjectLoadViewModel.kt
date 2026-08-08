@@ -20,19 +20,29 @@ class TopicSubjectLoadViewModel @AssistedInject constructor(
     @Assisted("id") var id: Int,
     @Assisted("list") var oldList: List<TopicSubjectResponse.Result.Data>,
     @Assisted("totalPage") var oldTotalPage: Int,
+    @Assisted("attachPrefix") oldAttachPrefix: String,
     networkRepo: NetworkRepo,
 ) : BaseRefreshLoadViewModel<TopicSubjectResponse.Result.Data>(networkRepo, oldList, oldTotalPage) {
+
+    init {
+        // The first tab is seeded from TopicSubjectViewModel's response.
+        if (oldList.isNotEmpty()) {
+            isLoaded = true
+        }
+    }
 
     @AssistedFactory
     interface ViewModelFactory {
         fun create(
             @Assisted("id") id: Int,
             @Assisted("list")list: List<TopicSubjectResponse.Result.Data> = emptyList(),
-            @Assisted("totalPage") totalPage: Int = 1
+            @Assisted("totalPage") totalPage: Int = 1,
+            @Assisted("attachPrefix") attachPrefix: String = ""
         ): TopicSubjectLoadViewModel
     }
 
     var result by mutableStateOf<TopicSubjectResponse?>(null)
+    var attachPrefix by mutableStateOf(oldAttachPrefix)
 
     override fun fetchData() {
         viewModelScope.launch {
@@ -45,6 +55,9 @@ class TopicSubjectLoadViewModel @AssistedInject constructor(
                         is LoadingState.Success -> {
                             val response = state.response
                             result = response
+                            if (response.result.attachPrefix.isNotBlank()) {
+                                attachPrefix = response.result.attachPrefix
+                            }
                             page = response.currentPage
                             totalPage = response.totalPage
                             list += response.result.data

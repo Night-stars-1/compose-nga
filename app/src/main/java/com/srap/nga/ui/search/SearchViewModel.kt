@@ -9,6 +9,7 @@ import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseViewModel
 import com.srap.nga.utils.ToastUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,9 +19,16 @@ class SearchViewModel @Inject constructor(
 ) : BaseViewModel(networkRepo) {
 
     var result by mutableStateOf<List<String>>(emptyList())
+    private var searchJob: Job? = null
 
     fun fetchData(word: String) {
-        viewModelScope.launch {
+        searchJob?.cancel()
+        if (word.isBlank()) {
+            result = emptyList()
+            return
+        }
+
+        searchJob = viewModelScope.launch {
             networkRepo.getSearchPrompt(word)
                 .collect { state ->
                     when (state) {
@@ -28,8 +36,11 @@ class SearchViewModel @Inject constructor(
                             ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
-                            if (state.response.result.isNotEmpty())
+                            if (state.response.result.isNotEmpty()) {
                                 result = state.response.result[0].recomList
+                            } else {
+                                result = emptyList()
+                            }
                         }
                     }
                 }

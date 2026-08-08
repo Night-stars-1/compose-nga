@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
@@ -13,8 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,17 +22,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.ui.Alignment
 import com.srap.nga.logic.model.RecTopicResponse
 import com.srap.nga.ui.component.button.SearchButton
-import com.srap.nga.ui.component.card.LoadingCard
 import com.srap.nga.ui.component.list.RefreshLoadVerticalGrid
 
 /**
@@ -47,17 +45,21 @@ fun HomeScreen(
     openUrl: (String) -> Unit,
 ) {
     val viewModel: HomeLoadViewModel = hiltViewModel()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
                 windowInsets = WindowInsets.systemBars
                     .only(
                         WindowInsetsSides.Top + WindowInsetsSides.Start
                     ),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
                     Text("推荐")
@@ -72,7 +74,7 @@ fun HomeScreen(
     ) { innerPadding ->
         RefreshLoadVerticalGrid(
             viewModel = viewModel,
-            columns = GridCells.Fixed(2), // 每行固定 2 列
+            columns = GridCells.Adaptive(minSize = 168.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(innerPadding),
@@ -98,7 +100,12 @@ fun HomeCard(
                 onViewPost(item.tid)
             }
         },
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier.padding(8.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ),
     ) {
         Box(
             modifier = Modifier
@@ -111,11 +118,12 @@ fun HomeCard(
                     contentDescription = item.subject,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(75.dp)
+                        .height(75.dp),
+                    contentScale = ContentScale.Fit,
                 )
                 Text(
                     text = item.subject,
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(12.dp),
                     maxLines = 2,
                     minLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -129,15 +137,15 @@ fun HomeCard(
                         .align(Alignment.TopStart)
                         .padding(2.dp)
                         .background(
-                            color = Color.Black.copy(alpha = 0.6f), // 半透明背景
-                            shape = RoundedCornerShape(4.dp)
+                            color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.9f),
+                            shape = MaterialTheme.shapes.extraSmall,
                         )
                         .padding(horizontal = 8.dp)
                 ) {
                     Text(
                         text = item.topic.parent[1].toString(),
-                        color = Color.White,
-                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        style = MaterialTheme.typography.labelSmall,
                         textAlign = TextAlign.Center
                     )
                 }

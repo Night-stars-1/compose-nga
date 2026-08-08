@@ -5,6 +5,8 @@ import com.srap.nga.logic.model.base.BaseResponse
 import com.srap.nga.logic.state.Code
 
 data class TopicCateGoryResponse(
+    @SerializedName("forum_icon_pre")
+    val forumIconPre: String? = null,
     /**
      * 推荐版块
      */

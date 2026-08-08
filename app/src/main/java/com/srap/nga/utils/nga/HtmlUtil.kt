@@ -1,55 +1,68 @@
 package com.srap.nga.utils.nga
 
+import android.util.LruCache
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.srap.nga.constant.Constants.EMPTY_STRING
-import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.ImagePreviewer
 import com.srap.nga.ui.component.card.ExpandableCard
+import com.srap.nga.ui.component.webview.HtmlPoll
+import com.srap.nga.ui.component.webview.HtmlTable
 import com.srap.nga.ui.component.webview.HtmlText
+import com.srap.nga.ui.component.webview.HtmlVideo
 import com.srap.nga.utils.nga.parse.NgaContent
+import com.srap.nga.utils.nga.parse.NgaMarkupNormalizer
 import com.srap.nga.utils.nga.parse.SplitQuote
-import kotlin.collections.get
-
-private const val TAG = "HtmlUtil"
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object HtmlUtil {
 
+    private val parsedContentCache = LruCache<String, SplitQuote>(200)
+
     private fun parseNgaHtml(html: String): SplitQuote {
-        var result = html
-        result = result.replace("<div style=\"text-align:center\">", EMPTY_STRING)
-        // 去掉一个<br/>
-//        result = result.replace("""<br/><br/>""", """<br||||/>""").replace("""<br/>""", "").replace("""<br||||/>""", """<br/>""")
-        // [img]https://ngabbs.com/read.php?tid=42886511[/img]
-//        result = html.replace(Regex("""\[img](https?://.+?)\[/img]"""), """<img src="$1" onclick="openImage('$1')" />""")
-        // [url=http://ngabbs.com/read.php?tid=42886511]2024NGA年度最受欢迎手机游戏[/url]
-        result = result.replace(Regex("""\[url=(https?://.+?)](.+?)\[/url]"""), """<a href="$1">$2</a>""")
-        // [url]https://bbs.nga.cn/misc/event/20250101genshin/index.html[/url]
-        result = result.replace(Regex("""\[url](https?://.+?)\[/url]"""), """<a href="$1">$1</a>""")
-        // [tid=23643614]尼尔机械纪元：黑裙白刃的战斗悲歌与横尾作品的阅读体验[/tid]
-        result = result.replace(Regex("""\[tid=([0-9]*)](.+?)\[/tid]"""), """<a href="https://bbs.nga.cn/read.php?tid=$1">$2</a>""")
-        // [uid=60413566]MissRabbit丶[/uid]
-        result = result.replace(Regex("""\[uid=([0-9]*)](.+?)\[/uid]"""), """<a href="https://bbs.nga.cn/nuke.php?func=ucp&uid=$1">$2</a>""")
-//        // [s:ac:无语]
-//        result = result.replace(Regex("""\[s:([A-Za-z0-9]+):(.+?)]""")) { matchResult ->
-//            val key = matchResult.groups[1]?.value // ac
-//            val value = matchResult.groups[2]?.value // 无语
-//            val smilePath = smileMap[key]?.get(value)
-//            """<img src="${NetworkModule.NGA_SMILE_URL.format(smilePath)}" class="smile" />"""
-//        }
-        // [flash]https://www.bilibili.com/video/BV1q16DY1E6M/[/flash]
-        result = result.replace(Regex("""\[flash](https?://.+?)\[/flash]"""), """<a href="$1">点击查看视频</a>""")
-//        result = result.replace(Regex("""\[(\w+)](.+?)\[/\1]"""), """<$1>$2</$1>""")
+        val result = NgaMarkupNormalizer.normalizeLinks(html)
         val parseObj = SplitQuote()
         parseObj.splitQuote(result)
         return parseObj
+    }
+
+    private fun getOrParseNgaHtml(html: String): SplitQuote {
+        parsedContentCache.get(html)?.let { return it }
+        val parsed = parseNgaHtml(html)
+        prewarmTextStyles(parsed.data)
+        parsedContentCache.put(html, parsed)
+        return parsed
+    }
+
+    suspend fun preload(html: String) {
+        if (parsedContentCache.get(html) != null) return
+        withContext(Dispatchers.Default) {
+            getOrParseNgaHtml(html)
+        }
+    }
+
+    private fun prewarmTextStyles(content: List<NgaContent>) {
+        content.forEach {
+            when (it) {
+                is NgaContent.Text -> NgaMarkupNormalizer.adaptStyles(it.content)
+                is NgaContent.Quote -> prewarmTextStyles(it.content)
+                is NgaContent.Collapse -> prewarmTextStyles(it.content)
+                else -> Unit
+            }
+        }
     }
 
     @Composable
@@ -60,18 +73,16 @@ object HtmlUtil {
         modifier: Modifier = Modifier,
         onViewPost: (Int) -> Unit,
         openUrl: (String) -> Unit,
+        quoteDepth: Int = 0,
     ) {
-        Column(
-            modifier = modifier
-        ) {
+        Column(modifier = modifier) {
             ngaContent?.forEach {
                 when (it) {
                     is NgaContent.Text -> {
                         if (it.content.isNotBlank() && it.content != "<br/>") {
-                            // 排除空格和只有换行符的情况
                             HtmlText(
                                 html = it.content,
-                                modifier = modifier.fillMaxSize(),
+                                modifier = Modifier.fillMaxWidth(),
                                 onViewPost = onViewPost,
                                 openUrl = openUrl,
                             )
@@ -82,55 +93,111 @@ object HtmlUtil {
                             image = Pair(it.url, "${it.url}$uid"),
                             images = images,
                             modifier = Modifier
-                                .fillMaxSize()
+                                .fillMaxWidth()
                                 .padding(bottom = 2.dp),
                             contentScale = ContentScale.FillWidth
                         )
                     }
+                    is NgaContent.Video -> {
+                        HtmlVideo(
+                            video = it.video,
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            openUrl = openUrl,
+                        )
+                    }
                     is NgaContent.Quote -> {
-                        Card(
+                        val isNestedQuote = quoteDepth > 0
+                        val containerColor = if (isNestedQuote) {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        }
+                        val contentColor = if (isNestedQuote) {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
+                        val accentColor = if (isNestedQuote) {
+                            MaterialTheme.colorScheme.tertiary
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        }
+
+                        Surface(
                             modifier = Modifier
-                                .padding(bottom = 4.dp)
-                                .fillMaxWidth()
+                                .padding(vertical = if (isNestedQuote) 6.dp else 4.dp)
+                                .fillMaxWidth(),
+                            shape = if (isNestedQuote) {
+                                MaterialTheme.shapes.small
+                            } else {
+                                MaterialTheme.shapes.medium
+                            },
+                            color = containerColor,
+                            contentColor = contentColor,
+                            tonalElevation = if (isNestedQuote) 0.dp else 1.dp,
                         ) {
                             Column(
-                                modifier = modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                it.content.forEach { nestedContent ->
-                                    RenderNgaContent(
-                                        listOf(nestedContent),
-                                        uid,
-                                        images,
-                                        modifier,
-                                        onViewPost,
-                                        openUrl,
+                                modifier = Modifier
+                                    .drawBehind {
+                                        val barWidth = 4.dp.toPx()
+                                        drawRoundRect(
+                                            color = accentColor,
+                                            size = Size(barWidth, size.height),
+                                            cornerRadius = CornerRadius(barWidth / 2f),
+                                        )
+                                    }
+                                    .padding(
+                                        start = 16.dp,
+                                        end = 12.dp,
+                                        top = 10.dp,
+                                        bottom = 10.dp,
                                     )
-                                }
+                                    .fillMaxWidth()
+                            ) {
+                                RenderNgaContent(
+                                    ngaContent = it.content,
+                                    uid = uid,
+                                    images = images,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onViewPost = onViewPost,
+                                    openUrl = openUrl,
+                                    quoteDepth = quoteDepth + 1,
+                                )
                             }
                         }
                     }
                     is NgaContent.Collapse -> {
-                        ExpandableCard(
-                            title = it.name
-                        ) {
-                            Column(
-                                modifier = modifier
-                                    .fillMaxSize()
-                            ) {
-                                it.content.forEach { nestedContent ->
-                                    RenderNgaContent(
-                                        listOf(nestedContent),
-                                        uid,
-                                        images,
-                                        modifier,
-                                        onViewPost,
-                                        openUrl,
-                                    )
-                                }
+                        ExpandableCard(title = it.name) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                RenderNgaContent(
+                                    ngaContent = it.content,
+                                    uid = uid,
+                                    images = images,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onViewPost = onViewPost,
+                                    openUrl = openUrl,
+                                    quoteDepth = quoteDepth,
+                                )
                             }
                         }
+                    }
+                    is NgaContent.Table -> {
+                        HtmlTable(
+                            table = it.table,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            onViewPost = onViewPost,
+                            openUrl = openUrl,
+                        )
+                    }
+                    is NgaContent.Poll -> {
+                        HtmlPoll(
+                            poll = it.poll,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                        )
                     }
                 }
             }
@@ -145,8 +212,17 @@ object HtmlUtil {
         onViewPost: (Int) -> Unit,
         openUrl: (String) -> Unit,
     ) {
-        val data = parseNgaHtml(html)
-        val newImages = data.imageList.map { Pair(it, "$it$uid") }
-        RenderNgaContent(data.data, uid, newImages, modifier, onViewPost, openUrl)
+        val cachedData = remember(html) { parsedContentCache.get(html) }
+        val data by produceState(initialValue = cachedData, key1 = html) {
+            if (value == null) {
+                value = withContext(Dispatchers.Default) {
+                    getOrParseNgaHtml(html)
+                }
+            }
+        }
+        val newImages = remember(data, uid) {
+            data?.imageList?.map { Pair(it, "$it$uid") }.orEmpty()
+        }
+        RenderNgaContent(data?.data, uid, newImages, modifier, onViewPost, openUrl)
     }
 }

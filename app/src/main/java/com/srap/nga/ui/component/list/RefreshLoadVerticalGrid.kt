@@ -22,7 +22,6 @@ fun <T> RefreshLoadVerticalGrid(
         viewModel = viewModel,
         modifier = modifier,
         state = state,
-        columns = columns,
     ) {
         LazyVerticalGrid(
             state = state,

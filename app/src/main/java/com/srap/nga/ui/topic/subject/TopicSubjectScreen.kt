@@ -38,9 +38,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.button.BackButton
@@ -67,16 +68,20 @@ fun TopicSubjectScreen(
     val result = viewModel.result
 
     val scope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
                 windowInsets = WindowInsets.systemBars
                     .only(
                         WindowInsetsSides.Top + WindowInsetsSides.Start
                     ),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 navigationIcon = {
                     BackButton { onBackClick() }
@@ -123,14 +128,19 @@ fun TopicSubjectScreen(
                 SearchResultTag(
                     title = "全部",
                     viewModel = hiltViewModel<TopicSubjectLoadViewModel, TopicSubjectLoadViewModel.ViewModelFactory>(key = "${id}load") { factory ->
-                        factory.create(id, data.data, result.totalPage)
+                        factory.create(
+                            id = id,
+                            list = data.data,
+                            totalPage = result.totalPage,
+                            attachPrefix = data.attachPrefix,
+                        )
                     }
                 )
             ) + data.subForum.mapIndexed { index, item ->
                 SearchResultTag(
                     title = item.name,
                     viewModel = hiltViewModel<TopicSubjectLoadViewModel, TopicSubjectLoadViewModel.ViewModelFactory>(key = "${id}load${index}") { factory ->
-                        factory.create(item.id)
+                        factory.create(id = item.id)
                     }
                 )
             }
@@ -168,6 +178,7 @@ fun TopicSubjectScreen(
                     modifier = Modifier.fillMaxHeight()
                 ) { index ->
                     val viewModel = loadViewModelList[index].viewModel
+                    val prefix = viewModel.attachPrefix.ifBlank { data.attachPrefix }
                     RefreshLoadList(
                         viewModel = viewModel,
                         modifier = Modifier.fillMaxHeight()
@@ -184,9 +195,11 @@ fun TopicSubjectScreen(
                                 title = item.subject,
                                 images = item.attachs?.map {
                                     Pair(
-                                        NetworkModule.NGA_ATTACHMENTS_URL.format(
-                                            it.attachUrl
-                                        ), "${item.authorId}${it.attachUrl}"
+                                        attachmentUrl(
+                                            prefix = prefix,
+                                            path = it.attachUrl,
+                                        ),
+                                        "${item.authorId}${it.attachUrl}",
                                     )
                                 },
                                 name = item.author,
@@ -211,6 +224,20 @@ fun TopicSubjectScreen(
 //            }
         }
     }
+}
+
+private fun attachmentUrl(prefix: String, path: String): String {
+    val normalizedPath = path.trimStart('/')
+    val normalizedPrefix = prefix.trim().trimEnd('/')
+    val absolutePrefix = when {
+        normalizedPrefix.startsWith("//") -> "https:" + normalizedPrefix
+        normalizedPrefix.startsWith("http://", ignoreCase = true) ->
+            "https://" + normalizedPrefix.substringAfter("://")
+        normalizedPrefix.startsWith("https://", ignoreCase = true) -> normalizedPrefix
+        else -> NetworkModule.NGA_ATTACHMENTS_URL.substringBeforeLast('/')
+    }.trimEnd('/')
+
+    return absolutePrefix + "/" + normalizedPath
 }
 
 @Composable

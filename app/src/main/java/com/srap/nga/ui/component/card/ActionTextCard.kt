@@ -1,6 +1,5 @@
 package com.srap.nga.ui.component.card
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 /**
  * 文本描述及操作栏卡片
@@ -37,7 +34,7 @@ fun ActionTextCard(
             .padding(bottom = 2.dp)
             .background(
                 MaterialTheme.colorScheme.surfaceContainerHighest,
-                shape = RoundedCornerShape(8.dp)
+                shape = MaterialTheme.shapes.medium,
             )
             .fillMaxWidth()
             .clickable(enabled = isFillClick) {
@@ -54,12 +51,12 @@ fun ActionTextCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(title)
+                    Text(title, style = MaterialTheme.typography.titleSmall)
                     if (description != null)
                         Text(
                             description,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.outline
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                 }
 

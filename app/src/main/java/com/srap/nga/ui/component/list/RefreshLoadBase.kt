@@ -1,64 +1,48 @@
 package com.srap.nga.ui.component.list
 
-import android.util.Log
-import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.srap.nga.ui.base.BaseRefreshLoadViewModel
-import com.srap.nga.ui.component.state.rememberSwipeableState
-import com.srap.nga.utils.swipeable
-import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun <T> RefreshLoadContent(
     viewModel: BaseRefreshLoadViewModel<T>,
     modifier: Modifier = Modifier,
+    showRefreshIndicator: Boolean = true,
+    initialLoadAsRefresh: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    // 刷新功能
     val state = rememberPullToRefreshState()
-    val coroutineScope = rememberCoroutineScope()
-    val loadDistance = with(LocalDensity.current) { 70.dp.toPx() }
-    val swipeableState = rememberSwipeableState(
-        anchors = Triple(-loadDistance, -30f, loadDistance),
-        heightRange = Pair(-300f, 300f)
-    )
 
-    // 进入该界面后加载数据
     LaunchedEffect(Unit) {
-        // 如果位加载并且默认数据为空则加载数据
         if (!viewModel.isLoaded && viewModel.list.isEmpty()) {
-            viewModel.refresh()
-        }
-    }
-    viewModel.loadedCallback = {
-        coroutineScope.launch {
-            swipeableState.close()
+            if (initialLoadAsRefresh) {
+                viewModel.refresh()
+            } else {
+                viewModel.fetchData()
+            }
         }
     }
 
@@ -67,38 +51,35 @@ fun <T> RefreshLoadContent(
         isRefreshing = viewModel.isRefreshing,
         state = state,
         onRefresh = viewModel::refresh,
+        indicator = {
+            if (showRefreshIndicator) {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = state,
+                    isRefreshing = viewModel.isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+            }
+        },
     ) {
         Box(
-            modifier = Modifier
-                .swipeable(
-                    state = swipeableState,
-                    orientation = Orientation.Vertical,
-                )
-                .fillMaxSize()
-                .wrapContentWidth(Alignment.CenterHorizontally)
+            modifier = Modifier.fillMaxSize()
         ) {
             content()
 
-            Box(modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) },
+            AnimatedVisibility(
+                visible = viewModel.isLoadMore,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter),
             ) {
-                ElevatedCard(
-                    modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally)
-                ) {
-                    if (viewModel.isEmpty) {
-                        Text(
-                            "已经到底了...",
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                    } else {
-                        CircularProgressIndicator(modifier = Modifier.padding(6.dp))
-                    }
-                }
+                LoadingIndicator(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .size(32.dp),
+                )
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,11 +88,15 @@ fun <T> RefreshLoadBase(
     viewModel: BaseRefreshLoadViewModel<T>,
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
+    showRefreshIndicator: Boolean = true,
+    initialLoadAsRefresh: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     RefreshLoadContent(
         viewModel = viewModel,
         modifier = modifier,
+        showRefreshIndicator = showRefreshIndicator,
+        initialLoadAsRefresh = initialLoadAsRefresh,
         content = content,
     )
 
@@ -138,14 +123,17 @@ fun <T> RefreshLoadBase(
 @Composable
 fun <T> RefreshLoadBase(
     viewModel: BaseRefreshLoadViewModel<T>,
-    columns: GridCells,
     modifier: Modifier = Modifier,
     state: LazyGridState = rememberLazyGridState(),
+    showRefreshIndicator: Boolean = true,
+    initialLoadAsRefresh: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     RefreshLoadContent(
         viewModel = viewModel,
         modifier = modifier,
+        showRefreshIndicator = showRefreshIndicator,
+        initialLoadAsRefresh = initialLoadAsRefresh,
         content = content,
     )
 
@@ -157,7 +145,7 @@ fun <T> RefreshLoadBase(
                 val totalItemsCount = layoutInfo.totalItemsCount
                 // 判断是否滚动到底部并触发加载更多
                 if (
-                    lastVisibleItemIndex >= totalItemsCount + columns.hashCode()
+                    lastVisibleItemIndex >= totalItemsCount - 4
                     && !viewModel.isLoadMore
                     && !viewModel.isRefreshing
                     && !viewModel.isEmpty

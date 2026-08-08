@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,13 +10,13 @@ plugins {
 
 android {
     namespace = "com.srap.nga"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.srap.nga"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 8
+        targetSdk = 37
+        versionCode = 9
         versionName = "测试版"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -51,11 +53,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     tasks.withType<JavaCompile>().configureEach {
         options.compilerArgs.add("-Xlint:deprecation")
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
@@ -101,6 +106,7 @@ dependencies {
 
     // 网络图像加载
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
     implementation(libs.coil.network.okhttp)
     // 网络请求库
     implementation(libs.okhttp)

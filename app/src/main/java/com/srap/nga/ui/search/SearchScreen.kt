@@ -1,6 +1,5 @@
 package com.srap.nga.ui.search
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,22 +12,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,15 +39,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.card.SearchItemCard
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,85 +63,80 @@ fun SearchScreen(
         }
     }
 
-    // 保存状态，屏幕旋转后搜索框文本不丢失
-    var textInput by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue())
+    var textInput by rememberSaveable { mutableStateOf("") }
+    LaunchedEffect(textInput) {
+        delay(300)
+        viewModel.fetchData(textInput.trim())
     }
-
-    val textStyle = LocalTextStyle.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets.systemBars
-                    .only(WindowInsetsSides.Start + WindowInsetsSides.Top),
-                navigationIcon = {
-                    BackButton { onBackClick() }
-                },
-                title = {
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequest),
-                        singleLine = true,
-                        value = textInput,
-                        onValueChange = {
-                            textInput = it
-                            viewModel.fetchData(textInput.text)
-                        },
-                        textStyle = textStyle.copy(fontSize = 18.sp),
-                        trailingIcon = {
-                            AnimatedVisibility(
-                                visible = textInput.text.isNotEmpty(),
-                                enter = fadeIn(),
-                                exit = fadeOut()
-                            ) {
-                                IconButton(onClick = {
-                                    textInput = TextFieldValue()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Clear,
-                                        contentDescription = "清空文本"
-                                    )
+            Column {
+                TopAppBar(
+                    windowInsets = WindowInsets.systemBars
+                        .only(WindowInsetsSides.Start + WindowInsetsSides.Top),
+                    navigationIcon = {
+                        BackButton { onBackClick() }
+                    },
+                    title = {
+                        Text("搜索")
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
+                )
+                DockedSearchBar(
+                    inputField = {
+                        SearchBarDefaults.InputField(
+                            query = textInput,
+                            onQueryChange = { textInput = it },
+                            onSearch = onViewSearchResult,
+                            expanded = false,
+                            onExpandedChange = {},
+                            placeholder = { Text("搜索社区或帖子") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "搜索",
+                                )
+                            },
+                            trailingIcon = {
+                                AnimatedVisibility(
+                                    visible = textInput.isNotEmpty(),
+                                    enter = fadeIn(),
+                                    exit = fadeOut(),
+                                ) {
+                                    IconButton(onClick = { textInput = "" }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "清空搜索内容",
+                                        )
+                                    }
                                 }
-                            }
-                        },
-                        // 清理输入框颜色，使其融入周边按钮
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Search // 搜索按钮
-                        ),
-                        keyboardActions = KeyboardActions(
-                            // 注册键盘搜索按钮点击事件
-                            onSearch = {
-                                onViewSearchResult(textInput.text)
-                            }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequest),
                         )
-                    )
-                },
-                actions = {
-                    IconButton(onClick = {
-                        onViewSearchResult(textInput.text)
-                    }) {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                    }
-                }
-            )
+                    },
+                    expanded = false,
+                    onExpandedChange = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                ) {}
+            }
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier.padding(innerPadding)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            HorizontalDivider()
-
-            viewModel.result.forEach {
+            items(viewModel.result) {
                 SearchItemCard(
                     title = it,
                     startIcon = Icons.Default.Search,
@@ -156,8 +147,6 @@ fun SearchScreen(
                         }
                 )
             }
-
-            // TODO 搜索记录
         }
     }
 }

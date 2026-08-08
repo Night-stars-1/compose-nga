@@ -62,6 +62,7 @@ data class PostResponse(
     val vrows: Int
 ) : BaseResponse<PostResponse>() {
     data class Result(
+        val pid: Int,
         val author: Author,
         val content: String,
         val attches: List<Attche>?,

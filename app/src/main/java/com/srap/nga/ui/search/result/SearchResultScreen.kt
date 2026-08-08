@@ -28,8 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.base.BaseRefreshLoadViewModel
 import com.srap.nga.ui.component.button.BackButton
@@ -51,6 +52,7 @@ fun SearchResultScreen(
     onBackClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val searchResultTags = listOf(
         SearchResultTag(
             title = "帖子",
@@ -66,15 +68,18 @@ fun SearchResultScreen(
         ),
     )
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
+                scrollBehavior = scrollBehavior,
                 windowInsets = WindowInsets.systemBars
                     .only(
                         WindowInsetsSides.Top + WindowInsetsSides.Start
                     ),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 navigationIcon = {
                     BackButton { onBackClick() }

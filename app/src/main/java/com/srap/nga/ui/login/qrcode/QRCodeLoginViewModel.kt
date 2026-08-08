@@ -1,16 +1,13 @@
 package com.srap.nga.ui.login.qrcode
 
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.srap.nga.logic.repository.NetworkRepo
+import com.srap.nga.logic.session.SessionManager
 import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseViewModel
-import com.srap.nga.ui.navigateToHome
-import com.srap.nga.utils.GlobalObject
 import com.srap.nga.utils.StorageUtils
 import com.srap.nga.utils.ToastUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +25,7 @@ data class Key(
 @HiltViewModel
 class QRCodeLoginViewModel @Inject constructor(
     networkRepo: NetworkRepo,
+    private val sessionManager: SessionManager,
 ) : BaseViewModel(networkRepo) {
     private val TAG = javaClass.simpleName
 
@@ -98,10 +96,7 @@ class QRCodeLoginViewModel @Inject constructor(
                                     StorageUtils.Token = result.token
                                     StorageUtils.Uid = result.uid
                                     // 更改登录状态为登录
-                                    GlobalObject.isLogin = true
-                                    Handler(Looper.getMainLooper()).post {
-                                        GlobalObject.navController?.navigateToHome()
-                                    }
+                                    sessionManager.markLoggedIn(result.uid)
                                 }
                             }
                         }
@@ -111,7 +106,6 @@ class QRCodeLoginViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        super.onCleared()
         stopQRCodeCheckLoop()
     }
 }
