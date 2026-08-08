@@ -21,10 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -35,11 +31,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.ui.Alignment
 import com.srap.nga.logic.model.RecTopicResponse
-import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.button.SearchButton
 import com.srap.nga.ui.component.list.RefreshLoadVerticalGrid
-import com.srap.nga.utils.toHttps
-import com.srap.nga.utils.toHttpsOrNull
 
 /**
  * 首页
@@ -99,16 +92,6 @@ fun HomeCard(
     onViewPost: (Int) -> Unit,
     openUrl: (String) -> Unit,
 ) {
-    val primaryImage = item.threadIcon.toHttpsOrNull()
-    val attachmentImage = item.topic?.attachs
-        ?.firstOrNull()
-        ?.attachUrl
-        ?.let(::homeAttachmentUrl)
-    var useAttachmentFallback by remember(item.tid, primaryImage, attachmentImage) {
-        mutableStateOf(primaryImage == null)
-    }
-    val imageUrl = if (useAttachmentFallback) attachmentImage else primaryImage
-
     Card(
         onClick = {
             if (item.url != null) {
@@ -131,17 +114,12 @@ fun HomeCard(
             // 主内容
             Column {
                 AsyncImage(
-                    model = imageUrl,
+                    model = item.threadIcon,
                     contentDescription = item.subject,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(75.dp),
                     contentScale = ContentScale.Fit,
-                    onError = {
-                        if (attachmentImage != null && imageUrl != attachmentImage) {
-                            useAttachmentFallback = true
-                        }
-                    },
                 )
                 Text(
                     text = item.subject,
@@ -173,17 +151,5 @@ fun HomeCard(
                 }
             }
         }
-    }
-}
-
-private fun homeAttachmentUrl(rawPath: String): String? {
-    val normalized = rawPath.toHttpsOrNull() ?: return null
-    return if (
-        normalized.startsWith("http://", ignoreCase = true) ||
-        normalized.startsWith("https://", ignoreCase = true)
-    ) {
-        normalized
-    } else {
-        NetworkModule.NGA_ATTACHMENTS_URL.format(rawPath.trim()).toHttps()
     }
 }

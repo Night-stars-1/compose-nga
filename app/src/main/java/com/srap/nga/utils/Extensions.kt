@@ -98,20 +98,7 @@ inline fun Modifier.noRippleClickable(
  * 将HTTP转为HTTPS
  */
 fun String.toHttps(): String {
-    return toHttpsOrNull().orEmpty()
-}
-
-fun String?.toHttpsOrNull(): String? {
-    val value = this?.trim().orEmpty()
-    if (value.isEmpty()) return null
-
-    return when {
-        value.startsWith("//") -> "https:" + value
-        value.startsWith("http://", ignoreCase = true) ->
-            "https://" + value.substringAfter("://")
-        value.startsWith("https://", ignoreCase = true) -> value
-        else -> value
-    }
+    return this.replace("http://", "https://")
 }
 
 @Composable
