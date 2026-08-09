@@ -101,6 +101,14 @@ fun String.toHttps(): String {
     return this.replace("http://", "https://")
 }
 
+/**
+ * 将 NGA 已停用的图片域名切换到当前可用域名。
+ */
+fun String.toNgaImageUrl(): String {
+    return toHttps()
+        .replace("https://img.nga.178.com/", "https://img.nga.cn/")
+}
+
 @Composable
 fun Modifier.swipeable(
     state: SwipeableState,

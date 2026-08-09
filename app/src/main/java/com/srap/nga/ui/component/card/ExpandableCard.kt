@@ -1,6 +1,11 @@
 package com.srap.nga.ui.component.card
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -24,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.srap.nga.ui.theme.AppMotion
 
 /**
  * 折叠卡片
@@ -45,7 +50,6 @@ fun ExpandableCard(
                 MaterialTheme.colorScheme.surfaceContainerHighest,
                 shape = MaterialTheme.shapes.medium,
             )
-            .animateContentSize(animationSpec = AppMotion.defaultSpatial())
             .fillMaxWidth()
             .clickable(enabled = isFillClick) {
                 expanded = !expanded
@@ -56,7 +60,9 @@ fun ExpandableCard(
                 .padding(8.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -78,8 +84,20 @@ fun ExpandableCard(
                     }
                 }
             }
-            if (expanded) {
-                content()
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically(
+                    animationSpec = tween(durationMillis = 240),
+                    expandFrom = Alignment.Top,
+                ) + fadeIn(animationSpec = tween(durationMillis = 160)),
+                exit = shrinkVertically(
+                    animationSpec = tween(durationMillis = 200),
+                    shrinkTowards = Alignment.Top,
+                ) + fadeOut(animationSpec = tween(durationMillis = 120)),
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    content()
+                }
             }
         }
     }

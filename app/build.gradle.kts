@@ -16,7 +16,7 @@ android {
         applicationId = "com.srap.nga"
         minSdk = 26
         targetSdk = 37
-        versionCode = 9
+        versionCode = 10
         versionName = "测试版"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -31,6 +31,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.srap.nga.logic.preferences.AppPreferences
 import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.card.LoadingCard
@@ -62,6 +64,7 @@ fun TopicSubjectScreen(
     isFavor: Boolean?,
 ) {
     var isFavorState by remember { mutableStateOf(isFavor) }
+    val forumPostImageCount by AppPreferences.forumPostImageCount.collectAsState()
     val viewModel = hiltViewModel<TopicSubjectViewModel, TopicSubjectViewModel.ViewModelFactory>(key = id.toString()) { factory ->
         factory.create(id)
     }
@@ -204,6 +207,7 @@ fun TopicSubjectScreen(
                                 },
                                 name = item.author,
                                 count = item.replies,
+                                maxImageCount = forumPostImageCount,
                             )
                         }
                     }

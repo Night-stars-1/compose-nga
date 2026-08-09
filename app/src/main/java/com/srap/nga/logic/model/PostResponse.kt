@@ -65,7 +65,11 @@ data class PostResponse(
         val pid: Int,
         val author: Author,
         val content: String,
+        @SerializedName("postdate")
+        val postDate: String = "",
         val attches: List<Attche>?,
+        /** 当前账号是否关注该帖子作者，0 为未关注。 */
+        val follow: Int = 0,
     ) {
         data class Author(
             val uid: Int,
@@ -74,6 +78,18 @@ data class PostResponse(
              * 头像链接
              */
             val avatar: String,
+            @SerializedName("member")
+            val group: String? = null,
+            val rvrc: String? = null,
+            @SerializedName("postnum")
+            val posts: Int? = null,
+            val medal: List<Medal>? = null,
+        )
+
+        data class Medal(
+            val id: Int = 0,
+            val name: String? = null,
+            val icon: String? = null,
         )
 
         data class Attche(

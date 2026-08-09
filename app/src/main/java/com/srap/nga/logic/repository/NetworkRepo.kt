@@ -70,6 +70,20 @@ class NetworkRepo @Inject constructor(
     }
 
     /**
+     * 关注用户
+     */
+    fun followUser(userId: Int) = fire {
+        apiService.followUser(userId).await()
+    }
+
+    /**
+     * 取消关注用户
+     */
+    fun unfollowUser(userId: Int) = fire {
+        apiService.unfollowUser(userId).await()
+    }
+
+    /**
      * 获取社区内容
      */
     fun getTopicSubject(id: Int, page: Int = 1) = fire {

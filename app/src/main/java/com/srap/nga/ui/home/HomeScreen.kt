@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import com.srap.nga.logic.model.RecTopicResponse
 import com.srap.nga.ui.component.button.SearchButton
 import com.srap.nga.ui.component.list.RefreshLoadVerticalGrid
+import com.srap.nga.utils.toNgaImageUrl
 
 /**
  * 首页
@@ -114,7 +115,7 @@ fun HomeCard(
             // 主内容
             Column {
                 AsyncImage(
-                    model = item.threadIcon,
+                    model = item.threadIcon.toNgaImageUrl(),
                     contentDescription = item.subject,
                     modifier = Modifier
                         .fillMaxWidth()

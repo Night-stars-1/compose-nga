@@ -5,6 +5,7 @@ import com.srap.nga.logic.model.CommonResponse
 import com.srap.nga.logic.model.CreateQRCodeResponse
 import com.srap.nga.logic.model.FavoriteContentResponse
 import com.srap.nga.logic.model.FavoriteResponse
+import com.srap.nga.logic.model.FollowResponse
 import com.srap.nga.logic.model.ForumBySearchResponse
 import com.srap.nga.logic.model.SearchPromptResponse
 import com.srap.nga.logic.model.PostResponse
@@ -69,6 +70,26 @@ interface ApiService {
     fun delCateGoryFavor(
         @Field("fid") fid: Int,
     ): Call<CommonResponse>
+
+    /**
+     * 关注用户
+     */
+    @FormUrlEncoded
+    @POST("nuke.php?__lib=follow_v2&__act=follow")
+    fun followUser(
+        @Field("id") userId: Int,
+        @Field("type") type: Int = 1,
+    ): Call<FollowResponse>
+
+    /**
+     * 取消关注用户
+     */
+    @FormUrlEncoded
+    @POST("nuke.php?__lib=follow_v2&__act=follow")
+    fun unfollowUser(
+        @Field("id") userId: Int,
+        @Field("type") type: Int = 8,
+    ): Call<FollowResponse>
 
     /**
      * 获取社区内容

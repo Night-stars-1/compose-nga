@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Grade
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.topic.TopicSubjectCard
 import com.srap.nga.ui.component.userinfo.UserInfoCard
+import com.srap.nga.utils.StorageUtils
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +52,7 @@ fun UserInfoScreen(
     onViewLogin: () -> Unit,
     onBackClick: (() -> Unit)?,
     onViewFavorite: () -> Unit = {},
+    onViewSettings: () -> Unit = {},
 ) {
     val viewModel =
         hiltViewModel<UserInfoLoadViewModel, UserInfoLoadViewModel.ViewModelFactory>(key = id.toString()) { factory ->
@@ -106,6 +109,11 @@ fun UserInfoScreen(
                         ) {
                             Icon(Icons.Outlined.Grade, contentDescription = "收藏")
                         }
+                        IconButton(
+                            onClick = onViewSettings,
+                        ) {
+                            Icon(Icons.Outlined.Settings, contentDescription = "设置")
+                        }
                     }
                 }
             )
@@ -141,6 +149,15 @@ fun UserInfoScreen(
                             name = result.username,
                             description = "级别: ${result.group} | IP属地: ${result.ipLoc}\n" +
                                     "UID: ${result.uid} | 威望: ${result.rvrc}",
+                            isFollowing = result.follow != 0,
+                            followLoading = viewModel.isFollowLoading,
+                            onFollowClick = if (
+                                onBackClick != null && result.uid != StorageUtils.Uid
+                            ) {
+                                viewModel::toggleFollow
+                            } else {
+                                null
+                            },
                             modifier = Modifier
                                 .padding(horizontal = 8.dp)
                         )

@@ -3,15 +3,18 @@ package com.srap.nga.ui.search
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -27,8 +30,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.TextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -72,22 +74,19 @@ fun SearchScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Column {
-                TopAppBar(
-                    windowInsets = WindowInsets.systemBars
-                        .only(WindowInsetsSides.Start + WindowInsetsSides.Top),
-                    navigationIcon = {
-                        BackButton { onBackClick() }
-                    },
-                    title = {
-                        Text("搜索")
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .windowInsetsPadding(
+                        WindowInsets.systemBars.only(
+                            WindowInsetsSides.Start +
+                                WindowInsetsSides.Top +
+                                WindowInsetsSides.End
+                        )
+                    )
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            ) {
                 DockedSearchBar(
                     inputField = {
                         SearchBarDefaults.InputField(
@@ -98,21 +97,31 @@ fun SearchScreen(
                             onExpandedChange = {},
                             placeholder = { Text("搜索社区或帖子") },
                             leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "搜索",
-                                )
+                                BackButton { onBackClick() }
                             },
                             trailingIcon = {
-                                AnimatedVisibility(
-                                    visible = textInput.isNotEmpty(),
-                                    enter = fadeIn(),
-                                    exit = fadeOut(),
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    IconButton(onClick = { textInput = "" }) {
+                                    AnimatedVisibility(
+                                        visible = textInput.isNotEmpty(),
+                                        enter = fadeIn(),
+                                        exit = fadeOut(),
+                                    ) {
+                                        IconButton(onClick = { textInput = "" }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Clear,
+                                                contentDescription = "清空搜索内容",
+                                            )
+                                        }
+                                    }
+                                    IconButton(
+                                        onClick = { onViewSearchResult(textInput) },
+                                        enabled = textInput.isNotBlank(),
+                                    ) {
                                         Icon(
-                                            imageVector = Icons.Default.Clear,
-                                            contentDescription = "清空搜索内容",
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = "搜索",
                                         )
                                     }
                                 }
@@ -124,9 +133,7 @@ fun SearchScreen(
                     },
                     expanded = false,
                     onExpandedChange = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {}
             }
         }

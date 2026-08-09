@@ -45,4 +45,21 @@ class NgaMarkupNormalizerTest {
         assertFalse(adapted.contains("class=\"red\""))
         assertFalse(adapted.contains("[size="))
     }
+    @Test
+    fun `normalizes size before structural line break splitting`() {
+        val normalized = NgaMarkupNormalizer.normalizeSizes(
+            """
+                [size=180%]问卷链接</span><br/><br/>
+                <b>注意事项：</b><br/>
+                1.第一项<br/>
+                2.第二项[/size]
+            """.trimIndent()
+        )
+        val parser = SplitQuote()
+        parser.splitQuote(normalized)
+        val textChunks = parser.data.filterIsInstance<NgaContent.Text>()
+        assertFalse(textChunks.any { it.content.contains("[size=") })
+        assertFalse(textChunks.any { it.content.contains("[/size]") })
+        assertTrue(textChunks.any { it.content.contains("<big><big>") })
+    }
 }

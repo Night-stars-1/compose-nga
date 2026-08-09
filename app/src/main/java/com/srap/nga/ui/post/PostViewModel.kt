@@ -42,6 +42,14 @@ class PostViewModel @AssistedInject constructor(
     var replyQuantity by mutableIntStateOf(0)
         private set
 
+    var isFollowLoading by mutableStateOf(false)
+        private set
+
+    var authorFollow by mutableIntStateOf(0)
+        private set
+
+
+
     override fun fetchData() {
         val requestedPage = page
         viewModelScope.launch {
@@ -73,6 +81,7 @@ class PostViewModel @AssistedInject constructor(
                             response = loadedResponse
                             response?.let {
                                 list = if (requestedPage == 1) {
+                                    authorFollow = it.result.firstOrNull()?.follow ?: 0
                                     it.result
                                 } else {
                                     list + it.result
@@ -109,6 +118,60 @@ class PostViewModel @AssistedInject constructor(
             contentState = PostContentState.Loading
             isLoaded = false
             refresh()
+        }
+    }
+
+    fun toggleAuthorFollow() {
+        val post = list.firstOrNull() ?: return
+        val author = post.author
+        if (isFollowLoading) return
+
+        val previousFollow = authorFollow
+        val shouldFollow = previousFollow == 0
+        val targetFollow = if (shouldFollow) 1 else 0
+        isFollowLoading = true
+        authorFollow = targetFollow
+        updateAuthorFollow(targetFollow)
+
+        viewModelScope.launch {
+            val request = if (shouldFollow) {
+                networkRepo.followUser(author.uid)
+            } else {
+                networkRepo.unfollowUser(author.uid)
+            }
+            request.collect { state ->
+                when (state) {
+                    is LoadingState.Error -> {
+                        val alreadyInTargetState = if (shouldFollow) {
+                            state.errMsg.contains("已经关注") || state.errMsg.contains("已关注")
+                        } else {
+                            state.errMsg.contains("未关注") || state.errMsg.contains("尚未关注")
+                        }
+                        if (alreadyInTargetState) {
+                            authorFollow = targetFollow
+                            updateAuthorFollow(targetFollow)
+                        } else {
+                            authorFollow = previousFollow
+                            updateAuthorFollow(previousFollow)
+                        }
+                        ToastUtils.show(state.errMsg)
+                    }
+                    is LoadingState.Success -> {
+                        ToastUtils.show(if (shouldFollow) "关注成功" else "已取消关注")
+                    }
+                }
+                isFollowLoading = false
+            }
+        }
+    }
+
+    private fun updateAuthorFollow(follow: Int) {
+        list = list.mapIndexed { index, post ->
+            if (index == 0) {
+                post.copy(follow = follow)
+            } else {
+                post
+            }
         }
     }
 }

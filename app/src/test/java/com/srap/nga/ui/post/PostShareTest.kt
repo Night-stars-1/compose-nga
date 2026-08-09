@@ -5,18 +5,10 @@ import org.junit.Test
 
 class PostShareTest {
     @Test
-    fun `share text contains title and canonical post url`() {
-        assertEquals(
-            "帖子标题\nhttps://bbs.nga.cn/read.php?tid=123",
-            buildPostShareText(id = 123, title = " 帖子标题 "),
-        )
-    }
-
-    @Test
-    fun `share text omits blank title`() {
+    fun `share text only contains canonical post url`() {
         assertEquals(
             "https://bbs.nga.cn/read.php?tid=123",
-            buildPostShareText(id = 123, title = "  "),
+            buildPostShareText(id = 123),
         )
     }
 }

@@ -24,6 +24,7 @@ import com.srap.nga.ui.main.MainScreen
 import com.srap.nga.ui.post.PostScreen
 import com.srap.nga.ui.search.SearchScreen
 import com.srap.nga.ui.search.result.SearchResultScreen
+import com.srap.nga.ui.settings.SettingsScreen
 import com.srap.nga.ui.topic.subject.TopicSubjectScreen
 import com.srap.nga.ui.userinfo.UserInfoScreen
 import com.srap.nga.ui.webview.WebViewScreen
@@ -77,6 +78,7 @@ fun AppNavigation(
                 onSearch = navController::navigateToSearch,
                 onViewLogin = navController::navigateToLogin,
                 onViewFavorite = navController::navigateToFavorite,
+                onViewSettings = navController::navigateToSettings,
                 openUrl = navController::openUrl,
             )
         }
@@ -96,6 +98,7 @@ fun AppNavigation(
                     id = id,
                     onBackClick = navController::popBackStack,
                     onViewPost = navController::navigateToPost,
+                    onViewTopicSubject = navController::navigateToTopicSubject,
                     onUserInfo = navController::navigateToUserInfo,
                     openUrl = navController::openUrl,
                 )
@@ -266,6 +269,13 @@ fun AppNavigation(
             }
         }
 
+        // 设置
+        composable("settings") {
+            SettingsScreen(
+                onBackClick = navController::popBackStack,
+            )
+        }
+
         // 打开URL
         composable(
             "webview/{url}",
@@ -335,6 +345,11 @@ fun NavHostController.navigateToImagePreView(image: String, images: List<String>
 fun NavHostController.navigateToFavorite() {
     navigate("favorite")
 }
+
+fun NavHostController.navigateToSettings() {
+    navigate("settings")
+}
+
 fun NavHostController.navigateToFavoriteContent(id: Int, title: String) {
     navigate("favorite/content/$id/${Uri.encode(title)}")
 }

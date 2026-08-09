@@ -2,9 +2,15 @@ package com.srap.nga.ui.component.userinfo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.PersonRemove
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import coil3.compose.AsyncImage
-import com.srap.nga.utils.toHttps
+import androidx.constraintlayout.compose.Dimension
+import com.srap.nga.ui.component.UserAvatar
 
 /**
  * 用户信息卡片
@@ -23,6 +29,9 @@ fun UserInfoCard(
     avatar: String,
     name: String,
     description: String,
+    isFollowing: Boolean = false,
+    followLoading: Boolean = false,
+    onFollowClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(
@@ -33,15 +42,13 @@ fun UserInfoCard(
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(8.dp)
     ) {
-        val (avatarRef, nameRef, descriptionRef) = createRefs()
+        val (avatarRef, nameRef, descriptionRef, followRef) = createRefs()
         // 头像
-        AsyncImage(
-            model = avatar.toHttps(),
-            contentDescription = "头像",
+        UserAvatar(
+            avatar = avatar,
+            name = name,
             modifier = Modifier
                 .size(48.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
                 .constrainAs(avatarRef) {
                     top.linkTo(parent.top, margin = 4.dp)
                     start.linkTo(parent.start)
@@ -55,6 +62,10 @@ fun UserInfoCard(
             modifier = Modifier.constrainAs(nameRef) {
                 top.linkTo(avatarRef.top)
                 start.linkTo(avatarRef.end, margin = 8.dp)
+                if (onFollowClick != null) {
+                    end.linkTo(followRef.start, margin = 8.dp)
+                    width = Dimension.fillToConstraints
+                }
             }
         )
 
@@ -66,7 +77,36 @@ fun UserInfoCard(
             modifier = Modifier.constrainAs(descriptionRef) {
                 top.linkTo(nameRef.bottom, margin = 4.dp)
                 start.linkTo(avatarRef.end, margin = 8.dp)
+                if (onFollowClick != null) {
+                    end.linkTo(followRef.start, margin = 8.dp)
+                } else {
+                    end.linkTo(parent.end)
+                }
+                width = Dimension.fillToConstraints
             }
         )
+
+        if (onFollowClick != null) {
+            FilledTonalButton(
+                onClick = onFollowClick,
+                enabled = !followLoading,
+                contentPadding = PaddingValues(horizontal = 10.dp),
+                modifier = Modifier.constrainAs(followRef) {
+                    top.linkTo(parent.top)
+                    end.linkTo(parent.end)
+                },
+            ) {
+                Icon(
+                    imageVector = if (isFollowing) {
+                        Icons.Outlined.PersonRemove
+                    } else {
+                        Icons.Outlined.PersonAdd
+                    },
+                    contentDescription = if (isFollowing) "取消关注" else "关注",
+                )
+                Spacer(modifier = Modifier.size(6.dp))
+                Text(if (isFollowing) "已关注" else "关注")
+            }
+        }
     }
 }

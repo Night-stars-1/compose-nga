@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -225,16 +226,16 @@ fun ContentCard(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 4.dp),
-        horizontalAlignment = Alignment.Start
+            .fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalAlignment = Alignment.Start,
     ) {
         result.forEach { group ->
             item {
                 Text(
                     text = group.name,
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
 
@@ -264,15 +265,15 @@ fun FavorContentCard(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 4.dp),
-        horizontalAlignment = Alignment.Start
+            .fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalAlignment = Alignment.Start,
     ) {
         item {
             Text(
                 text = "关注",
                 style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.padding(vertical = 8.dp),
             )
         }
 
@@ -293,12 +294,12 @@ fun FavorContentCard(
 private fun forumIconUrl(prefix: String?, id: Int): String {
     val rawPrefix = prefix?.trim().orEmpty()
     val normalizedPrefix = when {
-        rawPrefix.startsWith("//") -> "https:" + rawPrefix
+        rawPrefix.startsWith("//") -> "https:$rawPrefix"
         rawPrefix.startsWith("http://", ignoreCase = true) ->
             "https://" + rawPrefix.substringAfter("://")
         rawPrefix.startsWith("https://", ignoreCase = true) -> rawPrefix
         else -> NetworkModule.NGA_APP_ICON_URL.substringBefore("%s")
     }.trimEnd('/')
 
-    return normalizedPrefix + "/" + id + ".png"
+    return "$normalizedPrefix/$id.png"
 }

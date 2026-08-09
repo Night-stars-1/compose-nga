@@ -90,8 +90,12 @@ internal fun prepareImagePreview(
 @Composable
 fun ImagesPreviewer(
     images: List<Pair<String, String>>,
+    maxVisibleImages: Int = Int.MAX_VALUE,
 ) {
     val previewImages = remember(images) { preparePreviewImages(images) }
+    val visibleImages = remember(previewImages, maxVisibleImages) {
+        previewImages.take(maxVisibleImages.coerceAtLeast(0))
+    }
     val previewerState = rememberPreviewerState(
         pageCount = { previewImages.size },
         getKey = { previewImages[it].second }
@@ -101,7 +105,7 @@ fun ImagesPreviewer(
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        previewImages.forEachIndexed { index, image ->
+        visibleImages.forEachIndexed { index, image ->
             TransformImageView(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))

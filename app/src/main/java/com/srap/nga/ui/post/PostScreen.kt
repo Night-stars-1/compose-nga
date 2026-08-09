@@ -18,8 +18,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -47,6 +47,7 @@ import com.srap.nga.ui.component.post.PostContentCard
 import com.srap.nga.ui.component.post.PostLoadError
 import com.srap.nga.ui.component.post.PostLoadingSkeleton
 import com.srap.nga.utils.nga.HtmlUtil
+import com.srap.nga.utils.StorageUtils
 
 /**
  * 帖子详细页面
@@ -58,6 +59,7 @@ fun PostScreen(
     id: Int,
     onBackClick: () -> Unit,
     onViewPost: (Int) -> Unit,
+    onViewTopicSubject: (Int, Boolean?) -> Unit,
     onUserInfo: (Int) -> Unit,
     openUrl: (String) -> Unit,
 ) {
@@ -137,10 +139,7 @@ fun PostScreen(
                             },
                             onClick = {
                                 dropdownMenuExpanded = false
-                                context.sharePost(
-                                    id = id,
-                                    title = viewModel.response?.tsubject,
-                                )
+                                context.sharePost(id)
                             },
                         )
                     }
@@ -173,10 +172,18 @@ fun PostScreen(
                         item(key = "post-header") {
                             PostHeader(
                                 item = post,
+                                forumId = viewModel.response?.fid ?: 0,
+                                forumName = viewModel.response?.forumName.orEmpty(),
                                 replyQuantity = replyQuantity,
                                 onViewPost = onViewPost,
+                                onForumClick = onViewTopicSubject,
                                 onUserInfo = onUserInfo,
                                 openUrl = openUrl,
+                                isFollowing = viewModel.authorFollow != 0,
+                                followLoading = viewModel.isFollowLoading,
+                                onFollowClick = if (StorageUtils.Uid != 0 && post.author.uid != StorageUtils.Uid) {
+                                    viewModel::toggleAuthorFollow
+                                } else null,
                             )
                         }
 
@@ -187,11 +194,16 @@ fun PostScreen(
                             PostReplyCard(
                                 avatar = item.author.avatar,
                                 name = item.author.username,
+                                group = item.author.group.orEmpty(),
+                                rvrc = item.author.rvrc.orEmpty(),
+                                posts = item.author.posts ?: 0,
+                                medals = item.author.medal.orEmpty(),
+                                postDate = item.postDate,
                                 onAvatarClick = {
                                     onUserInfo(item.author.uid)
                                 },
                                 modifier = Modifier
-                                    .padding(horizontal = 12.dp, vertical = 12.dp)
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 HtmlUtil.FromHtml(
                                     item.content,
@@ -201,11 +213,6 @@ fun PostScreen(
                                     openUrl = openUrl,
                                 )
                             }
-                            HorizontalDivider(
-                                modifier = Modifier.padding(start = 68.dp, end = 12.dp),
-                                thickness = 0.5.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                            )
                         }
                     } else {
                         item(key = "post-empty-error") {
@@ -223,19 +230,36 @@ fun PostScreen(
 @Composable
 fun PostHeader(
     item: PostResponse.Result,
+    forumId: Int,
+    forumName: String,
     replyQuantity: Int,
     onViewPost: (Int) -> Unit,
+    onForumClick: (Int, Boolean?) -> Unit,
     onUserInfo: (Int) -> Unit,
     openUrl: (String) -> Unit,
+    isFollowing: Boolean = item.follow != 0,
+    followLoading: Boolean = false,
+    onFollowClick: (() -> Unit)? = null,
 ) {
     PostContentCard(
-        modifier = Modifier
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth(),
         avatar = item.author.avatar,
         name = item.author.username,
         onAvatarClick = {
             onUserInfo(item.author.uid)
-        }
+        },
+        isFollowing = isFollowing,
+        followLoading = followLoading,
+        onFollowClick = onFollowClick,
+        group = item.author.group.orEmpty(),
+        rvrc = item.author.rvrc.orEmpty(),
+        posts = item.author.posts ?: 0,
+        medals = item.author.medal.orEmpty(),
+        forumName = forumName,
+        onForumClick = if (forumId > 0) {
+            { onForumClick(forumId, null) }
+        } else null,
+        postDate = item.postDate,
     ) {
         HtmlUtil.FromHtml(
             item.content,

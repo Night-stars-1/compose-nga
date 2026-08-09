@@ -47,7 +47,9 @@ class SignInterceptor : Interceptor {
 
             val fid = formData.getOrDefault("fid", EMPTY_STRING)
             val tid = formData.getOrDefault("tid", EMPTY_STRING)
-            val uid = formData.getOrDefault("uid", EMPTY_STRING)
+            val uid = formData["uid"]
+                ?: formData["id"]
+                ?: EMPTY_STRING
             val key = formData.getOrDefault("key", EMPTY_STRING)
 
 //            val sortedKeys = formData.keys.filter { !it.startsWith("__") }.sorted()

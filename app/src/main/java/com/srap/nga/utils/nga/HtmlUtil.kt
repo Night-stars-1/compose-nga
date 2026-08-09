@@ -33,7 +33,9 @@ object HtmlUtil {
     private val parsedContentCache = LruCache<String, SplitQuote>(200)
 
     private fun parseNgaHtml(html: String): SplitQuote {
-        val result = NgaMarkupNormalizer.normalizeLinks(html)
+        val result = NgaMarkupNormalizer.normalizeSizes(
+            NgaMarkupNormalizer.normalizeLinks(html)
+        )
         val parseObj = SplitQuote()
         parseObj.splitQuote(result)
         return parseObj

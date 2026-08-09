@@ -45,6 +45,11 @@ data class UserInfoResponse(
          */
         @SerializedName("follow_by_num")
         val followByNum: Int,
+        /**
+         * 当前账号是否关注该用户，0 为未关注。
+         */
+        @SerializedName("follow")
+        val follow: Int = 0,
         @SerializedName("fuck_money")
         val fuckMoney: Int,
         @SerializedName("gender")

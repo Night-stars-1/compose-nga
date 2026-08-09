@@ -28,6 +28,7 @@ class UserInfoLoadViewModel @AssistedInject constructor(
     }
 
     var result by mutableStateOf<UserInfoResponse.Result?>(null)
+    var isFollowLoading by mutableStateOf(false)
 
     init {
         getUserInfo()
@@ -65,6 +66,30 @@ class UserInfoLoadViewModel @AssistedInject constructor(
                         }
                     }
                 }
+        }
+    }
+
+    fun toggleFollow() {
+        val current = result ?: return
+        if (isFollowLoading) return
+
+        val shouldFollow = current.follow == 0
+        isFollowLoading = true
+        viewModelScope.launch {
+            val request = if (shouldFollow) {
+                networkRepo.followUser(id)
+            } else {
+                networkRepo.unfollowUser(id)
+            }
+            request.collect { state ->
+                when (state) {
+                    is LoadingState.Error -> ToastUtils.show(state.errMsg)
+                    is LoadingState.Success -> {
+                        result = result?.copy(follow = if (shouldFollow) 1 else 0)
+                    }
+                }
+                isFollowLoading = false
+            }
         }
     }
 }

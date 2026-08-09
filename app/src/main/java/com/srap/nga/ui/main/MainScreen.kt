@@ -37,6 +37,7 @@ fun MainScreen(
     onSearch: () -> Unit,
     onViewLogin: () -> Unit,
     onViewFavorite: () -> Unit = {},
+    onViewSettings: () -> Unit = {},
     openUrl: (String) -> Unit,
 ) {
     val navigationData = listOf(
@@ -117,6 +118,7 @@ fun MainScreen(
                             onViewLogin = onViewLogin,
                             onBackClick = null,
                             onViewFavorite = onViewFavorite,
+                            onViewSettings = onViewSettings,
                         )
                     }
                 }

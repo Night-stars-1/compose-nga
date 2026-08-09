@@ -26,6 +26,7 @@ fun TopicSubjectCard(
     count: Int,
     modifier: Modifier = Modifier,
     images: List<Pair<String, String>>? = emptyList(),
+    maxImageCount: Int = Int.MAX_VALUE,
 ) {
     val newImages = images?.filter { !it.first.contains(".mp4") }
     Card(
@@ -41,9 +42,12 @@ fun TopicSubjectCard(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
             )
-            if (!newImages.isNullOrEmpty()) {
+            if (!newImages.isNullOrEmpty() && maxImageCount > 0) {
                 Spacer(modifier = Modifier.height(8.dp))
-                ImagesPreviewer(newImages)
+                ImagesPreviewer(
+                    images = newImages,
+                    maxVisibleImages = maxImageCount,
+                )
             }
             Row(
                 modifier = Modifier

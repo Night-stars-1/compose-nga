@@ -14,6 +14,10 @@ internal object NgaMarkupNormalizer {
     }
 
     private val multilineOptions = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
+    private val sizeBbCodePattern = Regex(
+        """\[size=(\d+(?:\.\d+)?)%](.*?)\[/size]""",
+        multilineOptions,
+    )
     private val fontSizePattern = Regex(
         """font-size\s*:\s*(\d+(?:\.\d+)?)\s*%""",
         RegexOption.IGNORE_CASE,
@@ -66,6 +70,14 @@ internal object NgaMarkupNormalizer {
         return result
     }
 
+    fun normalizeSizes(html: String): String =
+        sizeBbCodePattern.replace(html) { match ->
+            wrapForPercentage(
+                html = match.groupValues[2],
+                percentage = match.groupValues[1].toFloatOrNull() ?: 100f,
+            )
+        }
+
     fun adaptStyles(html: String): String {
         synchronized(adaptedStyleCache) {
             adaptedStyleCache[html]?.let { return it }
@@ -90,13 +102,7 @@ internal object NgaMarkupNormalizer {
             Regex("""\[color=([#a-zA-Z0-9]+)](.*?)\[/color]""", multilineOptions),
             """<font color="$1">$2</font>""",
         )
-        result = Regex("""\[size=(\d+(?:\.\d+)?)%](.*?)\[/size]""", multilineOptions)
-            .replace(result) { match ->
-                wrapForPercentage(
-                    html = match.groupValues[2],
-                    percentage = match.groupValues[1].toFloatOrNull() ?: 100f,
-                )
-            }
+        result = normalizeSizes(result)
 
         val document = Jsoup.parseBodyFragment(result)
         document.outputSettings().prettyPrint(false)
