@@ -333,9 +333,9 @@ fun NavHostController.navigateToSearch() {
 }
 
 fun NavHostController.navigateToSearchResult(key: String) {
-    // 搜索词不为空才调整
-    if (key.isNotEmpty()) {
-        navigate("search/result/${Uri.encode(key)}")
+    val normalizedKey = key.trim()
+    if (normalizedKey.isNotEmpty()) {
+        navigate("search/result/${Uri.encode(normalizedKey)}")
     }
 }
 

@@ -1,13 +1,17 @@
 package com.srap.nga.ui.component.modal
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -53,14 +57,14 @@ fun FavModal(
             },
             sheetState = sheetState,
             dragHandle = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    BottomSheetDefaults.DragHandle(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
                     Text(
                         text = "选择收藏夹",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
             },
@@ -99,18 +103,23 @@ fun FavModal(
             }
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
-                itemsIndexed(viewModel.list) { _, item ->
+                itemsIndexed(
+                    items = viewModel.list,
+                    key = { _, item -> item.id },
+                ) { index, item ->
                     FavCheckBox(
                         title = item.name,
-                        description = "${item.length}条内容·${item.type}",
+                        description = "${item.length} 条内容 · ${item.type}",
                         checked = state.checkedFolders[item.id] ?: item.default,
                         onCheckedChange = { checked ->
                             state.checkedFolders[item.id] = checked
                         },
+                        index = index,
+                        count = viewModel.list.size,
                     )
                 }
             }

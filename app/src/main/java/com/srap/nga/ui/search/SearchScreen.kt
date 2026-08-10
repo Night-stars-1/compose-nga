@@ -19,18 +19,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.filled.NorthWest
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.TextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.srap.nga.ui.component.button.BackButton
@@ -54,6 +59,7 @@ fun SearchScreen(
     onViewSearchResult: (String) -> Unit,
 ) {
     val viewModel: SearchViewModel = hiltViewModel()
+    val history by viewModel.history.collectAsState()
 
     val focusRequest = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -66,6 +72,9 @@ fun SearchScreen(
     }
 
     var textInput by rememberSaveable { mutableStateOf("") }
+    val submitSearch: (String) -> Unit = { query ->
+        viewModel.recordSearch(query)?.let(onViewSearchResult)
+    }
     LaunchedEffect(textInput) {
         delay(300)
         viewModel.fetchData(textInput.trim())
@@ -92,7 +101,7 @@ fun SearchScreen(
                         SearchBarDefaults.InputField(
                             query = textInput,
                             onQueryChange = { textInput = it },
-                            onSearch = onViewSearchResult,
+                            onSearch = submitSearch,
                             expanded = false,
                             onExpandedChange = {},
                             placeholder = { Text("搜索社区或帖子") },
@@ -116,7 +125,7 @@ fun SearchScreen(
                                         }
                                     }
                                     IconButton(
-                                        onClick = { onViewSearchResult(textInput) },
+                                        onClick = { submitSearch(textInput) },
                                         enabled = textInput.isNotBlank(),
                                     ) {
                                         Icon(
@@ -143,16 +152,72 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            items(viewModel.result) {
-                SearchItemCard(
-                    title = it,
-                    startIcon = Icons.Default.Search,
-                    endIcon = Icons.Default.NorthWest,
-                    modifier = Modifier
-                        .clickable {
-                            onViewSearchResult(it)
+            if (textInput.isBlank()) {
+                if (history.isNotEmpty()) {
+                    item(key = "search-history-header") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 24.dp, end = 8.dp, top = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "搜索历史",
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleSmall,
+                            )
+                            IconButton(onClick = viewModel::clearHistory) {
+                                Icon(
+                                    imageVector = Icons.Outlined.DeleteSweep,
+                                    contentDescription = "清空搜索历史",
+                                )
+                            }
                         }
-                )
+                    }
+                    items(
+                        items = history,
+                        key = { "search-history:$it" },
+                    ) { query ->
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    text = query,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.Outlined.History,
+                                    contentDescription = null,
+                                )
+                            },
+                            trailingContent = {
+                                IconButton(
+                                    onClick = { viewModel.removeHistory(query) },
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "删除搜索记录：$query",
+                                    )
+                                }
+                            },
+                            modifier = Modifier.clickable { submitSearch(query) },
+                        )
+                    }
+                }
+            } else {
+                items(viewModel.result) {
+                    SearchItemCard(
+                        title = it,
+                        startIcon = Icons.Default.Search,
+                        endIcon = Icons.Default.NorthWest,
+                        modifier = Modifier
+                            .clickable {
+                                submitSearch(it)
+                            }
+                    )
+                }
             }
         }
     }

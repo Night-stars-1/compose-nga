@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.srap.nga.logic.preferences.SearchHistoryStore
 import com.srap.nga.logic.repository.NetworkRepo
 import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseViewModel
@@ -15,11 +16,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    networkRepo: NetworkRepo
+    networkRepo: NetworkRepo,
+    private val searchHistoryStore: SearchHistoryStore,
 ) : BaseViewModel(networkRepo) {
 
     var result by mutableStateOf<List<String>>(emptyList())
     private var searchJob: Job? = null
+    val history = searchHistoryStore.history
+
+    fun recordSearch(query: String): String? = searchHistoryStore.record(query)
+
+    fun removeHistory(query: String) {
+        searchHistoryStore.remove(query)
+    }
+
+    fun clearHistory() {
+        searchHistoryStore.clear()
+    }
 
     fun fetchData(word: String) {
         searchJob?.cancel()
