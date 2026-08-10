@@ -70,7 +70,19 @@ data class PostResponse(
         val attches: List<Attche>?,
         /** 当前账号是否关注该帖子作者，0 为未关注。 */
         val follow: Int = 0,
+        /** 点赞数量。 */
+        @SerializedName("vote_good")
+        val likeCount: Int = 0,
+        /** 点踩数量。 */
+        @SerializedName("vote_bad")
+        val dislikeCount: Int = 0,
+        /** 当前账号的投票状态，接口可能返回空字符串或数字。 */
+        @SerializedName("vote")
+        val vote: String? = null,
     ) {
+        val voteState: Int
+            get() = PostVote.normalize(vote?.toIntOrNull() ?: PostVote.NONE)
+
         data class Author(
             val uid: Int,
             val username: String,

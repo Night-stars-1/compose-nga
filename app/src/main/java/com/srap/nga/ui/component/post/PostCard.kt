@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,11 +17,17 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.PersonRemove
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.srap.nga.logic.model.PostResponse
+import com.srap.nga.logic.model.PostVote
 import com.srap.nga.ui.component.UserAvatar
 import com.srap.nga.utils.toHttps
 import java.time.Instant
@@ -58,6 +66,11 @@ fun PostContentCard(
     forumName: String = "",
     onForumClick: (() -> Unit)? = null,
     postDate: String = "",
+    likeCount: Int = 0,
+    voteState: Int = PostVote.NONE,
+    pendingVote: Int? = null,
+    onLikeClick: (() -> Unit)? = null,
+    onDislikeClick: (() -> Unit)? = null,
     message: @Composable () -> Unit
 ) {
     Surface(
@@ -92,6 +105,11 @@ fun PostContentCard(
             forumName = forumName,
             onForumClick = onForumClick,
             postDate = postDate,
+            likeCount = likeCount,
+            voteState = voteState,
+            pendingVote = pendingVote,
+            onLikeClick = onLikeClick,
+            onDislikeClick = onDislikeClick,
         )
         }
     }
@@ -109,6 +127,11 @@ fun PostReplyCard(
     posts: Int = 0,
     medals: List<PostResponse.Result.Medal> = emptyList(),
     postDate: String = "",
+    likeCount: Int = 0,
+    voteState: Int = PostVote.NONE,
+    pendingVote: Int? = null,
+    onLikeClick: (() -> Unit)? = null,
+    onDislikeClick: (() -> Unit)? = null,
     message: @Composable () -> Unit
 ) {
     Surface(
@@ -133,7 +156,14 @@ fun PostReplyCard(
         ) {
             message()
         }
-        PostMetadata(postDate = postDate)
+        PostReplyMetadata(
+            postDate = postDate,
+            likeCount = likeCount,
+            voteState = voteState,
+            pendingVote = pendingVote,
+            onLikeClick = onLikeClick,
+            onDislikeClick = onDislikeClick,
+        )
         }
     }
 }@Composable
@@ -236,28 +266,133 @@ private fun PostAuthor(
 private val postTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
 @Composable
+private fun PostReplyMetadata(
+    postDate: String,
+    likeCount: Int,
+    voteState: Int,
+    pendingVote: Int?,
+    onLikeClick: (() -> Unit)?,
+    onDislikeClick: (() -> Unit)?,
+) {
+    val formattedTime = remember(postDate) { formatPostTime(postDate) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 56.dp, top = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (formattedTime.isNotBlank()) {
+            PostTimeLabel(
+                text = formattedTime,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
+
+        PostVoteActions(
+            likeCount = likeCount,
+            voteState = voteState,
+            pendingVote = pendingVote,
+            onLikeClick = onLikeClick,
+            onDislikeClick = onDislikeClick,
+        )
+    }
+}
+
+@Composable
+private fun PostVoteActions(
+    likeCount: Int,
+    voteState: Int,
+    pendingVote: Int?,
+    onLikeClick: (() -> Unit)?,
+    onDislikeClick: (() -> Unit)?,
+) {
+    val isLiked = voteState == PostVote.LIKE
+    val isDisliked = voteState == PostVote.DISLIKE
+    val isVotePending = pendingVote != null
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(
+            onClick = { onLikeClick?.invoke() },
+            enabled = onLikeClick != null && !isVotePending,
+            modifier = Modifier.size(36.dp),
+        ) {
+            if (pendingVote == PostVote.LIKE) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(15.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Icon(
+                    imageVector = if (isLiked) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
+                    contentDescription = if (isLiked) "取消点赞" else "点赞",
+                    modifier = Modifier.size(18.dp),
+                    tint = if (isLiked) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+        }
+        Text(
+            text = likeCount.toString(),
+            style = MaterialTheme.typography.labelMedium,
+            color = if (isLiked) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            maxLines = 1,
+        )
+        IconButton(
+            onClick = { onDislikeClick?.invoke() },
+            enabled = onDislikeClick != null && !isVotePending,
+            modifier = Modifier.size(36.dp),
+        ) {
+            if (pendingVote == PostVote.DISLIKE) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(15.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Icon(
+                    imageVector = if (isDisliked) Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown,
+                    contentDescription = if (isDisliked) "取消点踩" else "点踩",
+                    modifier = Modifier.size(18.dp),
+                    tint = if (isDisliked) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun PostMetadata(
     forumName: String = "",
     onForumClick: (() -> Unit)? = null,
     postDate: String = "",
+    likeCount: Int = 0,
+    voteState: Int = PostVote.NONE,
+    pendingVote: Int? = null,
+    onLikeClick: (() -> Unit)? = null,
+    onDislikeClick: (() -> Unit)? = null,
 ) {
-    val formattedTime = remember(postDate) {
-        val normalized = postDate.trim()
-        val timestamp = normalized.toLongOrNull()
-        if (timestamp != null && timestamp > 0) {
-            val epochSeconds = if (timestamp > 9_999_999_999L) {
-                timestamp / 1000
-            } else {
-                timestamp
-            }
-            postTimeFormatter.format(
-                Instant.ofEpochSecond(epochSeconds).atZone(ZoneId.systemDefault())
-            )
-        } else {
-            normalized
-        }
-    }
-    if (forumName.isBlank() && formattedTime.isBlank()) return
+    val formattedTime = remember(postDate) { formatPostTime(postDate) }
+    if (
+        forumName.isBlank() &&
+        formattedTime.isBlank() &&
+        onLikeClick == null &&
+        onDislikeClick == null
+    ) return
 
     Row(
         modifier = Modifier
@@ -266,45 +401,85 @@ private fun PostMetadata(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (forumName.isNotBlank()) {
-            Row(
-                modifier = Modifier
-                    .widthIn(max = 220.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        shape = MaterialTheme.shapes.small,
-                    )
-                    .clickable(
-                        enabled = onForumClick != null,
-                        onClick = { onForumClick?.invoke() },
-                    )
-                    .padding(horizontal = 8.dp, vertical = 5.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart,
             ) {
-                Icon(
-                    imageVector = Icons.Default.Topic,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = forumName,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(
+                    modifier = Modifier
+                        .widthIn(max = 220.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            shape = MaterialTheme.shapes.small,
+                        )
+                        .clickable(
+                            enabled = onForumClick != null,
+                            onClick = { onForumClick?.invoke() },
+                        )
+                        .padding(horizontal = 8.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Topic,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = forumName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(1f))
         if (formattedTime.isNotBlank()) {
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
+            Spacer(modifier = Modifier.width(8.dp))
+            PostTimeLabel(
                 text = formattedTime,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
             )
         }
+        PostVoteActions(
+            likeCount = likeCount,
+            voteState = voteState,
+            pendingVote = pendingVote,
+            onLikeClick = onLikeClick,
+            onDislikeClick = onDislikeClick,
+        )
     }
+}
+
+@Composable
+private fun PostTimeLabel(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.height(36.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+private fun formatPostTime(postDate: String): String {
+    val normalized = postDate.trim()
+    val timestamp = normalized.toLongOrNull()
+    if (timestamp == null || timestamp <= 0) return normalized
+
+    val epochSeconds = if (timestamp > 9_999_999_999L) timestamp / 1000 else timestamp
+    return postTimeFormatter.format(
+        Instant.ofEpochSecond(epochSeconds).atZone(ZoneId.systemDefault())
+    )
 }

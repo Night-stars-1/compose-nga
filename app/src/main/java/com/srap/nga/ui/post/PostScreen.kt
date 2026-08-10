@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.srap.nga.logic.model.PostResponse
+import com.srap.nga.logic.model.PostVote
 import com.srap.nga.ui.component.button.BackButton
 import com.srap.nga.ui.component.list.RefreshLoadList
 import com.srap.nga.ui.component.modal.FavModal
@@ -61,6 +62,8 @@ fun PostScreen(
     onViewPost: (Int) -> Unit,
     onViewTopicSubject: (Int, Boolean?) -> Unit,
     onUserInfo: (Int) -> Unit,
+    isLoggedIn: Boolean,
+    onViewLogin: () -> Unit,
     openUrl: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -184,6 +187,21 @@ fun PostScreen(
                                 onFollowClick = if (StorageUtils.Uid != 0 && post.author.uid != StorageUtils.Uid) {
                                     viewModel::toggleAuthorFollow
                                 } else null,
+                                pendingVote = viewModel.pendingVotes[post.pid],
+                                onLikeClick = {
+                                    if (isLoggedIn) {
+                                        viewModel.togglePostVote(post.pid, PostVote.LIKE)
+                                    } else {
+                                        onViewLogin()
+                                    }
+                                },
+                                onDislikeClick = {
+                                    if (isLoggedIn) {
+                                        viewModel.togglePostVote(post.pid, PostVote.DISLIKE)
+                                    } else {
+                                        onViewLogin()
+                                    }
+                                },
                             )
                         }
 
@@ -199,6 +217,23 @@ fun PostScreen(
                                 posts = item.author.posts ?: 0,
                                 medals = item.author.medal.orEmpty(),
                                 postDate = item.postDate,
+                                likeCount = item.likeCount,
+                                voteState = item.voteState,
+                                pendingVote = viewModel.pendingVotes[item.pid],
+                                onLikeClick = {
+                                    if (isLoggedIn) {
+                                        viewModel.togglePostVote(item.pid, PostVote.LIKE)
+                                    } else {
+                                        onViewLogin()
+                                    }
+                                },
+                                onDislikeClick = {
+                                    if (isLoggedIn) {
+                                        viewModel.togglePostVote(item.pid, PostVote.DISLIKE)
+                                    } else {
+                                        onViewLogin()
+                                    }
+                                },
                                 onAvatarClick = {
                                     onUserInfo(item.author.uid)
                                 },
@@ -240,6 +275,9 @@ fun PostHeader(
     isFollowing: Boolean = item.follow != 0,
     followLoading: Boolean = false,
     onFollowClick: (() -> Unit)? = null,
+    pendingVote: Int? = null,
+    onLikeClick: (() -> Unit)? = null,
+    onDislikeClick: (() -> Unit)? = null,
 ) {
     PostContentCard(
         modifier = Modifier.fillMaxWidth(),
@@ -260,6 +298,11 @@ fun PostHeader(
             { onForumClick(forumId, null) }
         } else null,
         postDate = item.postDate,
+        likeCount = item.likeCount,
+        voteState = item.voteState,
+        pendingVote = pendingVote,
+        onLikeClick = onLikeClick,
+        onDislikeClick = onDislikeClick,
     ) {
         HtmlUtil.FromHtml(
             item.content,

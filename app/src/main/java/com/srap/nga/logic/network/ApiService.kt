@@ -9,6 +9,7 @@ import com.srap.nga.logic.model.FollowResponse
 import com.srap.nga.logic.model.ForumBySearchResponse
 import com.srap.nga.logic.model.SearchPromptResponse
 import com.srap.nga.logic.model.PostResponse
+import com.srap.nga.logic.model.PostVoteResponse
 import com.srap.nga.logic.model.QRCodeLoginResponse
 import com.srap.nga.logic.model.RecTopicResponse
 import com.srap.nga.logic.model.SubjectBySearchResponse
@@ -41,6 +42,18 @@ interface ApiService {
         @Field("tid") tid: Int,
         @Field("page") page: Int = 1,
     ): Call<PostResponse>
+
+    /**
+     * 点赞、点踩或取消当前操作
+     */
+    @FormUrlEncoded
+    @POST("app_api.php?__lib=post&__act=recommend")
+    fun votePost(
+        @Field("pid") pid: Int,
+        @Field("value") value: Int,
+        @Field("tid") tid: Int,
+        @Field("atpage") atPage: Int,
+    ): Call<PostVoteResponse>
 
     /**
      * 获取社区列表

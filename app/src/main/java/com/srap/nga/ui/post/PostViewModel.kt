@@ -5,10 +5,16 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.srap.nga.logic.model.PostVote
 import com.srap.nga.logic.model.PostResponse
+import com.srap.nga.logic.model.applyPostVoteResult
+import com.srap.nga.logic.model.explicitVoteState
+import com.srap.nga.logic.model.mergePostVoteState
+import com.srap.nga.logic.preferences.PostVoteStore
 import com.srap.nga.logic.repository.NetworkRepo
 import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseRefreshLoadViewModel
+import com.srap.nga.utils.StorageUtils
 import com.srap.nga.utils.ToastUtils
 import com.srap.nga.utils.nga.HtmlUtil
 import dagger.assisted.Assisted
@@ -27,6 +33,7 @@ sealed interface PostContentState {
 class PostViewModel @AssistedInject constructor(
     @Assisted("id") var id: Int,
     networkRepo: NetworkRepo,
+    private val postVoteStore: PostVoteStore,
 ) : BaseRefreshLoadViewModel<PostResponse.Result>(networkRepo) {
 
     @AssistedFactory
@@ -48,7 +55,10 @@ class PostViewModel @AssistedInject constructor(
     var authorFollow by mutableIntStateOf(0)
         private set
 
+    var pendingVotes by mutableStateOf<Map<Int, Int>>(emptyMap())
+        private set
 
+    private val pageByPid = mutableMapOf<Int, Int>()
 
     override fun fetchData() {
         val requestedPage = page
@@ -64,6 +74,32 @@ class PostViewModel @AssistedInject constructor(
                         }
                         is LoadingState.Success -> {
                             val loadedResponse = state.response
+                            val userId = StorageUtils.Uid
+                            val loadedPosts = loadedResponse.result.map { post ->
+                                val persistedVote = postVoteStore.getVote(
+                                    userId = userId,
+                                    threadId = id,
+                                    postId = post.pid,
+                                )
+                                val mergedPost = post.mergePostVoteState(persistedVote)
+                                post.explicitVoteState?.let { explicitVote ->
+                                    postVoteStore.setVote(
+                                        userId = userId,
+                                        threadId = id,
+                                        postId = post.pid,
+                                        vote = explicitVote,
+                                    )
+                                }
+                                mergedPost
+                            }
+                            val sourcePage = loadedResponse.currentPage.takeIf { it > 0 }
+                                ?: requestedPage
+                            if (requestedPage == 1) {
+                                pageByPid.clear()
+                            }
+                            loadedPosts.forEach { post ->
+                                pageByPid[post.pid] = sourcePage
+                            }
                             val isContentReady = if (requestedPage == 1) {
                                 loadedResponse.result.firstOrNull()?.let { firstPost ->
                                     try {
@@ -82,9 +118,9 @@ class PostViewModel @AssistedInject constructor(
                             response?.let {
                                 list = if (requestedPage == 1) {
                                     authorFollow = it.result.firstOrNull()?.follow ?: 0
-                                    it.result
+                                    loadedPosts
                                 } else {
-                                    list + it.result
+                                    list + loadedPosts
                                 }
                                 page = it.currentPage
                                 totalPage = it.totalPage
@@ -165,10 +201,73 @@ class PostViewModel @AssistedInject constructor(
         }
     }
 
+    fun togglePostVote(pid: Int, value: Int) {
+        if (value != PostVote.LIKE && value != PostVote.DISLIKE) return
+        if (pendingVotes.containsKey(pid)) return
+        val atPage = pageByPid[pid] ?: return
+        val userId = StorageUtils.Uid
+        if (userId <= 0) return
+
+        pendingVotes = pendingVotes + (pid to value)
+        viewModelScope.launch {
+            try {
+                networkRepo.votePost(
+                    pid = pid,
+                    value = value,
+                    tid = id,
+                    atPage = atPage,
+                ).collect { state ->
+                    when (state) {
+                        is LoadingState.Error -> ToastUtils.show(state.errMsg)
+                        is LoadingState.Success -> {
+                            val lastVote = state.response.lastState
+                            if (lastVote == null) {
+                                ToastUtils.show("投票结果异常，请刷新后确认")
+                                return@collect
+                            }
+                            updateReplyVote(
+                                pid = pid,
+                                requestedVote = value,
+                                lastVote = lastVote,
+                                userId = userId,
+                            )
+                        }
+                    }
+                }
+            } finally {
+                pendingVotes = pendingVotes - pid
+            }
+        }
+    }
+
     private fun updateAuthorFollow(follow: Int) {
         list = list.mapIndexed { index, post ->
             if (index == 0) {
                 post.copy(follow = follow)
+            } else {
+                post
+            }
+        }
+    }
+
+    private fun updateReplyVote(
+        pid: Int,
+        requestedVote: Int,
+        lastVote: Int,
+        userId: Int,
+    ) {
+        postVoteStore.setVote(
+            userId = userId,
+            threadId = id,
+            postId = pid,
+            vote = PostVote.nextState(requestedVote, lastVote),
+        )
+        list = list.map { post ->
+            if (post.pid == pid) {
+                post.applyPostVoteResult(
+                    requestedVote = requestedVote,
+                    lastVote = lastVote,
+                )
             } else {
                 post
             }

@@ -40,7 +40,7 @@ class SignInterceptor : Interceptor {
             val appId = "1010"
             val accessUid = StorageUtils.Uid.toString()
             val accessToken = StorageUtils.Token
-            val timestamp = System.currentTimeMillis().toString()
+            val timestamp = ngaTimestampSeconds(System.currentTimeMillis())
 
             // 解析请求体
             val formData = parseFormBody(originalBody)
@@ -49,13 +49,14 @@ class SignInterceptor : Interceptor {
             val tid = formData.getOrDefault("tid", EMPTY_STRING)
             val uid = formData["uid"]
                 ?: formData["id"]
+                ?: formData["pid"]
                 ?: EMPTY_STRING
             val key = formData.getOrDefault("key", EMPTY_STRING)
+            val value = formData.getOrDefault("value", EMPTY_STRING)
 
 //            val sortedKeys = formData.keys.filter { !it.startsWith("__") }.sorted()
 //            val combinedValues = sortedKeys.joinToString("") { formData[it] ?: "" }
-            val md5String = "$appId$accessUid$accessToken$fid$tid$uid$key${timestamp}${Constants.SALT}"
-            Log.d(TAG, "intercept: $md5String")
+            val md5String = "$appId$accessUid$accessToken$fid$tid$uid$key$value${timestamp}${Constants.SALT}"
             val md5Signature = StringUtils.md5(md5String)
 
             val newBodyBuilder = FormBody.Builder()
@@ -76,3 +77,6 @@ class SignInterceptor : Interceptor {
         return chain.proceed(signedRequest.build())
     }
 }
+
+internal fun ngaTimestampSeconds(currentTimeMillis: Long): String =
+    (currentTimeMillis / 1000L).toString()

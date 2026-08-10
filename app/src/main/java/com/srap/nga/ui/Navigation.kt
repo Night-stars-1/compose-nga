@@ -100,6 +100,8 @@ fun AppNavigation(
                     onViewPost = navController::navigateToPost,
                     onViewTopicSubject = navController::navigateToTopicSubject,
                     onUserInfo = navController::navigateToUserInfo,
+                    isLoggedIn = isLoggedIn,
+                    onViewLogin = navController::navigateToLogin,
                     openUrl = navController::openUrl,
                 )
             } else {

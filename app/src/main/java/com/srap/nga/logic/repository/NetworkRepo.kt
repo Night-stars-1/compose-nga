@@ -42,6 +42,13 @@ class NetworkRepo @Inject constructor(
     }
 
     /**
+     * 点赞、点踩或取消当前操作
+     */
+    fun votePost(pid: Int, value: Int, tid: Int, atPage: Int) = fire {
+        apiService.votePost(pid, value, tid, atPage).await()
+    }
+
+    /**
      * 获取社区列表
      */
     fun getTopicCateGory() = fire {
