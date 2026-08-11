@@ -26,13 +26,22 @@ class HomeLoadViewModel @Inject constructor(
                             ToastUtils.show(state.errMsg)
                         }
                         is LoadingState.Success -> {
-                            val result = state.response.result as List<*>
-                            val data = state.parseItem<RecTopicResponse.Result>(result[0])
-                            val json = gson.toJson(result[2])
-                            val pageInfo = gson.fromJson(json, RecTopicResponse.PageInfo::class.java)
+                            val result = state.response.result
+                            val data = result.getOrNull(0)?.let {
+                                state.parseItem<RecTopicResponse.Result>(it)
+                            }
+                            val pageInfo = result.getOrNull(2)?.let {
+                                runCatching {
+                                    gson.fromJson(
+                                        gson.toJson(it),
+                                        RecTopicResponse.PageInfo::class.java,
+                                    )
+                                }.getOrNull()
+                            }
                             if (data != null) {
                                 list += data
-
+                            }
+                            if (pageInfo != null) {
                                 page = pageInfo.currentPage
                                 totalPage = pageInfo.perPage
                             }

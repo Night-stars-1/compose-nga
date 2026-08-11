@@ -36,7 +36,7 @@ data class RecTopicResponse(
         @SerializedName("thread_abstract")
         val threadAbstract: String,
         @SerializedName("thread_icon")
-        val threadIcon: String,
+        val threadIcon: String?,
         @SerializedName("tid")
         val tid: Int,
         @SerializedName("topic")
@@ -65,7 +65,7 @@ data class RecTopicResponse(
         @SerializedName("lastposter")
         val lastposter: String,
         @SerializedName("parent")
-        val parent: List<Any>,
+        val parent: List<Any>?,
         @SerializedName("postdate")
         val postdate: Int,
         @SerializedName("quote_from")

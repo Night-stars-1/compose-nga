@@ -2,10 +2,12 @@ package com.srap.nga.ui.topic.subject
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -74,6 +76,7 @@ fun TopicSubjectScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -82,8 +85,8 @@ fun TopicSubjectScreen(
                         WindowInsetsSides.Top + WindowInsetsSides.Start
                     ),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 navigationIcon = {
@@ -117,7 +120,11 @@ fun TopicSubjectScreen(
         }
     ) { innerPadding ->
         if (result == null) {
-            LoadingCard()
+            LoadingCard(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+            )
         } else {
             val data = result.result
             val pagerState = rememberPagerState(
@@ -150,11 +157,12 @@ fun TopicSubjectScreen(
 
             Column(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(innerPadding),
             ) {
                 SecondaryScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     indicator = {
                         TabRowDefaults.SecondaryIndicator(
                             Modifier
@@ -174,24 +182,38 @@ fun TopicSubjectScreen(
                     }
                 }
 
-                HorizontalDivider()
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                )
 
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                 ) { index ->
                     val viewModel = loadViewModelList[index].viewModel
                     val prefix = viewModel.attachPrefix.ifBlank { data.attachPrefix }
                     RefreshLoadList(
                         viewModel = viewModel,
-                        modifier = Modifier.fillMaxHeight()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceContainer),
+                        contentPadding = PaddingValues(
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 8.dp,
+                            bottom = 64.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(viewModel.list) { item ->
+                        items(
+                            items = viewModel.list,
+                            key = { item -> item.tid },
+                        ) { item ->
                             TopicSubjectCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 8.dp)
-                                    .padding(top = 8.dp)
                                     .clickable {
                                         onViewPost(item.tid)
                                     },

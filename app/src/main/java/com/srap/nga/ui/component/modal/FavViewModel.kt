@@ -10,6 +10,7 @@ import com.srap.nga.logic.state.LoadingState
 import com.srap.nga.ui.base.BaseViewModel
 import com.srap.nga.utils.ToastUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,21 +20,18 @@ class FavViewModel @Inject constructor(
 ) : BaseViewModel(networkRepo) {
     var list by mutableStateOf(emptyList<FavoriteResponse.Data>())
 
-     fun fetchData() {
-         viewModelScope.launch {
-             networkRepo.getFavorite()
-                 .collect { state ->
-                     when (state) {
-                         is LoadingState.Error -> {
-                             ToastUtils.show(state.errMsg)
-                         }
+    suspend fun fetchData(): Boolean {
+        return when (val state = networkRepo.getFavorite().first()) {
+            is LoadingState.Error -> {
+                ToastUtils.show(state.errMsg)
+                false
+            }
 
-                         is LoadingState.Success -> {
-                             list = state.response.result
-                         }
-                     }
-                 }
-         }
+            is LoadingState.Success -> {
+                list = state.response.result
+                true
+            }
+        }
     }
 
     /**

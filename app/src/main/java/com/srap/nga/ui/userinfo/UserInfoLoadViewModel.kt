@@ -14,6 +14,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = UserInfoLoadViewModel.ViewModelFactory::class)
@@ -28,6 +29,8 @@ class UserInfoLoadViewModel @AssistedInject constructor(
     }
 
     var result by mutableStateOf<UserInfoResponse.Result?>(null)
+    var isUserInfoLoading by mutableStateOf(false)
+        private set
     var isFollowLoading by mutableStateOf(false)
 
     init {
@@ -53,19 +56,42 @@ class UserInfoLoadViewModel @AssistedInject constructor(
         }
     }
 
+    override fun refresh() {
+        getUserInfo()
+        super.refresh()
+    }
+
     private fun getUserInfo() {
+        if (isUserInfoLoading) return
+        isUserInfoLoading = true
         viewModelScope.launch {
-            networkRepo.getUserInfo(id)
-                .collect { state ->
-                    when (state) {
-                        is LoadingState.Error -> {
-                            ToastUtils.show(state.errMsg)
+            var errorMessage: String? = null
+            try {
+                repeat(USER_INFO_LOAD_ATTEMPTS) { attempt ->
+                    var succeeded = false
+                    networkRepo.getUserInfo(id)
+                        .collect { state ->
+                            when (state) {
+                                is LoadingState.Error -> {
+                                    errorMessage = state.errMsg
+                                }
+                                is LoadingState.Success -> {
+                                    result = state.response.result
+                                    succeeded = true
+                                }
+                            }
                         }
-                        is LoadingState.Success -> {
-                            result = state.response.result
-                        }
+
+                    if (succeeded) return@launch
+                    if (attempt < USER_INFO_LOAD_ATTEMPTS - 1) {
+                        delay(USER_INFO_RETRY_DELAY_MS)
                     }
                 }
+
+                errorMessage?.let(ToastUtils::show)
+            } finally {
+                isUserInfoLoading = false
+            }
         }
     }
 
@@ -91,5 +117,10 @@ class UserInfoLoadViewModel @AssistedInject constructor(
                 isFollowLoading = false
             }
         }
+    }
+
+    private companion object {
+        const val USER_INFO_LOAD_ATTEMPTS = 2
+        const val USER_INFO_RETRY_DELAY_MS = 500L
     }
 }

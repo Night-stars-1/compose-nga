@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -37,7 +38,6 @@ fun UserInfoCard(
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 8.dp)
             .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(8.dp)
@@ -59,6 +59,8 @@ fun UserInfoCard(
         Text(
             text = name,
             style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.constrainAs(nameRef) {
                 top.linkTo(avatarRef.top)
                 start.linkTo(avatarRef.end, margin = 8.dp)
@@ -74,6 +76,8 @@ fun UserInfoCard(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.constrainAs(descriptionRef) {
                 top.linkTo(nameRef.bottom, margin = 4.dp)
                 start.linkTo(avatarRef.end, margin = 8.dp)
@@ -92,7 +96,8 @@ fun UserInfoCard(
                 enabled = !followLoading,
                 contentPadding = PaddingValues(horizontal = 10.dp),
                 modifier = Modifier.constrainAs(followRef) {
-                    top.linkTo(parent.top)
+                    top.linkTo(avatarRef.top)
+                    bottom.linkTo(avatarRef.bottom)
                     end.linkTo(parent.end)
                 },
             ) {

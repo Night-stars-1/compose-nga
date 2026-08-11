@@ -19,10 +19,17 @@ fun FavCheckBox(
     modifier: Modifier = Modifier,
     description: String? = null,
 ) {
+    val segmentedShapes = ListItemDefaults.segmentedShapes(index = index, count = count)
     SegmentedListItem(
         checked = checked,
         onCheckedChange = onCheckedChange,
-        shapes = ListItemDefaults.segmentedShapes(index = index, count = count),
+        shapes = segmentedShapes.copy(
+            selectedShape = segmentedShapes.shape,
+            pressedShape = segmentedShapes.shape,
+            focusedShape = segmentedShapes.shape,
+            hoveredShape = segmentedShapes.shape,
+            draggedShape = segmentedShapes.shape,
+        ),
         modifier = modifier,
         supportingContent = if (description == null) {
             null

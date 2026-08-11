@@ -91,6 +91,7 @@ internal fun prepareImagePreview(
 fun ImagesPreviewer(
     images: List<Pair<String, String>>,
     maxVisibleImages: Int = Int.MAX_VALUE,
+    imageHeight: Dp = 104.dp,
 ) {
     val previewImages = remember(images) { preparePreviewImages(images) }
     val visibleImages = remember(previewImages, maxVisibleImages) {
@@ -103,14 +104,19 @@ fun ImagesPreviewer(
     val scope = rememberCoroutineScope()
 
     Row(
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         visibleImages.forEachIndexed { index, image ->
+            val imageModifier = if (visibleImages.size == 1) {
+                Modifier.fillMaxWidth()
+            } else {
+                Modifier.weight(1f)
+            }
             TransformImageView(
-                modifier = Modifier
+                modifier = imageModifier
                     .clip(RoundedCornerShape(8.dp))
-                    .weight(0.1f)
-                    .height(130.dp)
+                    .height(imageHeight)
                     .clickable {
                         scope.launch {
                             ImagePreview.openImage(previewImages, previewerState)

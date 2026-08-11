@@ -1,32 +1,36 @@
 package com.srap.nga.ui.topic.category
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,14 +39,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil3.compose.AsyncImage
 import com.srap.nga.logic.model.CateGoryFavorResponse
 import com.srap.nga.logic.model.TopicCateGoryResponse
 import com.srap.nga.logic.network.NetworkModule
 import com.srap.nga.ui.component.button.SearchButton
-import com.srap.nga.ui.component.card.ImageTextCard
 import com.srap.nga.ui.component.card.LoadingCard
 import kotlinx.coroutines.launch
 
@@ -62,6 +69,7 @@ fun TopicCateGoryScreen(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -70,8 +78,8 @@ fun TopicCateGoryScreen(
                         WindowInsetsSides.Top + WindowInsetsSides.Start
                     ),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
@@ -99,7 +107,7 @@ fun TopicCateGoryScreen(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 val titles = listOf("关注") + result.result.map { it.name }
                 if (maxWidth < 600.dp) {
@@ -107,6 +115,7 @@ fun TopicCateGoryScreen(
                         SecondaryScrollableTabRow(
                             selectedTabIndex = pageState.currentPage,
                             edgePadding = 8.dp,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
                         ) {
                             titles.forEachIndexed { index, title ->
                                 CategoryTab(pageState, index, title)
@@ -208,6 +217,7 @@ private fun CategoryPager(
         } else {
             ContentCard(
                 result = result.result[index - 1].groups,
+                categoryName = result.result[index - 1].name,
                 onViewTopicSubject = onViewTopicSubject,
                 iconPrefix = result.forumIconPre,
             )
@@ -219,36 +229,83 @@ private fun CategoryPager(
  * 右侧社区选择栏
  */
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun ContentCard(
     result: List<TopicCateGoryResponse.Result.Group>,
     onViewTopicSubject: (Int, Boolean?) -> Unit,
+    categoryName: String? = null,
     iconPrefix: String? = null,
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalAlignment = Alignment.Start,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 12.dp,
+            bottom = 64.dp,
+        ),
     ) {
-        result.forEach { group ->
-            item {
-                Text(
-                    text = group.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
+        val groups = result.filter { it.forums.isNotEmpty() }
+        groups.forEachIndexed { groupIndex, group ->
+            val showGroupHeading = groups.size > 1 || group.name != categoryName
+            if (showGroupHeading) {
+                item(key = "group-${group.id}") {
+                    Text(
+                        text = group.name,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(
+                            start = 8.dp,
+                            top = if (groupIndex == 0) 0.dp else 24.dp,
+                            bottom = 12.dp,
+                        ),
+                    )
+                }
             }
 
-            items(group.forums) { forum ->
-                ImageTextCard(
-                    image = forumIconUrl(iconPrefix, forum.id),
-                    title = forum.name,
-                    description = forum.info,
-                    modifier = Modifier
-                        .clickable {
-                            onViewTopicSubject(forum.fid, false)
+            itemsIndexed(
+                items = group.forums,
+                key = { _, forum -> "group-${group.id}-forum-${forum.fid}-${forum.id}" },
+            ) { index, forum ->
+                val description = forum.info?.trim().orEmpty()
+                SegmentedListItem(
+                    onClick = {
+                        onViewTopicSubject(forum.fid, false)
+                    },
+                    shapes = ListItemDefaults.segmentedShapes(
+                        index = index,
+                        count = group.forums.size,
+                    ),
+                    leadingContent = {
+                        CommunityIcon(
+                            image = forumIconUrl(iconPrefix, forum.id),
+                        )
+                    },
+                    supportingContent = if (description.isEmpty()) {
+                        null
+                    } else {
+                        {
+                            Text(
+                                text = description,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
-                )
+                    },
+                    modifier = Modifier.padding(
+                        bottom = if (index == group.forums.lastIndex) {
+                            0.dp
+                        } else {
+                            ListItemDefaults.SegmentedGap
+                        },
+                    ),
+                ) {
+                    Text(
+                        text = forum.name,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }
@@ -258,36 +315,79 @@ fun ContentCard(
  * 右侧关注社区选择栏
  */
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun FavorContentCard(
     result: List<CateGoryFavorResponse.Result>,
     onViewTopicSubject: (Int, Boolean?) -> Unit,
     iconPrefix: String? = null,
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalAlignment = Alignment.Start,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 12.dp,
+            bottom = 64.dp,
+        ),
     ) {
-        item {
-            Text(
-                text = "关注",
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(vertical = 8.dp),
-            )
+        itemsIndexed(
+            items = result,
+            key = { _, forum -> "favorite-${forum.fid}-${forum.id}" },
+        ) { index, forum ->
+            SegmentedListItem(
+                onClick = {
+                    onViewTopicSubject(forum.fid, true)
+                },
+                shapes = ListItemDefaults.segmentedShapes(
+                    index = index,
+                    count = result.size,
+                ),
+                leadingContent = {
+                    CommunityIcon(
+                        image = forumIconUrl(iconPrefix, forum.id),
+                    )
+                },
+                modifier = Modifier.padding(
+                    bottom = if (index == result.lastIndex) {
+                        0.dp
+                    } else {
+                        ListItemDefaults.SegmentedGap
+                    },
+                ),
+            ) {
+                Text(
+                    text = forum.name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
+    }
+}
 
-        items(result) { forum ->
-            ImageTextCard(
-                image = forumIconUrl(iconPrefix, forum.id),
-                title = forum.name,
-                description = "",
-                modifier = Modifier
-                    .clickable {
-                        onViewTopicSubject(forum.fid, true)
-                    }
-            )
-        }
+@Composable
+private fun CommunityIcon(
+    image: String,
+) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Topic,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.size(20.dp),
+        )
+        AsyncImage(
+            model = image,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
     }
 }
 

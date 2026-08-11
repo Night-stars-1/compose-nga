@@ -95,7 +95,7 @@ data class TopicCateGoryResponse(
                 @SerializedName("id")
                 val id: Int,
                 @SerializedName("info")
-                val info: String,
+                val info: String?,
                 @SerializedName("infoL")
                 val infoL: String,
                 @SerializedName("infoS")
@@ -112,5 +112,3 @@ data class TopicCateGoryResponse(
         }
     }
 }
-
-

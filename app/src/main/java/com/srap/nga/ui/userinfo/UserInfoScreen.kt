@@ -1,22 +1,25 @@
 package com.srap.nga.ui.userinfo
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -66,6 +69,7 @@ fun UserInfoScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -74,8 +78,8 @@ fun UserInfoScreen(
                         WindowInsetsSides.Top + WindowInsetsSides.Start
                     ),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 navigationIcon = {
@@ -85,7 +89,7 @@ fun UserInfoScreen(
                     Text(
                         text = if (onBackClick != null) {
                             if (firstVisibleItemIndex > 0) {
-                                viewModel.result?.username.toString()
+                                viewModel.result?.username ?: "用户详情"
                             } else "用户详情"
                         } else "我的",
                         maxLines = 1,
@@ -102,20 +106,14 @@ fun UserInfoScreen(
                 },
                 actions = {
                     if (onBackClick == null) {
-                        IconButton(
-                            onClick = {
-                                onViewFavorite()
-                            },
-                        ) {
+                        IconButton(onClick = onViewFavorite) {
                             Icon(Icons.Outlined.Grade, contentDescription = "收藏")
                         }
-                        IconButton(
-                            onClick = onViewSettings,
-                        ) {
+                        IconButton(onClick = onViewSettings) {
                             Icon(Icons.Outlined.Settings, contentDescription = "设置")
                         }
                     }
-                }
+                },
             )
         }
     ) { innerPadding ->
@@ -126,10 +124,11 @@ fun UserInfoScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Button(
-                    modifier = Modifier.size(112.dp, 48.dp),
-                    onClick = onViewLogin
+                FilledTonalButton(
+                    modifier = Modifier.widthIn(min = 120.dp),
+                    onClick = onViewLogin,
                 ) {
+                    Icon(Icons.AutoMirrored.Outlined.Login, contentDescription = null)
                     Text("登录")
                 }
             }
@@ -140,10 +139,27 @@ fun UserInfoScreen(
                     .fillMaxWidth()
                     .padding(innerPadding),
                 listState = listState,
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 12.dp,
+                    bottom = 32.dp,
+                ),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 item {
                     val result = viewModel.result
-                    if (result != null) {
+                    if (onBackClick == null) {
+                        if (result != null) {
+                            MyProfileHeader(result = result)
+                        } else {
+                            MyProfileHeaderPlaceholder(
+                                uid = id,
+                                name = viewModel.list.firstOrNull()?.author,
+                                isLoading = viewModel.isUserInfoLoading,
+                            )
+                        }
+                    } else if (result != null) {
                         UserInfoCard(
                             avatar = result.avatar,
                             name = result.username,
@@ -151,25 +167,23 @@ fun UserInfoScreen(
                                     "UID: ${result.uid} | 威望: ${result.rvrc}",
                             isFollowing = result.follow != 0,
                             followLoading = viewModel.isFollowLoading,
-                            onFollowClick = if (
-                                onBackClick != null && result.uid != StorageUtils.Uid
-                            ) {
+                            onFollowClick = if (result.uid != StorageUtils.Uid) {
                                 viewModel::toggleFollow
                             } else {
                                 null
                             },
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
 
-                items(viewModel.list) { item ->
+                items(
+                    items = viewModel.list,
+                    key = { it.tid },
+                ) { item ->
                     TopicSubjectCard(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .padding(top = 8.dp)
                             .clickable {
                                 onViewPost(item.tid)
                             },
@@ -182,6 +196,8 @@ fun UserInfoScreen(
                         },
                         name = item.author,
                         count = item.replies,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }

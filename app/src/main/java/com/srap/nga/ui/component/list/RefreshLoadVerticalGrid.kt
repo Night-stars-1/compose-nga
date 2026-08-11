@@ -1,5 +1,7 @@
 package com.srap.nga.ui.component.list
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -16,6 +18,9 @@ fun <T> RefreshLoadVerticalGrid(
     modifier: Modifier = Modifier,
     state: LazyGridState = rememberLazyGridState(),
     columns: GridCells,
+    contentPadding: PaddingValues = PaddingValues(),
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     content: LazyGridScope.() -> Unit,
 ) {
     RefreshLoadBase(
@@ -28,6 +33,9 @@ fun <T> RefreshLoadVerticalGrid(
             columns = columns,
             modifier = Modifier
                 .fillMaxWidth(),
+            contentPadding = contentPadding,
+            horizontalArrangement = horizontalArrangement,
+            verticalArrangement = verticalArrangement,
             content = content
         )
     }
