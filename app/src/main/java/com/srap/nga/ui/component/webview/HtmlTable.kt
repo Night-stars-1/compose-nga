@@ -61,9 +61,11 @@ fun HtmlTable(
     modifier: Modifier = Modifier,
     onViewPost: (Int) -> Unit,
     openUrl: (String) -> Unit,
+    onViewPostByPid: ((Int) -> Unit)? = null,
 ) {
     val currentOnViewPost by rememberUpdatedState(onViewPost)
     val currentOpenUrl by rememberUpdatedState(openUrl)
+    val currentOnViewPostByPid by rememberUpdatedState(onViewPostByPid)
     val containerColor = MaterialTheme.colorScheme.surface
     val dividerColor = MaterialTheme.colorScheme.outlineVariant
     val appearance = TableAppearance(
@@ -109,6 +111,7 @@ fun HtmlTable(
                         appearance = appearance,
                         onViewPost = { currentOnViewPost(it) },
                         openUrl = { currentOpenUrl(it) },
+                        onViewPostByPid = currentOnViewPostByPid,
                     )
                 }
             },
@@ -121,6 +124,7 @@ private fun TableViewHolder.renderTable(
     appearance: TableAppearance,
     onViewPost: (Int) -> Unit,
     openUrl: (String) -> Unit,
+    onViewPostByPid: ((Int) -> Unit)?,
 ) {
     scrollView.grid = null
     container.removeAllViews()
@@ -132,6 +136,7 @@ private fun TableViewHolder.renderTable(
                 appearance = appearance,
                 onViewPost = onViewPost,
                 openUrl = openUrl,
+                onViewPostByPid = onViewPostByPid,
                 fitImagesToWidth = true,
             ).apply {
                 setPadding(dp(12), dp(10), dp(12), dp(10))
@@ -166,6 +171,7 @@ private fun TableViewHolder.renderTable(
                 appearance = appearance,
                 onViewPost = onViewPost,
                 openUrl = openUrl,
+                onViewPostByPid = onViewPostByPid,
                 fitImagesToWidth = true,
             ).apply {
                 gravity = cell.alignment.toGravity() or Gravity.CENTER_VERTICAL
@@ -448,6 +454,7 @@ private fun LinearLayout.createHtmlTextView(
     appearance: TableAppearance,
     onViewPost: (Int) -> Unit,
     openUrl: (String) -> Unit,
+    onViewPostByPid: ((Int) -> Unit)?,
     fitImagesToWidth: Boolean,
 ): TextView = TextView(context).apply {
     includeFontPadding = false
@@ -456,7 +463,7 @@ private fun LinearLayout.createHtmlTextView(
     setTextSize(TypedValue.COMPLEX_UNIT_SP, appearance.bodyTextSizeSp)
     setTextColor(appearance.text)
     setLinkTextColor(appearance.link)
-    movementMethod = CustomLinkMovementMethod(onViewPost, openUrl)
+    movementMethod = CustomLinkMovementMethod(onViewPost, openUrl, onViewPostByPid)
     val normalizedHtml = html.replace(
         Regex("""\[img](https?://.+?)\[/img]""", RegexOption.IGNORE_CASE),
         """<img src="$1"/>""",

@@ -41,6 +41,7 @@ fun openInBrowser(url: String) {
 class CustomLinkMovementMethod(
     private val onViewPost: (Int) -> Unit,
     private val openUrl: (String) -> Unit,
+    private val onViewPostByPid: ((Int) -> Unit)? = null,
 ) : LinkMovementMethod() {
     override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return super.onTouchEvent(widget, buffer, event)
@@ -60,6 +61,16 @@ class CustomLinkMovementMethod(
 
     private fun handleCustomNavigation(url: String) {
         val uri = url.toUri()
+        parseNgaPostLink(url)?.let { link ->
+            link.tid?.let {
+                onViewPost(it)
+                return
+            }
+            link.pid?.let { pid ->
+                onViewPostByPid?.invoke(pid) ?: openUrl(url)
+                return
+            }
+        }
         if (url.contains("nga", ignoreCase = true) && url.contains("tid", ignoreCase = true)) {
             uri.getQueryParameter("tid")?.toIntOrNull()?.let(onViewPost)
             return
@@ -78,6 +89,7 @@ fun HtmlText(
     modifier: Modifier = Modifier,
     onViewPost: (Int) -> Unit,
     openUrl: (String) -> Unit,
+    onViewPostByPid: ((Int) -> Unit)? = null,
 ) {
     val contentColor = LocalContentColor.current.toArgb()
     val primary = MaterialTheme.colorScheme.primary.toArgb()
@@ -95,6 +107,7 @@ fun HtmlText(
                     textSizeSp = bodyTextSizeSp,
                     onViewPost = onViewPost,
                     openUrl = openUrl,
+                    onViewPostByPid = onViewPostByPid,
                 )
             }
         },
@@ -106,6 +119,7 @@ fun HtmlText(
                 textSizeSp = bodyTextSizeSp,
                 onViewPost = onViewPost,
                 openUrl = openUrl,
+                onViewPostByPid = onViewPostByPid,
             )
         },
     )
@@ -118,10 +132,11 @@ private fun TextView.updateNgaHtmlText(
     textSizeSp: Float,
     onViewPost: (Int) -> Unit,
     openUrl: (String) -> Unit,
+    onViewPostByPid: ((Int) -> Unit)?,
 ) {
     includeFontPadding = false
     setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeSp)
-    movementMethod = CustomLinkMovementMethod(onViewPost, openUrl)
+    movementMethod = CustomLinkMovementMethod(onViewPost, openUrl, onViewPostByPid)
     setTextColor(contentColor)
     setLinkTextColor(linkColor)
     if (tag == html) return

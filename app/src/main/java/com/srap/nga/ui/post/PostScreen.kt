@@ -82,6 +82,9 @@ fun PostScreen(
     val contentState = viewModel.contentState
     val postItems = viewModel.list
     val replyQuantity = viewModel.replyQuantity
+    val onViewPostByPid: (Int) -> Unit = { pid ->
+        viewModel.resolvePostByPid(pid, onViewPost)
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -182,6 +185,7 @@ fun PostScreen(
                                 onForumClick = onViewTopicSubject,
                                 onUserInfo = onUserInfo,
                                 openUrl = openUrl,
+                                onViewPostByPid = onViewPostByPid,
                                 isFollowing = viewModel.authorFollow != 0,
                                 followLoading = viewModel.isFollowLoading,
                                 onFollowClick = if (StorageUtils.Uid != 0 && post.author.uid != StorageUtils.Uid) {
@@ -246,6 +250,7 @@ fun PostScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     onViewPost = onViewPost,
                                     openUrl = openUrl,
+                                    onViewPostByPid = onViewPostByPid,
                                 )
                             }
                         }
@@ -272,6 +277,7 @@ fun PostHeader(
     onForumClick: (Int, Boolean?) -> Unit,
     onUserInfo: (Int) -> Unit,
     openUrl: (String) -> Unit,
+    onViewPostByPid: ((Int) -> Unit)? = null,
     isFollowing: Boolean = item.follow != 0,
     followLoading: Boolean = false,
     onFollowClick: (() -> Unit)? = null,
@@ -309,7 +315,8 @@ fun PostHeader(
             uid = item.author.uid.toString(),
             modifier = Modifier.fillMaxWidth(),
             onViewPost = onViewPost,
-            openUrl = openUrl
+            openUrl = openUrl,
+            onViewPostByPid = onViewPostByPid,
         )
     }
 

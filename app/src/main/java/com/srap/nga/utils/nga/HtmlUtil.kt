@@ -75,6 +75,7 @@ object HtmlUtil {
         modifier: Modifier = Modifier,
         onViewPost: (Int) -> Unit,
         openUrl: (String) -> Unit,
+        onViewPostByPid: ((Int) -> Unit)? = null,
         quoteDepth: Int = 0,
     ) {
         Column(modifier = modifier) {
@@ -87,6 +88,7 @@ object HtmlUtil {
                                 modifier = Modifier.fillMaxWidth(),
                                 onViewPost = onViewPost,
                                 openUrl = openUrl,
+                                onViewPostByPid = onViewPostByPid,
                             )
                         }
                     }
@@ -163,6 +165,7 @@ object HtmlUtil {
                                     modifier = Modifier.fillMaxWidth(),
                                     onViewPost = onViewPost,
                                     openUrl = openUrl,
+                                    onViewPostByPid = onViewPostByPid,
                                     quoteDepth = quoteDepth + 1,
                                 )
                             }
@@ -178,6 +181,7 @@ object HtmlUtil {
                                     modifier = Modifier.fillMaxWidth(),
                                     onViewPost = onViewPost,
                                     openUrl = openUrl,
+                                    onViewPostByPid = onViewPostByPid,
                                     quoteDepth = quoteDepth,
                                 )
                             }
@@ -191,6 +195,7 @@ object HtmlUtil {
                                 .padding(vertical = 4.dp),
                             onViewPost = onViewPost,
                             openUrl = openUrl,
+                            onViewPostByPid = onViewPostByPid,
                         )
                     }
                     is NgaContent.Poll -> {
@@ -213,6 +218,7 @@ object HtmlUtil {
         modifier: Modifier = Modifier,
         onViewPost: (Int) -> Unit,
         openUrl: (String) -> Unit,
+        onViewPostByPid: ((Int) -> Unit)? = null,
     ) {
         val cachedData = remember(html) { parsedContentCache.get(html) }
         val data by produceState(initialValue = cachedData, key1 = html) {
@@ -225,6 +231,14 @@ object HtmlUtil {
         val newImages = remember(data, uid) {
             data?.imageList?.map { Pair(it, "$it$uid") }.orEmpty()
         }
-        RenderNgaContent(data?.data, uid, newImages, modifier, onViewPost, openUrl)
+        RenderNgaContent(
+            ngaContent = data?.data,
+            uid = uid,
+            images = newImages,
+            modifier = modifier,
+            onViewPost = onViewPost,
+            openUrl = openUrl,
+            onViewPostByPid = onViewPostByPid,
+        )
     }
 }

@@ -46,8 +46,9 @@ class SignInterceptor : Interceptor {
             val formData = parseFormBody(originalBody)
 
             val fid = formData.getOrDefault("fid", EMPTY_STRING)
-            val tid = formData.getOrDefault("tid", EMPTY_STRING)
+//            val tid = formData.getOrDefault("tid", EMPTY_STRING)
             val uid = formData["uid"]
+                ?: formData["tid"]
                 ?: formData["id"]
                 ?: formData["pid"]
                 ?: EMPTY_STRING
@@ -56,7 +57,7 @@ class SignInterceptor : Interceptor {
 
 //            val sortedKeys = formData.keys.filter { !it.startsWith("__") }.sorted()
 //            val combinedValues = sortedKeys.joinToString("") { formData[it] ?: "" }
-            val md5String = "$appId$accessUid$accessToken$fid$tid$uid$key$value${timestamp}${Constants.SALT}"
+            val md5String = "$appId$accessUid$accessToken$fid$uid$key$value${timestamp}${Constants.SALT}"
             val md5Signature = StringUtils.md5(md5String)
 
             val newBodyBuilder = FormBody.Builder()

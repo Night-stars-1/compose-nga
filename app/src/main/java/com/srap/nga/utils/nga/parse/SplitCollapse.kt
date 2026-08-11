@@ -65,12 +65,8 @@ class SplitCollapse {
                     } else {
                         pendingHtml += child.outerHtml()
                     }
-                } else if (child.nodeName() != "br") {
-                    pendingHtml += child.outerHtml()
                 } else {
-                    val content = splitLeaf(pendingHtml)
-                    pendingHtml = EMPTY_STRING
-                    content?.let { dataStack.addAll(it) }
+                    pendingHtml += child.outerHtml()
                 }
             } else {
                 pendingHtml += child.outerHtml()

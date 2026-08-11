@@ -44,6 +44,17 @@ interface ApiService {
     ): Call<PostResponse>
 
     /**
+     * 通过 pid 解析回复链接对应的帖子，NGA 客户端使用 tid=0。
+     */
+    @FormUrlEncoded
+    @POST("app_api.php?__lib=post&__act=list")
+    fun getPostByPid(
+        @Field("pid") pid: Int,
+        @Field("page") page: Int = 1,
+        @Field("tid") tid: Int = 0,
+    ): Call<PostResponse>
+
+    /**
      * 点赞、点踩或取消当前操作
      */
     @FormUrlEncoded

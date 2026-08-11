@@ -59,7 +59,10 @@ data class PostResponse(
      * -1后为评论的数量
      */
     @SerializedName("vrows")
-    val vrows: Int
+    val vrows: Int,
+    /** 通过 pid 查询回复时返回的帖子 ID。 */
+    @SerializedName("tid")
+    val tid: Int = 0,
 ) : BaseResponse<PostResponse>() {
     data class Result(
         val pid: Int,
@@ -79,6 +82,9 @@ data class PostResponse(
         /** 当前账号的投票状态，接口可能返回空字符串或数字。 */
         @SerializedName("vote")
         val vote: String? = null,
+        /** 回复列表中包含的帖子 ID。 */
+        @SerializedName("tid")
+        val tid: Int = 0,
     ) {
         val voteState: Int
             get() = PostVote.normalize(vote?.toIntOrNull() ?: PostVote.NONE)

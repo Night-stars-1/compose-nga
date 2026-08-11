@@ -240,6 +240,30 @@ class PostViewModel @AssistedInject constructor(
         }
     }
 
+    fun resolvePostByPid(pid: Int, onResolved: (Int) -> Unit) {
+        if (pid <= 0) return
+
+        viewModelScope.launch {
+            networkRepo.getPostByPid(pid).collect { state ->
+                when (state) {
+                    is LoadingState.Error -> ToastUtils.show(state.errMsg)
+                    is LoadingState.Success -> {
+                        val resolvedTid = state.response.result
+                            .firstOrNull { it.tid > 0 }
+                            ?.tid
+                            ?.takeIf { it > 0 }
+                            ?: state.response.tid.takeIf { it > 0 }
+                        if (resolvedTid != null) {
+                            onResolved(resolvedTid)
+                        } else {
+                            ToastUtils.show("未找到对应帖子")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun updateAuthorFollow(follow: Int) {
         list = list.mapIndexed { index, post ->
             if (index == 0) {

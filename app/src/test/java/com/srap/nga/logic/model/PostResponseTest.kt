@@ -86,4 +86,22 @@ class PostResponseTest {
 
         assertEquals(PostVote.DISLIKE, result.voteState)
     }
+
+    @Test
+    fun result_mapsContainingThreadId() {
+        val result = gson.fromJson(
+            """
+            {
+              "pid": 865494843,
+              "tid": 47332975,
+              "author": {"uid": 7, "username": "tester", "avatar": ""},
+              "content": "reply",
+              "attches": []
+            }
+            """.trimIndent(),
+            PostResponse.Result::class.java,
+        )
+
+        assertEquals(47332975, result.tid)
+    }
 }

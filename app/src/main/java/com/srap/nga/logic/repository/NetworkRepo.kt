@@ -41,6 +41,11 @@ class NetworkRepo @Inject constructor(
         apiService.getPost(id, page).await()
     }
 
+    /** 通过回复 ID 获取 NGA 返回的帖子信息。 */
+    fun getPostByPid(pid: Int, page: Int = 1) = fire {
+        apiService.getPostByPid(pid, page).await()
+    }
+
     /**
      * 点赞、点踩或取消当前操作
      */
