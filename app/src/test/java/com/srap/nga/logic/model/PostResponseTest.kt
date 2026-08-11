@@ -104,4 +104,49 @@ class PostResponseTest {
 
         assertEquals(47332975, result.tid)
     }
+
+    @Test
+    fun response_readsContainingThreadIdFromReply() {
+        val response = gson.fromJson(
+            """
+            {
+              "result": [
+                {
+                  "pid": 865494843,
+                  "tid": 47332975,
+                  "author": {"uid": 7, "username": "tester", "avatar": ""},
+                  "content": "reply",
+                  "attches": []
+                }
+              ],
+              "tid": 123
+            }
+            """.trimIndent(),
+            PostResponse::class.java,
+        )
+
+        assertEquals(47332975, response.containingThreadId)
+    }
+
+    @Test
+    fun response_fallsBackToTopLevelThreadId() {
+        val response = gson.fromJson(
+            """
+            {
+              "result": [
+                {
+                  "pid": 865494843,
+                  "author": {"uid": 7, "username": "tester", "avatar": ""},
+                  "content": "reply",
+                  "attches": []
+                }
+              ],
+              "tid": 47332975
+            }
+            """.trimIndent(),
+            PostResponse::class.java,
+        )
+
+        assertEquals(47332975, response.containingThreadId)
+    }
 }

@@ -62,12 +62,16 @@ class CustomLinkMovementMethod(
     private fun handleCustomNavigation(url: String) {
         val uri = url.toUri()
         parseNgaPostLink(url)?.let { link ->
+            if (link.pid != null && onViewPostByPid != null) {
+                onViewPostByPid.invoke(link.pid)
+                return
+            }
             link.tid?.let {
                 onViewPost(it)
                 return
             }
-            link.pid?.let { pid ->
-                onViewPostByPid?.invoke(pid) ?: openUrl(url)
+            if (link.pid != null) {
+                openUrl(url)
                 return
             }
         }

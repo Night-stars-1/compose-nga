@@ -52,14 +52,17 @@ import com.srap.nga.utils.StorageUtils
 
 /**
  * 帖子详细页面
- * @param id 帖子id
+ * @param id 主题 ID
+ * @param pid 回复 ID，为 0 时按主题 ID 加载
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PostScreen(
     id: Int,
+    pid: Int,
     onBackClick: () -> Unit,
     onViewPost: (Int) -> Unit,
+    onViewPostByPid: (Int) -> Unit,
     onViewTopicSubject: (Int, Boolean?) -> Unit,
     onUserInfo: (Int) -> Unit,
     isLoggedIn: Boolean,
@@ -69,8 +72,9 @@ fun PostScreen(
     val context = LocalContext.current
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
     val favState = rememberFavState()
-    val viewModel = hiltViewModel<PostViewModel, PostViewModel.ViewModelFactory>(key = id.toString()) { factory ->
-        factory.create(id)
+    val viewModelKey = if (pid > 0) "pid-$pid" else "tid-$id"
+    val viewModel = hiltViewModel<PostViewModel, PostViewModel.ViewModelFactory>(key = viewModelKey) { factory ->
+        factory.create(id, pid)
     }
     val listState = rememberLazyListState(
         cacheWindow = LazyLayoutCacheWindow(
@@ -82,9 +86,7 @@ fun PostScreen(
     val contentState = viewModel.contentState
     val postItems = viewModel.list
     val replyQuantity = viewModel.replyQuantity
-    val onViewPostByPid: (Int) -> Unit = { pid ->
-        viewModel.resolvePostByPid(pid, onViewPost)
-    }
+    val threadId = viewModel.threadId
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -107,6 +109,7 @@ fun PostScreen(
                 },
                 actions = {
                     IconButton(
+                        enabled = threadId > 0,
                         onClick = {
                             dropdownMenuExpanded = true
                         }
@@ -130,9 +133,10 @@ fun PostScreen(
                                     contentDescription = null,
                                 )
                             },
+                            enabled = threadId > 0,
                             onClick = {
                                 dropdownMenuExpanded = false
-                                favState.open(id = id)
+                                favState.open(id = threadId)
                             }
                         )
                         DropdownMenuItem(
@@ -143,9 +147,10 @@ fun PostScreen(
                                     contentDescription = null,
                                 )
                             },
+                            enabled = threadId > 0,
                             onClick = {
                                 dropdownMenuExpanded = false
-                                context.sharePost(id)
+                                context.sharePost(threadId)
                             },
                         )
                     }

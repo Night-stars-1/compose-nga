@@ -60,7 +60,7 @@ data class PostResponse(
      */
     @SerializedName("vrows")
     val vrows: Int,
-    /** 通过 pid 查询回复时返回的帖子 ID。 */
+    /** 通过 pid 获取回复时返回的主题 ID。 */
     @SerializedName("tid")
     val tid: Int = 0,
 ) : BaseResponse<PostResponse>() {
@@ -82,7 +82,7 @@ data class PostResponse(
         /** 当前账号的投票状态，接口可能返回空字符串或数字。 */
         @SerializedName("vote")
         val vote: String? = null,
-        /** 回复列表中包含的帖子 ID。 */
+        /** 回复所属的主题 ID。 */
         @SerializedName("tid")
         val tid: Int = 0,
     ) {
@@ -116,3 +116,7 @@ data class PostResponse(
         )
     }
 }
+
+internal val PostResponse.containingThreadId: Int?
+    get() = result.firstOrNull { it.tid > 0 }?.tid
+        ?: tid.takeIf { it > 0 }

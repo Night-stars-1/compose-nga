@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.srap.nga.logic.model.PostVote
 import com.srap.nga.logic.model.PostResponse
 import com.srap.nga.logic.model.applyPostVoteResult
+import com.srap.nga.logic.model.containingThreadId
 import com.srap.nga.logic.model.explicitVoteState
 import com.srap.nga.logic.model.mergePostVoteState
 import com.srap.nga.logic.preferences.PostVoteStore
@@ -31,17 +32,24 @@ sealed interface PostContentState {
 
 @HiltViewModel(assistedFactory = PostViewModel.ViewModelFactory::class)
 class PostViewModel @AssistedInject constructor(
-    @Assisted("id") var id: Int,
+    @Assisted("id") initialThreadId: Int,
+    @Assisted("pid") private val initialPid: Int,
     networkRepo: NetworkRepo,
     private val postVoteStore: PostVoteStore,
 ) : BaseRefreshLoadViewModel<PostResponse.Result>(networkRepo) {
 
     @AssistedFactory
     interface ViewModelFactory {
-        fun create(@Assisted("id") id: Int): PostViewModel
+        fun create(
+            @Assisted("id") id: Int,
+            @Assisted("pid") pid: Int,
+        ): PostViewModel
     }
 
     var response by mutableStateOf<PostResponse?>(null)
+
+    var threadId by mutableIntStateOf(initialThreadId)
+        private set
 
     var contentState by mutableStateOf<PostContentState>(PostContentState.Loading)
         private set
@@ -63,7 +71,12 @@ class PostViewModel @AssistedInject constructor(
     override fun fetchData() {
         val requestedPage = page
         viewModelScope.launch {
-            networkRepo.getPost(id, requestedPage)
+            val request = if (initialPid > 0) {
+                networkRepo.getPostByPid(initialPid, requestedPage)
+            } else {
+                networkRepo.getPost(threadId, requestedPage)
+            }
+            request
                 .collect { state ->
                     when (state) {
                         is LoadingState.Error -> {
@@ -74,21 +87,29 @@ class PostViewModel @AssistedInject constructor(
                         }
                         is LoadingState.Success -> {
                             val loadedResponse = state.response
+                            loadedResponse.containingThreadId?.let { resolvedThreadId ->
+                                threadId = resolvedThreadId
+                            }
                             val userId = StorageUtils.Uid
+                            val voteThreadId = threadId.takeIf { it > 0 }
                             val loadedPosts = loadedResponse.result.map { post ->
-                                val persistedVote = postVoteStore.getVote(
-                                    userId = userId,
-                                    threadId = id,
-                                    postId = post.pid,
-                                )
-                                val mergedPost = post.mergePostVoteState(persistedVote)
-                                post.explicitVoteState?.let { explicitVote ->
-                                    postVoteStore.setVote(
+                                val persistedVote = voteThreadId?.let { id ->
+                                    postVoteStore.getVote(
                                         userId = userId,
                                         threadId = id,
                                         postId = post.pid,
-                                        vote = explicitVote,
                                     )
+                                }
+                                val mergedPost = post.mergePostVoteState(persistedVote)
+                                if (voteThreadId != null) {
+                                    post.explicitVoteState?.let { explicitVote ->
+                                        postVoteStore.setVote(
+                                            userId = userId,
+                                            threadId = voteThreadId,
+                                            postId = post.pid,
+                                            vote = explicitVote,
+                                        )
+                                    }
                                 }
                                 mergedPost
                             }
@@ -207,6 +228,7 @@ class PostViewModel @AssistedInject constructor(
         val atPage = pageByPid[pid] ?: return
         val userId = StorageUtils.Uid
         if (userId <= 0) return
+        val targetThreadId = threadId.takeIf { it > 0 } ?: return
 
         pendingVotes = pendingVotes + (pid to value)
         viewModelScope.launch {
@@ -214,7 +236,7 @@ class PostViewModel @AssistedInject constructor(
                 networkRepo.votePost(
                     pid = pid,
                     value = value,
-                    tid = id,
+                    tid = targetThreadId,
                     atPage = atPage,
                 ).collect { state ->
                     when (state) {
@@ -240,30 +262,6 @@ class PostViewModel @AssistedInject constructor(
         }
     }
 
-    fun resolvePostByPid(pid: Int, onResolved: (Int) -> Unit) {
-        if (pid <= 0) return
-
-        viewModelScope.launch {
-            networkRepo.getPostByPid(pid).collect { state ->
-                when (state) {
-                    is LoadingState.Error -> ToastUtils.show(state.errMsg)
-                    is LoadingState.Success -> {
-                        val resolvedTid = state.response.result
-                            .firstOrNull { it.tid > 0 }
-                            ?.tid
-                            ?.takeIf { it > 0 }
-                            ?: state.response.tid.takeIf { it > 0 }
-                        if (resolvedTid != null) {
-                            onResolved(resolvedTid)
-                        } else {
-                            ToastUtils.show("未找到对应帖子")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private fun updateAuthorFollow(follow: Int) {
         list = list.mapIndexed { index, post ->
             if (index == 0) {
@@ -282,7 +280,7 @@ class PostViewModel @AssistedInject constructor(
     ) {
         postVoteStore.setVote(
             userId = userId,
-            threadId = id,
+            threadId = threadId,
             postId = pid,
             vote = PostVote.nextState(requestedVote, lastVote),
         )

@@ -96,8 +96,10 @@ fun AppNavigation(
             if (id != null) {
                 PostScreen(
                     id = id,
+                    pid = 0,
                     onBackClick = navController::popBackStack,
                     onViewPost = navController::navigateToPost,
+                    onViewPostByPid = navController::navigateToPostByPid,
                     onViewTopicSubject = navController::navigateToTopicSubject,
                     onUserInfo = navController::navigateToUserInfo,
                     isLoggedIn = isLoggedIn,
@@ -106,6 +108,34 @@ fun AppNavigation(
                 )
             } else {
                 Text("帖子ID为空")
+            }
+        }
+
+        // 回复详细页
+        composable(
+            "post/pid/{pid}",
+            arguments = listOf(
+                navArgument("pid") {
+                    type = NavType.IntType
+                },
+            ),
+        ) {
+            val pid = it.arguments?.getInt("pid")
+            if (pid != null) {
+                PostScreen(
+                    id = 0,
+                    pid = pid,
+                    onBackClick = navController::popBackStack,
+                    onViewPost = navController::navigateToPost,
+                    onViewPostByPid = navController::navigateToPostByPid,
+                    onViewTopicSubject = navController::navigateToTopicSubject,
+                    onUserInfo = navController::navigateToUserInfo,
+                    isLoggedIn = isLoggedIn,
+                    onViewLogin = navController::navigateToLogin,
+                    openUrl = navController::openUrl,
+                )
+            } else {
+                Text("回复ID为空")
             }
         }
 
@@ -308,6 +338,10 @@ fun NavHostController.navigateToHome() {
 
 fun NavHostController.navigateToPost(id: Int) {
     navigate("post/$id")
+}
+
+fun NavHostController.navigateToPostByPid(pid: Int) {
+    navigate("post/pid/$pid")
 }
 
 fun NavHostController.navigateToTopicSubject(id: Int, isFavor: Boolean?) {

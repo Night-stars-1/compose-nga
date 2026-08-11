@@ -44,7 +44,7 @@ interface ApiService {
     ): Call<PostResponse>
 
     /**
-     * 通过 pid 解析回复链接对应的帖子，NGA 客户端使用 tid=0。
+     * 通过 pid 获取回复，返回结构与帖子列表一致，NGA 客户端使用 tid=0。
      */
     @FormUrlEncoded
     @POST("app_api.php?__lib=post&__act=list")
