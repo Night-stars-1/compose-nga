@@ -79,6 +79,11 @@ class CustomLinkMovementMethod(
             uri.getQueryParameter("tid")?.toIntOrNull()?.let(onViewPost)
             return
         }
+        if (parseNgaUserLink(url) != null) {
+            // 交给 openUrl 统一分发，会跳转到应用内用户页面。
+            openUrl(url)
+            return
+        }
         if (url.contains("nga.cn/", ignoreCase = true)) {
             openUrl(url)
             return

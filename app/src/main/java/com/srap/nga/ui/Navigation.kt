@@ -16,6 +16,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.srap.nga.ui.component.webview.parseNgaUserLink
 import com.srap.nga.ui.fav.FavoriteContentScreen
 import com.srap.nga.ui.fav.FavoriteScreen
 import com.srap.nga.ui.image.ImagePreviewScreen
@@ -391,5 +392,10 @@ fun NavHostController.navigateToFavoriteContent(id: Int, title: String) {
 }
 
 fun NavHostController.openUrl(url: String) {
+    // 用户中心链接直接跳转到应用内的用户页面，而不是 WebView。
+    parseNgaUserLink(url)?.let { uid ->
+        navigateToUserInfo(uid)
+        return
+    }
     navigate("webview/${Uri.encode(url)}")
 }
