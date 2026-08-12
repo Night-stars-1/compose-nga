@@ -92,6 +92,9 @@ fun SettingsScreen(
     updateViewModel.newRelease?.let { release ->
         AppUpdateDialog(
             release = release,
+            isDownloading = updateViewModel.isDownloading,
+            downloadProgress = updateViewModel.downloadProgress,
+            onDownload = updateViewModel::downloadAndInstall,
             onDismiss = updateViewModel::dismissUpdate,
         )
     }

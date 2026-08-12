@@ -8,10 +8,13 @@ import com.srap.nga.BuildConfig
 import com.srap.nga.logic.model.GithubReleaseResponse
 import com.srap.nga.logic.repository.NetworkRepo
 import com.srap.nga.logic.state.LoadingState
+import com.srap.nga.myApplication
 import com.srap.nga.ui.base.BaseViewModel
+import com.srap.nga.utils.ApkInstaller
 import com.srap.nga.utils.ToastUtils
 import com.srap.nga.utils.VersionUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,6 +49,33 @@ class AppUpdateViewModel @Inject constructor(
                     }
                 }
                 isChecking = false
+            }
+        }
+    }
+
+    var isDownloading by mutableStateOf(false)
+        private set
+
+    /** 下载进度 0..100 */
+    var downloadProgress by mutableStateOf(0)
+        private set
+
+    /** 下载 APK 并调起系统安装器 */
+    fun downloadAndInstall() {
+        val url = newRelease?.apkDownloadUrl ?: return
+        if (isDownloading) return
+        isDownloading = true
+        downloadProgress = 0
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val file = ApkInstaller.download(myApplication, url) { percent ->
+                    downloadProgress = percent
+                }
+                ApkInstaller.install(myApplication, file)
+            } catch (e: Exception) {
+                ToastUtils.show("下载失败: ${e.message}")
+            } finally {
+                isDownloading = false
             }
         }
     }

@@ -120,4 +120,7 @@ dependencies {
 
     // HTML解析库
     implementation(libs.jsoup)
+
+    // Markdown 渲染（更新日志）
+    implementation(libs.markdown.renderer.m3)
 }

@@ -18,9 +18,12 @@ data class GithubReleaseResponse(
         @SerializedName("browser_download_url") val browserDownloadUrl: String = "",
     )
 
-    /** APK 下载地址，无 APK 资源时退回 Release 页面 */
-    val downloadUrl: String
+    /** APK 资源直链，Release 未附带 APK 时为 null */
+    val apkDownloadUrl: String?
         get() = assets.firstOrNull { it.name.endsWith(".apk", ignoreCase = true) }
             ?.browserDownloadUrl
-            ?: htmlUrl
+
+    /** 浏览器打开地址，优先 APK 直链，无 APK 资源时退回 Release 页面 */
+    val downloadUrl: String
+        get() = apkDownloadUrl ?: htmlUrl
 }
