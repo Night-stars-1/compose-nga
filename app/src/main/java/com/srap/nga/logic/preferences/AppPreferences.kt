@@ -25,6 +25,7 @@ object AppPreferences {
     private const val ThemeModeKey = "themeMode"
     private const val DynamicColorKey = "dynamicColor"
     private const val ForumPostImageCountKey = "forumPostImageCount"
+    private const val DefaultFullscreenInputKey = "defaultFullscreenInput"
 
     private val preferences by lazy {
         myApplication.getSharedPreferences(PreferencesName, Context.MODE_PRIVATE)
@@ -50,6 +51,11 @@ object AppPreferences {
     }
     val forumPostImageCount by lazy { _forumPostImageCount.asStateFlow() }
 
+    private val _defaultFullscreenInput by lazy {
+        MutableStateFlow(preferences.getBoolean(DefaultFullscreenInputKey, false))
+    }
+    val defaultFullscreenInput by lazy { _defaultFullscreenInput.asStateFlow() }
+
     fun setThemeMode(value: AppThemeMode) {
         _themeMode.value = value
         preferences.edit { putString(ThemeModeKey, value.name) }
@@ -58,6 +64,11 @@ object AppPreferences {
     fun setDynamicColor(value: Boolean) {
         _dynamicColor.value = value
         preferences.edit { putBoolean(DynamicColorKey, value) }
+    }
+
+    fun setDefaultFullscreenInput(value: Boolean) {
+        _defaultFullscreenInput.value = value
+        preferences.edit { putBoolean(DefaultFullscreenInputKey, value) }
     }
 
     fun setForumPostImageCount(value: Int) {

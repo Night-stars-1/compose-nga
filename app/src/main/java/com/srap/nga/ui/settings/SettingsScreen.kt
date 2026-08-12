@@ -28,6 +28,7 @@ fun SettingsScreen(
     val themeMode by AppPreferences.themeMode.collectAsState()
     val dynamicColor by AppPreferences.dynamicColor.collectAsState()
     val forumPostImageCount by AppPreferences.forumPostImageCount.collectAsState()
+    val defaultFullscreenInput by AppPreferences.defaultFullscreenInput.collectAsState()
     val supportsDynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
     Scaffold(
@@ -72,6 +73,8 @@ fun SettingsScreen(
                     minImageCount = AppPreferences.MIN_FORUM_POST_IMAGE_COUNT,
                     maxImageCount = AppPreferences.MAX_FORUM_POST_IMAGE_COUNT,
                     onForumPostImageCountChange = AppPreferences::setForumPostImageCount,
+                    defaultFullscreenInput = defaultFullscreenInput,
+                    onDefaultFullscreenInputChange = AppPreferences::setDefaultFullscreenInput,
                 )
             }
             item {

@@ -17,6 +17,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Topic
@@ -130,15 +131,12 @@ fun PostReplyCard(
     likeCount: Int = 0,
     voteState: Int = PostVote.NONE,
     pendingVote: Int? = null,
+    onReplyClick: (() -> Unit)? = null,
     onLikeClick: (() -> Unit)? = null,
     onDislikeClick: (() -> Unit)? = null,
     message: @Composable () -> Unit
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-    ) {
+    val cardContent: @Composable () -> Unit = {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         PostAuthor(
             avatar = avatar,
@@ -161,9 +159,29 @@ fun PostReplyCard(
             likeCount = likeCount,
             voteState = voteState,
             pendingVote = pendingVote,
+            onReplyClick = onReplyClick,
             onLikeClick = onLikeClick,
             onDislikeClick = onDislikeClick,
         )
+        }
+    }
+    if (onReplyClick != null) {
+        // 点击卡片任意位置即可回复该楼，不必精确点到回复按钮。
+        Surface(
+            onClick = onReplyClick,
+            modifier = modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
+            cardContent()
+        }
+    } else {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
+            cardContent()
         }
     }
 }@Composable
@@ -271,6 +289,7 @@ private fun PostReplyMetadata(
     likeCount: Int,
     voteState: Int,
     pendingVote: Int?,
+    onReplyClick: (() -> Unit)?,
     onLikeClick: (() -> Unit)?,
     onDislikeClick: (() -> Unit)?,
 ) {
@@ -289,6 +308,20 @@ private fun PostReplyMetadata(
             )
         } else {
             Spacer(modifier = Modifier.weight(1f))
+        }
+
+        if (onReplyClick != null) {
+            IconButton(
+                onClick = onReplyClick,
+                modifier = Modifier.size(36.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Reply,
+                    contentDescription = "回复评论",
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
 
         PostVoteActions(
