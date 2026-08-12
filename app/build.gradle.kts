@@ -16,8 +16,9 @@ android {
         applicationId = "com.srap.nga"
         minSdk = 26
         targetSdk = 37
-        versionCode = 10
-        versionName = "测试版"
+        // CI 构建时通过环境变量注入版本号（见 .github/workflows/build.yml），本地构建使用默认值
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 11
+        versionName = System.getenv("VERSION_NAME") ?: "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
