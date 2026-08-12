@@ -21,16 +21,21 @@ fun ImagePreviewTransformScreen() {
     val scope = rememberCoroutineScope()
 
     if (previewerState != null) {
-        if (previewerState.canClose) {
-            BackHandler {
-                scope.launch {
-                    try {
-                        // 点击界面后关闭组件
-                        previewerState.exitTransform()
-                    } catch (e: IllegalStateException) {
-                        Log.e(TAG, "播放退出动画出错: ${e.message}", e)
-                        previewerState.close()
-                    }
+        // 只要预览处于活动状态（包括打开/关闭动画进行中）就拦截返回键，
+        // 否则动画期间 canClose 为 false 时返回事件会落到 NavController，把下层页面弹掉。
+        val previewActive = previewerState.visible ||
+            previewerState.animating ||
+            previewerState.visibleTarget == true
+        BackHandler(enabled = previewActive) {
+            // 正在播放关闭动画时不再重复触发
+            if (previewerState.visibleTarget == false) return@BackHandler
+            scope.launch {
+                try {
+                    // exitTransform 会先取消未完成的打开动画，再从当前位置收回
+                    previewerState.exitTransform()
+                } catch (e: IllegalStateException) {
+                    Log.e(TAG, "播放退出动画出错: ${e.message}", e)
+                    previewerState.close()
                 }
             }
         }
