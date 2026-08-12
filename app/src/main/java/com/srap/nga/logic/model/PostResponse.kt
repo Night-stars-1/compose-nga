@@ -85,6 +85,9 @@ data class PostResponse(
         /** 回复所属的主题 ID。 */
         @SerializedName("tid")
         val tid: Int = 0,
+        /** 楼层号，构造评论引用时由 NGA 放入 pid 标记。 */
+        @SerializedName("lou")
+        val lou: Int = 0,
     ) {
         val voteState: Int
             get() = PostVote.normalize(vote?.toIntOrNull() ?: PostVote.NONE)

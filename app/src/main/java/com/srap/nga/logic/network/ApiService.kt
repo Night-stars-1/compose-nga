@@ -9,6 +9,7 @@ import com.srap.nga.logic.model.FollowResponse
 import com.srap.nga.logic.model.ForumBySearchResponse
 import com.srap.nga.logic.model.SearchPromptResponse
 import com.srap.nga.logic.model.PostResponse
+import com.srap.nga.logic.model.PostCommentResponse
 import com.srap.nga.logic.model.PostVoteResponse
 import com.srap.nga.logic.model.QRCodeLoginResponse
 import com.srap.nga.logic.model.RecTopicResponse
@@ -53,6 +54,37 @@ interface ApiService {
         @Field("page") page: Int = 1,
         @Field("tid") tid: Int = 0,
     ): Call<PostResponse>
+
+    /**
+     * 回复主题。
+     */
+    @FormUrlEncoded
+    @POST("app_api.php?__lib=post&__act=reply")
+    fun submitComment(
+        @Field("fid") fid: Int,
+        @Field("tid") tid: Int,
+        @Field("content") content: String,
+        @Field("action") action: String = "reply",
+        @Field("anony") anony: Int = 0,
+        @Field("live") live: Int = 0,
+    ): Call<PostCommentResponse>
+
+    /**
+     * 回复指定评论。
+     *
+     * 评论回复使用独立的 quote 接口，并且必须携带被回复评论的 pid。
+     */
+    @FormUrlEncoded
+    @POST("app_api.php?__lib=post&__act=quote")
+    fun submitCommentQuote(
+        @Field("fid") fid: Int,
+        @Field("tid") tid: Int,
+        @Field("pid") pid: Int,
+        @Field("content") content: String,
+        @Field("anony") anony: Int = 0,
+        @Field("live") live: Int = 0,
+        @Field("action") action: String = "quote",
+    ): Call<PostCommentResponse>
 
     /**
      * 点赞、点踩或取消当前操作

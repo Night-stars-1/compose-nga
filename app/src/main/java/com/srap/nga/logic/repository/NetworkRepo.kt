@@ -47,6 +47,43 @@ class NetworkRepo @Inject constructor(
     }
 
     /**
+     * 回复主题。
+     */
+    fun submitComment(
+        fid: Int,
+        tid: Int,
+        content: String,
+        action: String = "reply",
+        anony: Int = 0,
+        live: Int = 0,
+    ) = fire {
+        apiService.submitComment(fid, tid, content, action, anony, live).await()
+    }
+
+    /**
+     * 回复指定评论。
+     */
+    fun submitQuote(
+        fid: Int,
+        tid: Int,
+        pid: Int,
+        content: String,
+        anony: Int = 0,
+        live: Int = 0,
+        action: String = "quote",
+    ) = fire {
+        apiService.submitCommentQuote(
+            fid = fid,
+            tid = tid,
+            pid = pid,
+            content = content,
+            anony = anony,
+            live = live,
+            action = action,
+        ).await()
+    }
+
+    /**
      * 点赞、点踩或取消当前操作
      */
     fun votePost(pid: Int, value: Int, tid: Int, atPage: Int) = fire {

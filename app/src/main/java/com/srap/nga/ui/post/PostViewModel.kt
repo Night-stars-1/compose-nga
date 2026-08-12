@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.srap.nga.logic.model.PostVote
 import com.srap.nga.logic.model.PostResponse
 import com.srap.nga.logic.model.applyPostVoteResult
+import com.srap.nga.logic.model.buildNgaQuoteContent
 import com.srap.nga.logic.model.containingThreadId
 import com.srap.nga.logic.model.explicitVoteState
 import com.srap.nga.logic.model.mergePostVoteState
@@ -23,6 +24,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 sealed interface PostContentState {
     data object Loading : PostContentState
@@ -66,12 +68,19 @@ class PostViewModel @AssistedInject constructor(
     var pendingVotes by mutableStateOf<Map<Int, Int>>(emptyMap())
         private set
 
+    /** 是否正在提交评论。 */
+    var isCommentSending by mutableStateOf(false)
+        private set
+
     private val pageByPid = mutableMapOf<Int, Int>()
+    private var refreshAfterCurrentLoad = false
 
     override fun fetchData() {
         val requestedPage = page
         viewModelScope.launch {
-            val request = if (initialPid > 0) {
+            // 首次通过 pid 打开时需要定位主题；定位成功后刷新直接使用主题接口，
+            // 这样发表评论后可以拿到完整的最新主题和回复列表。
+            val request = if (initialPid > 0 && threadId <= 0) {
                 networkRepo.getPostByPid(initialPid, requestedPage)
             } else {
                 networkRepo.getPost(threadId, requestedPage)
@@ -157,6 +166,10 @@ class PostViewModel @AssistedInject constructor(
                         }
                     }
                     super.fetchData()
+                    if (refreshAfterCurrentLoad) {
+                        refreshAfterCurrentLoad = false
+                        refresh()
+                    }
                 }
             }
         }
@@ -174,6 +187,73 @@ class PostViewModel @AssistedInject constructor(
         if (!isRefreshing && !isLoadMore) {
             contentState = PostContentState.Loading
             isLoaded = false
+            refresh()
+        }
+    }
+
+    /** 提交主题评论，指定回复目标时使用评论引用接口。 */
+    fun submitComment(
+        content: String,
+        replyTo: PostResponse.Result? = null,
+        onSuccess: () -> Unit = {},
+    ) {
+        val normalizedContent = content.trim()
+        if (normalizedContent.isBlank() || isCommentSending) return
+
+        val forumId = response?.fid ?: 0
+        val targetThreadId = threadId
+        if (forumId == 0 || targetThreadId <= 0) {
+            ToastUtils.show("帖子信息尚未加载完成")
+            return
+        }
+        if (replyTo != null && (replyTo.pid <= 0 || replyTo.lou <= 0)) {
+            ToastUtils.show("评论信息不完整，暂时无法回复")
+            return
+        }
+
+        isCommentSending = true
+        viewModelScope.launch {
+            try {
+                val submitState = if (replyTo == null) {
+                    networkRepo.submitComment(
+                        fid = forumId,
+                        tid = targetThreadId,
+                        content = normalizedContent,
+                    ).first()
+                } else {
+                    networkRepo.submitQuote(
+                        fid = forumId,
+                        tid = targetThreadId,
+                        pid = replyTo.pid,
+                        content = buildNgaQuoteContent(
+                            post = replyTo,
+                            threadId = targetThreadId,
+                            replyContent = normalizedContent,
+                        ),
+                    ).first()
+                }
+                when (submitState) {
+                    is LoadingState.Error -> ToastUtils.show(submitState.errMsg)
+                    is LoadingState.Success -> {
+                        ToastUtils.show(
+                            submitState.response.resultMessage?.takeIf { it.isNotBlank() }
+                                ?: if (replyTo == null) "评论成功" else "回复成功"
+                        )
+                        onSuccess()
+                        refreshAfterComment()
+                    }
+                }
+            } finally {
+                isCommentSending = false
+            }
+        }
+    }
+
+    /** 当前列表请求结束后再刷新，避免评论成功时与下拉刷新或加载更多互相覆盖。 */
+    private fun refreshAfterComment() {
+        if (isRefreshing || isLoadMore) {
+            refreshAfterCurrentLoad = true
+        } else {
             refresh()
         }
     }

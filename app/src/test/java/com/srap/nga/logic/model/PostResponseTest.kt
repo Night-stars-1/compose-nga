@@ -106,6 +106,24 @@ class PostResponseTest {
     }
 
     @Test
+    fun result_mapsFloorNumberForQuote() {
+        val result = gson.fromJson(
+            """
+            {
+              "pid": 865494843,
+              "lou": 6,
+              "author": {"uid": 7, "username": "tester", "avatar": ""},
+              "content": "reply",
+              "attches": []
+            }
+            """.trimIndent(),
+            PostResponse.Result::class.java,
+        )
+
+        assertEquals(6, result.lou)
+    }
+
+    @Test
     fun response_readsContainingThreadIdFromReply() {
         val response = gson.fromJson(
             """

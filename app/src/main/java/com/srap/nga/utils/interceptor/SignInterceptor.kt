@@ -53,10 +53,27 @@ class SignInterceptor : Interceptor {
                 ?: EMPTY_STRING
             val key = formData.getOrDefault("key", EMPTY_STRING)
             val value = formData.getOrDefault("value", EMPTY_STRING)
+            val requestLib = request.url.queryParameter("__lib")
+            val requestAction = request.url.queryParameter("__act")
 
 //            val sortedKeys = formData.keys.filter { !it.startsWith("__") }.sorted()
 //            val combinedValues = sortedKeys.joinToString("") { formData[it] ?: "" }
-            val md5String = "$appId$accessUid$accessToken$fid$tid$pid$uid$key$value${timestamp}${Constants.SALT}"
+            val md5String = signPayload(
+                lib = requestLib,
+                action = requestAction,
+                appId = appId,
+                accessUid = accessUid,
+                accessToken = accessToken,
+                fid = fid,
+                tid = tid,
+                pid = pid,
+                uid = uid,
+                key = key,
+                value = value,
+                content = formData.getOrDefault("content", EMPTY_STRING),
+                subject = formData.getOrDefault("subject", EMPTY_STRING),
+                timestamp = timestamp,
+            )
             val md5Signature = StringUtils.md5(md5String)
 
             val newBodyBuilder = FormBody.Builder()
@@ -66,6 +83,14 @@ class SignInterceptor : Interceptor {
                 .add("t", timestamp)
                 .add("sign", md5Signature)
                 .add("__output", "14")
+
+            // 发帖、主题回复和评论回复都需要官方客户端校验值。
+            if (requiresNgaClientChecksum(lib = requestLib, action = requestAction)) {
+                newBodyBuilder.add(
+                    "__ngaClientChecksum",
+                    ngaClientChecksum(accessUid, timestamp),
+                )
+            }
 
             formData.forEach {
                 newBodyBuilder.add(it.key, it.value)
@@ -80,3 +105,42 @@ class SignInterceptor : Interceptor {
 
 internal fun ngaTimestampSeconds(currentTimeMillis: Long): String =
     (currentTimeMillis / 1000L).toString()
+
+internal fun requiresNgaClientChecksum(lib: String?, action: String?): Boolean =
+    lib == "post" && action in setOf("new", "reply", "quote")
+
+/** 生成 NGA 普通 sign 的原始字符串；主题回复和评论回复把 tid、content 作为业务参数。 */
+internal fun signPayload(
+    lib: String?,
+    action: String?,
+    appId: String,
+    accessUid: String,
+    accessToken: String,
+    fid: String,
+    tid: String,
+    pid: String,
+    uid: String,
+    key: String,
+    value: String,
+    content: String,
+    subject: String,
+    timestamp: String,
+): String {
+    val prefix = "$appId$accessUid$accessToken"
+    return when {
+        lib == "post" && action in setOf("reply", "quote") ->
+            "$prefix$tid$content$timestamp${Constants.SALT}"
+        lib == "post" && action == "new" ->
+            "$prefix$fid$subject$content$timestamp${Constants.SALT}"
+        else -> {
+            "$prefix$fid$tid$pid$uid$key$value$timestamp${Constants.SALT}"
+        }
+    }
+}
+
+/** 根据官方 NGA 客户端算法生成发帖/回复校验值。 */
+internal fun ngaClientChecksum(uid: String, timestamp: String): String {
+    val md51 = StringUtils.md5("161c8c015f912abf4434c3263279c296$timestamp")
+    val secret = StringUtils.md5("${md51}12d6af9da0f1fe4e3c87f76ce0aec149")
+    return StringUtils.md5("$uid$secret$timestamp") + timestamp
+}
