@@ -18,11 +18,12 @@
 - 高性能、响应式界面
 - 流式评论区(不需要和其他NGA客户端一样，一页一页加载)
 - 支持网页活动
+- 回复和评论
 
 ## 截图
-| **推荐页** | **帖子浏览** | **评论区** | **社区页** |
-|:---:|:---:|:---:|:---:|
-| <div align="center"> <img src="https://github.com/user-attachments/assets/524248dd-f6e6-4f94-9e8b-7ef916751cc3"/> </div> | <div align="center"> <img src="https://github.com/user-attachments/assets/76b6aacd-db2c-4cdc-a8f3-28fa8d58b7b8"/> </div> | <div align="center"> <img src="https://github.com/user-attachments/assets/b6293f4b-2cd2-4916-95e1-fe8aab43c072"/> </div> | <div align="center"> <img src="https://github.com/user-attachments/assets/a5fc3032-593d-46cd-a4c2-0f75db838613"/> </div> |
+|                          **推荐页**                          |                         **帖子浏览**                          |                          **评论区**                          |                          **社区页**                          |
+|:---------------------------------------------------------:|:---------------------------------------------------------:|:---------------------------------------------------------:|:---------------------------------------------------------:|
+| <div align="center"> <img src="docs/image/1.jpg"/> </div> | <div align="center"> <img src="docs/image/2.jpg"/> </div> | <div align="center"> <img src="docs/image/3.jpg"/> </div> | <div align="center"> <img src="docs/image/4.jpg"/> </div> |
 
 ## 安装与运行
 
