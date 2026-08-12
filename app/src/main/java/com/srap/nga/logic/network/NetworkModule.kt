@@ -20,6 +20,10 @@ import javax.inject.Singleton
 @Retention(AnnotationRetention.BINARY)
 annotation class NgaService
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class GithubService
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -29,6 +33,9 @@ object NetworkModule {
     const val NGA_SMILE_URL = "https://img4.nga.cn/ngabbs/post/smile/%s"
     const val NGA_APP_IMAGE_URL = "http://img4.nga.cn/ngabbs/nga_classic/f/app/%s.png"
     const val NGA_QR_LOGIN_URL = "https://ngabbs.com/nuke.php?__lib=login&__act=qrlogin_ui&qrkey=%s"
+
+    const val GITHUB_REPO = "Night-stars-1/compose-nga"
+    private const val GITHUB_API_BASE_URL = "https://api.github.com/"
 
     @NgaService
     @Singleton
@@ -59,6 +66,25 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor(SignInterceptor()) // 添加请求签名拦截器
             .addInterceptor(AuthInterceptor(sessionManager))
+            .build()
+    }
+
+    @GithubService
+    @Singleton
+    @Provides
+    fun provideGithubService(@GithubService retrofit: Retrofit): GithubApiService {
+        return retrofit.create(GithubApiService::class.java)
+    }
+
+    @GithubService
+    @Singleton
+    @Provides
+    fun provideGithubServiceRetrofit(): Retrofit {
+        // GitHub API 不能复用 NGA 的 OkHttpClient，避免签名/鉴权拦截器篡改请求
+        return Retrofit.Builder()
+            .baseUrl(GITHUB_API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpClient())
             .build()
     }
 

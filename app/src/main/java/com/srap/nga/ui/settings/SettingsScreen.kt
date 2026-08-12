@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.srap.nga.BuildConfig
 import com.srap.nga.logic.preferences.AppPreferences
 import com.srap.nga.ui.component.button.BackButton
@@ -25,6 +26,7 @@ import com.srap.nga.ui.component.button.BackButton
 fun SettingsScreen(
     onBackClick: () -> Unit,
 ) {
+    val updateViewModel: AppUpdateViewModel = hiltViewModel()
     val themeMode by AppPreferences.themeMode.collectAsState()
     val dynamicColor by AppPreferences.dynamicColor.collectAsState()
     val forumPostImageCount by AppPreferences.forumPostImageCount.collectAsState()
@@ -78,8 +80,19 @@ fun SettingsScreen(
                 )
             }
             item {
-                AboutSettingsSection(versionName = BuildConfig.VERSION_NAME)
+                AboutSettingsSection(
+                    versionName = BuildConfig.VERSION_NAME,
+                    isCheckingUpdate = updateViewModel.isChecking,
+                    onCheckUpdate = updateViewModel::checkUpdate,
+                )
             }
         }
+    }
+
+    updateViewModel.newRelease?.let { release ->
+        AppUpdateDialog(
+            release = release,
+            onDismiss = updateViewModel::dismissUpdate,
+        )
     }
 }

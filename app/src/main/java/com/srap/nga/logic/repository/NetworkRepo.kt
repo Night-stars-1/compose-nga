@@ -3,6 +3,8 @@ package com.srap.nga.logic.repository
 import android.util.Log
 import com.srap.nga.logic.model.base.BaseResponse
 import com.srap.nga.logic.network.ApiService
+import com.srap.nga.logic.network.GithubApiService
+import com.srap.nga.logic.network.GithubService
 import com.srap.nga.logic.network.NgaService
 import com.srap.nga.logic.state.Code
 import com.srap.nga.logic.state.LoadingState
@@ -25,6 +27,8 @@ private const val TAG = "NetworkRepo"
 class NetworkRepo @Inject constructor(
     @NgaService
     private val apiService: ApiService,
+    @GithubService
+    private val githubApiService: GithubApiService,
 ) {
 
     /**
@@ -211,6 +215,13 @@ class NetworkRepo @Inject constructor(
         apiService.addFavorite(tid, folder).await()
     }
 
+    /**
+     * 获取 GitHub 最新 Release，用于检查应用更新
+     */
+    fun getLatestRelease() = fireResult {
+        githubApiService.getLatestRelease().await()
+    }
+
     private suspend fun <T> Call<T>.await(): T {
         return suspendCoroutine { continuation ->
             enqueue(object : Callback<T> {
@@ -237,6 +248,17 @@ class NetworkRepo @Inject constructor(
             } else {
                 LoadingState.Success(response)
             }
+        } catch (e: Exception) {
+            Log.e(TAG, e.message, e)
+            LoadingState.Error(e.message ?: "unknown error")
+        }
+        emit(result)
+    }.flowOn(Dispatchers.IO)
+
+    /** 与 [fire] 类似，但不校验 NGA 业务 code，用于第三方接口 */
+    private fun <T> fireResult(block: suspend () -> T): Flow<LoadingState<T>> = flow {
+        val result = try {
+            LoadingState.Success(block())
         } catch (e: Exception) {
             Log.e(TAG, e.message, e)
             LoadingState.Error(e.message ?: "unknown error")
