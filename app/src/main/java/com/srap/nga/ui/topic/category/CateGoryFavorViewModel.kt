@@ -20,7 +20,15 @@ class CateGoryFavorViewModel @Inject constructor(
 
     var result by mutableStateOf<List<CateGoryFavorResponse.Result>>(listOf())
 
+    var isRefreshing by mutableStateOf(false)
+        private set
+
     init {
+        fetchData()
+    }
+
+    fun refresh() {
+        isRefreshing = true
         fetchData()
     }
 
@@ -38,6 +46,7 @@ class CateGoryFavorViewModel @Inject constructor(
                             }
                         }
                     }
+                    isRefreshing = false
                 }
         }
     }

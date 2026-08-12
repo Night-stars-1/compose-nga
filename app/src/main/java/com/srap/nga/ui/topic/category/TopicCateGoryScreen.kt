@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Topic
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +36,9 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -125,6 +129,8 @@ fun TopicCateGoryScreen(
                             pageState = pageState,
                             result = result,
                             favoriteResult = favorViewModel.result,
+                            isFavoriteRefreshing = favorViewModel.isRefreshing,
+                            onRefreshFavorite = favorViewModel::refresh,
                             onViewTopicSubject = onViewTopicSubject,
                             modifier = Modifier.weight(1f),
                         )
@@ -145,6 +151,8 @@ fun TopicCateGoryScreen(
                             pageState = pageState,
                             result = result,
                             favoriteResult = favorViewModel.result,
+                            isFavoriteRefreshing = favorViewModel.isRefreshing,
+                            onRefreshFavorite = favorViewModel::refresh,
                             onViewTopicSubject = onViewTopicSubject,
                             modifier = Modifier.weight(1f),
                         )
@@ -201,6 +209,8 @@ private fun CategoryPager(
     pageState: PagerState,
     result: TopicCateGoryResponse,
     favoriteResult: List<CateGoryFavorResponse.Result>,
+    isFavoriteRefreshing: Boolean,
+    onRefreshFavorite: () -> Unit,
     onViewTopicSubject: (Int, Boolean?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -211,6 +221,8 @@ private fun CategoryPager(
         if (index == 0) {
             FavorContentCard(
                 result = favoriteResult,
+                isRefreshing = isFavoriteRefreshing,
+                onRefresh = onRefreshFavorite,
                 onViewTopicSubject = onViewTopicSubject,
                 iconPrefix = result.forumIconPre,
             )
@@ -315,51 +327,69 @@ fun ContentCard(
  * 右侧关注社区选择栏
  */
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 fun FavorContentCard(
     result: List<CateGoryFavorResponse.Result>,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     onViewTopicSubject: (Int, Boolean?) -> Unit,
     iconPrefix: String? = null,
 ) {
-    LazyColumn(
+    val state = rememberPullToRefreshState()
+
+    PullToRefreshBox(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 12.dp,
-            bottom = 64.dp,
-        ),
+        isRefreshing = isRefreshing,
+        state = state,
+        onRefresh = onRefresh,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = state,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        },
     ) {
-        itemsIndexed(
-            items = result,
-            key = { _, forum -> "favorite-${forum.fid}-${forum.id}" },
-        ) { index, forum ->
-            SegmentedListItem(
-                onClick = {
-                    onViewTopicSubject(forum.fid, true)
-                },
-                shapes = ListItemDefaults.segmentedShapes(
-                    index = index,
-                    count = result.size,
-                ),
-                leadingContent = {
-                    CommunityIcon(
-                        image = forumIconUrl(iconPrefix, forum.id),
-                    )
-                },
-                modifier = Modifier.padding(
-                    bottom = if (index == result.lastIndex) {
-                        0.dp
-                    } else {
-                        ListItemDefaults.SegmentedGap
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 12.dp,
+                bottom = 64.dp,
+            ),
+        ) {
+            itemsIndexed(
+                items = result,
+                key = { _, forum -> "favorite-${forum.fid}-${forum.id}" },
+            ) { index, forum ->
+                SegmentedListItem(
+                    onClick = {
+                        onViewTopicSubject(forum.fid, true)
                     },
-                ),
-            ) {
-                Text(
-                    text = forum.name,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                    shapes = ListItemDefaults.segmentedShapes(
+                        index = index,
+                        count = result.size,
+                    ),
+                    leadingContent = {
+                        CommunityIcon(
+                            image = forumIconUrl(iconPrefix, forum.id),
+                        )
+                    },
+                    modifier = Modifier.padding(
+                        bottom = if (index == result.lastIndex) {
+                            0.dp
+                        } else {
+                            ListItemDefaults.SegmentedGap
+                        },
+                    ),
+                ) {
+                    Text(
+                        text = forum.name,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }
