@@ -227,10 +227,20 @@ class NetworkRepo @Inject constructor(
             enqueue(object : Callback<T> {
                 override fun onResponse(call: Call<T>, response: Response<T>) {
                     val body = response.body()
-                    if (body != null) continuation.resume(body)
-                    else continuation.resumeWithException(
-                        RuntimeException("response body is null")
-                    )
+                    when {
+                        body != null -> continuation.resume(body)
+                        !response.isSuccessful -> {
+                            val detail = runCatching {
+                                response.errorBody()?.string()?.take(200)
+                            }.getOrNull()
+                            continuation.resumeWithException(
+                                RuntimeException("HTTP ${response.code()} ${detail ?: response.message()}")
+                            )
+                        }
+                        else -> continuation.resumeWithException(
+                            RuntimeException("response body is null")
+                        )
+                    }
                 }
 
                 override fun onFailure(call: Call<T>, t: Throwable) {
